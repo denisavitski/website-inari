@@ -1,0 +1,61 @@
+---
+import SocialIconLink, { type Props as SocialIconLinkProps } from './SocialIconLink.astro'
+
+export interface Props {
+  class?: string
+  theme?: SocialIconLinkProps['theme']
+  links?: Array<Omit<SocialIconLinkProps, 'theme' | 'target'>>
+}
+
+const {
+  class: className,
+  theme = 'wr',
+  links = [
+    {
+      title: 'Вконтакте',
+      href: 'https://google.com',
+      icon: 'vk',
+    },
+    {
+      title: 'Телеграм',
+      href: 'https://google.com',
+      icon: 'tg',
+    },
+    {
+      title: 'WhatsApp',
+      href: 'https://google.com',
+      icon: 'wa',
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['social-icon-links', className]}
+>
+  {
+    links.map((link) => {
+      return (
+        <SocialIconLink
+          {...link}
+          class="social-icon-links__link"
+          theme={theme}
+          target="_blank"
+        />
+      )
+    })
+  }
+</div>
+
+<style is:global>
+  .social-icon-links {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .social-icon-links__link {
+  }
+</style>

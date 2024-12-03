@@ -1,0 +1,66 @@
+---
+export interface Props {
+  class?: string
+  name?: string
+  value?: string
+  checked?: boolean
+}
+
+const { class: className, name = 'tab', value = 'value', checked = false, ...rest } = Astro.props
+---
+
+<label
+  {...rest}
+  class:list={['tab-button', className]}
+>
+  <input
+    type="radio"
+    class="visually-hidden tab-button__input"
+    {name}
+    {value}
+    {checked}
+  />
+  <span class="f-d-16-s tab-button__inner">
+    <slot>Tab</slot>
+  </span>
+</label>
+
+<style is:global>
+  .tab-button {
+    position: relative;
+    display: inline-block;
+
+    cursor: pointer;
+  }
+
+  .tab-button__inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 2.4rem;
+    height: 3.5rem;
+
+    transition-duration: var(--duration-button);
+    transition-property: color, background-color, border-color;
+
+    color: var(--color-primary-2);
+    background-color: transparent;
+    border: 0.1rem solid var(--color-primary-1);
+    border-radius: var(--border-radius-1);
+
+    .tab-button__input:checked ~ & {
+      color: var(--color-primary-2);
+      background-color: var(--color-primary-3);
+      border-color: transparent;
+    }
+
+    @media (hover: hover) {
+      .tab-button:hover .tab-button__input:not(:checked) ~ & {
+        color: var(--color-primary-2);
+        background-color: var(--color-primary-1);
+        border-color: var(--color-primary-2);
+      }
+    }
+  }
+</style>

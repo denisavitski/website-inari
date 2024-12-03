@@ -1,0 +1,295 @@
+---
+import type { ProductButtonSize } from './ProductButton.astro.0.mts'
+
+export interface Props {
+  class?: string
+  size?: ProductButtonSize
+  counter?: string | number
+  price?: string | number
+  max?: string | number
+}
+
+const {
+  class: className,
+  size = 'big',
+  counter = 0,
+  price = '100',
+  max = 99,
+  ...rest
+} = Astro.props
+---
+
+<e-product-button
+  {...rest}
+  class:list={[className]}
+  size={size}
+  counter={counter}
+  max={max}
+  price={price}
+>
+</e-product-button>
+
+<script>
+  import { numberToPrice } from '@utils/number'
+  import { clamp, createStylesheet, dispatchEvent, requestIdleCallback } from 'aptechka/utils'
+
+  export interface ProductButtonEvents {
+    productButtonCounterChange: CustomEvent<{ counter: number }>
+  }
+
+  const stylesheet = createStylesheet({
+    ':host': {
+      display: 'inline-grid',
+    },
+
+    ':host([size="big"])': {
+      width: '12rem',
+    },
+
+    ':host([size="small"])': {
+      width: '8rem',
+    },
+
+    '.price': {
+      gridColumn: '1/1',
+      gridRow: '1/1',
+
+      fontSize: '1.6rem',
+      fontWeight: '600',
+
+      position: 'relative',
+      zIndex: 1,
+
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+
+      backgroundColor: 'var(--color-primary-2)',
+      color: 'var(--color-primary-1)',
+      borderRadius: 'var(--border-radius-1)',
+      cursor: 'pointer',
+
+      userSelect: 'none',
+    },
+
+    ':host(.positive-value) .price': {
+      display: 'none',
+    },
+
+    '.content': {
+      boxSizing: 'border-box',
+
+      gridColumn: '1/1',
+      gridRow: '1/1',
+
+      fontWeight: '600',
+      lineHeight: '120%',
+
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+
+      padding: '0.6rem',
+
+      color: 'var(--color-primary-2)',
+      border: '0.1rem solid var(--color-primary-2)',
+      borderRadius: 'var(--border-radius-1)',
+    },
+
+    ':host([size="big"]) .content': {
+      gap: '1.6rem',
+      height: '3.6rem',
+    },
+
+    ':host([size="small"]) .content': {
+      gap: '1.2rem',
+      height: '2.4rem',
+    },
+
+    '.value': {
+      fontVariantNumeric: 'tabular-nums',
+    },
+
+    ':host([size="big"]) .value': {
+      fontSize: '1.6rem',
+    },
+
+    ':host([size="small"]) .value': {
+      fontSize: '1.2rem',
+    },
+
+    '.sign': {
+      boxSizing: 'border-box',
+
+      borderRadius: '0.3rem',
+
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+
+      userSelect: 'none',
+      border: 'none',
+      background: 'none',
+      fontFamily: 'inherit',
+      color: 'inherit',
+      cursor: 'pointer',
+      padding: '0',
+    },
+
+    ':host([size="big"]) .sign': {
+      fontSize: '2.4rem',
+      width: '2.4rem',
+      height: '2.4rem',
+    },
+
+    ':host([size="small"]) .sign': {
+      fontSize: '1.6rem',
+      width: '1.5rem',
+      height: '1.5rem',
+    },
+
+    '.plus': {
+      borderLeft: '0.1rem solid var(--color-primary-2)',
+    },
+
+    '.minus': {
+      borderRight: '0.1rem solid var(--color-primary-2)',
+    },
+
+    '@media(max-width: 768px)': {
+      ':host([size="big"])': {
+        width: '8rem',
+      },
+
+      '.price': {
+        fontSize: '1.4rem',
+      },
+
+      ':host([size="big"]) .content': {
+        gap: '1.2rem',
+        height: '2.4rem',
+      },
+
+      ':host([size="big"]) .value': {
+        fontSize: '1.2rem',
+      },
+
+      ':host([size="big"]) .sign': {
+        fontSize: '1.6rem',
+        width: '1.5rem',
+        height: '1.5rem',
+      },
+    },
+  })
+
+  export type ProductButtonSize = 'big' | 'small'
+
+  export class ProductButtonElement extends HTMLElement {
+    #priceElement: HTMLElement
+    #minusElement: HTMLElement
+    #plusElement: HTMLElement
+    #valueElement: HTMLElement
+    #counter = 0
+    #max = 99
+    #clickAllowed = true
+
+    constructor() {
+      super()
+
+      const shadow = this.attachShadow({ mode: 'open' })
+      shadow.adoptedStyleSheets = [...shadow.adoptedStyleSheets, stylesheet]
+
+      shadow.innerHTML = `
+        <div class="price"></div>
+        <div class="content">
+          <button class="minus sign">-</button>
+          <div class="value"></div>
+          <button class="plus sign">+</button>
+        </div>
+      `
+
+      this.#priceElement = shadow.querySelector('.price')!
+      this.#minusElement = shadow.querySelector('.minus')!
+      this.#valueElement = shadow.querySelector('.value')!
+      this.#plusElement = shadow.querySelector('.plus')!
+
+      this.#minusElement?.addEventListener('click', () => {
+        this.shift(-1)
+      })
+
+      this.#plusElement?.addEventListener('click', () => {
+        this.shift(1)
+      })
+
+      this.addEventListener('click', () => {
+        if (this.#clickAllowed) {
+          this.set(1)
+        }
+      })
+    }
+
+    public get counter() {
+      return this.#counter
+    }
+
+    public set(value: number) {
+      const prev = this.#counter
+
+      this.#counter = clamp(value, 0, this.#max)
+
+      if (prev === this.#counter) {
+        return
+      }
+
+      if (this.#valueElement) {
+        this.#valueElement.textContent = this.#counter.toString()
+      }
+
+      this.classList.toggle('positive-value', !!this.#counter)
+
+      requestIdleCallback(() => {
+        this.#clickAllowed = !this.#counter
+      })
+
+      this.#clickAllowed
+
+      dispatchEvent(this, 'productButtonCounterChange', {
+        detail: {
+          counter: this.#counter,
+        },
+      })
+    }
+
+    public shift(value: number) {
+      this.set(this.#counter + value)
+    }
+
+    public setPrice(value: number) {
+      this.#priceElement.textContent = numberToPrice(value)
+    }
+
+    protected connectedCallback() {
+      const priceAttr = parseInt(this.getAttribute('price') || '0') || 0
+      const maxAttr = parseInt(this.getAttribute('max') || '99') || 99
+      const counterAttr = parseInt(this.getAttribute('counter') || '0') || 0
+
+      this.setPrice(priceAttr)
+      this.#max = maxAttr
+      this.set(counterAttr)
+
+      this.setAttribute('data-popover-content', '')
+    }
+  }
+
+  if (!customElements.get('e-product-button')) {
+    customElements.define('e-product-button', ProductButtonElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-product-button': ProductButtonElement
+    }
+
+    interface HTMLElementEventMap extends ProductButtonEvents {}
+  }
+</script>

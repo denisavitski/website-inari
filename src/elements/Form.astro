@@ -1,0 +1,282 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+export interface CommmonFormProps {
+  submitButton?: string
+  terms?: string
+  successTitle?: string
+  successMessage?: string
+  errorMessage?: string
+}
+
+export interface Props extends HTMLAttributes<'div'> {
+  name?: string
+  handler?: string
+  successTitle?: string | undefined | false
+  successMessage?: string | undefined | false
+  errorMessage?: string | undefined | false
+  reusable?: boolean
+}
+
+const {
+  name = 'form',
+  handler = '/test',
+  successTitle,
+  successMessage,
+  errorMessage,
+  reusable = true,
+  ...rest
+} = Astro.props
+---
+
+<!-- 
+  Если указан handler отличный от /test, данные из формы отправятся по нему, 
+  и по успешному завершению откроется модалка.
+
+
+  В handler также можно указать значение fetchit, 
+  в таком случае отправка формы не будет обрабатываться, 
+  но буду слушаться события fetchit:success и fetchit:error 
+  которые будут открывать ответ.
+
+
+  Если форма находится внутри модалки и туда нужно 
+  передать значения в зависимости от нажатой кнопки,
+  то это можно сделать через специальные аитрибуты,
+  которые начинаются c data-input.
+
+  Например: <e-popover-button data-input-page="https://site.com/about" data-input-page-name="о нас">
+  при нажатии на такую кнопку в форме создадутся инпуты 
+  с названием page и pageName и соответствующими значениями
+-->
+<e-form
+  {...rest}
+  success-title={successTitle}
+  success-message={successMessage}
+  error-message={errorMessage}
+  {name}
+  {handler}
+  {reusable}
+>
+  <form>
+    <div class="form-tmp-inputs"></div>
+    <slot />
+  </form>
+</e-form>
+
+<style is:global>
+  e-form {
+    display: block;
+  }
+
+  e-form form {
+    display: contents;
+  }
+</style>
+
+<script>
+  import { PopoverElement, type PopoverEvents } from 'aptechka/popover'
+  import { findParentElement } from 'aptechka/utils'
+
+  export class FormElement extends HTMLElement {
+    #popoverElement: PopoverElement | null = null
+    #formElement: HTMLFormElement | null = null
+    #buttonElement: HTMLButtonElement | null = null
+    #inputElements: Array<HTMLInputElement> | null = null
+    #tmpInputsContainerElement: HTMLElement | null = null
+    #sended = false
+    #handler = '/test'
+    #isReusable = false
+
+    protected connectedCallback() {
+      this.#popoverElement = findParentElement(this, PopoverElement)
+
+      this.#formElement = this.querySelector('form')
+
+      this.#handler = this.getAttribute('handler') || '/test'
+      this.#isReusable = this.hasAttribute('reusable')
+
+      if (this.#formElement) {
+        this.#tmpInputsContainerElement = this.querySelector<HTMLElement>('.form-tmp-inputs')
+
+        this.#formElement.addEventListener('submit', this.#submitListener)
+
+        this.#inputElements = [...this.#formElement.querySelectorAll('input')]
+
+        this.#inputElements.forEach((inputElement) => {
+          inputElement.addEventListener('input', this.#inputListener)
+        })
+
+        this.#buttonElement = this.#formElement.querySelector('button[type="submit"]')
+
+        this.#inputListener()
+
+        if (this.#handler === 'fetchit') {
+          document.addEventListener('fetchit:success', this.#fetchitSuccesListener as EventListener)
+          document.addEventListener('fetchit:error', this.#fetchitErrorListener as EventListener)
+        }
+      }
+
+      this.#popoverElement?.addEventListener('popoverOpened', this.#popoverOpenedListener)
+      this.#popoverElement?.addEventListener('popoverClosed', this.#popoverClosedListener)
+    }
+
+    protected disconnectedCallback() {
+      this.#inputElements?.forEach((inputElement) =>
+        inputElement.removeEventListener('input', this.#inputListener),
+      )
+
+      this.#formElement?.removeEventListener('submit', this.#submitListener)
+
+      document.removeEventListener('fetchit:success', this.#fetchitSuccesListener as EventListener)
+      document.removeEventListener('fetchit:error', this.#fetchitErrorListener as EventListener)
+
+      this.#popoverElement?.removeEventListener('popoverOpened', this.#popoverOpenedListener)
+      this.#popoverElement?.removeEventListener('popoverClosed', this.#popoverClosedListener)
+    }
+
+    #submitListener = async (e: SubmitEvent) => {
+      e.preventDefault()
+
+      if (this.#handler === 'fetchit' || (this.#sended && !this.#isReusable)) {
+        return
+      }
+
+      this.#sended = true
+
+      const formData = new FormData(this.#formElement!)
+      formData.set('form-name', this.getAttribute('name') || 'unknown')
+
+      for (let pair of formData) {
+        console.log(pair[0] + ', ' + pair[1])
+      }
+
+      this.classList.add('pending')
+
+      try {
+        if (this.#handler === '/test') {
+          await new Promise<void>((res) => {
+            setTimeout(() => {
+              res()
+              this.classList.add('success')
+            }, 50)
+          })
+        } else {
+          await fetch(this.#handler, {
+            method: 'POST',
+            body: formData,
+          })
+        }
+
+        this.#success()
+      } catch (e) {
+        console.error(e)
+        this.#error()
+      }
+
+      this.classList.remove('pending')
+    }
+
+    #inputListener = () => {
+      const validInputs = this.#inputElements?.filter((inputElement) => {
+        return inputElement.validity.valid
+      }).length
+
+      if (this.#buttonElement) {
+        if (validInputs === this.#inputElements?.length) {
+          this.#buttonElement.disabled = false
+        } else {
+          this.#buttonElement.disabled = true
+        }
+      }
+    }
+
+    #fetchitSuccesListener = (e: CustomEvent) => {
+      console.log('[fetchit success event]', e)
+
+      const { form } = (e as CustomEvent)?.detail as { form: HTMLFormElement }
+
+      if (this.#formElement === form) {
+        this.#success()
+      }
+    }
+
+    #fetchitErrorListener = (e: CustomEvent) => {
+      console.log('[fetchit error event]', e)
+
+      const { form } = (e as CustomEvent)?.detail as { form: HTMLFormElement }
+
+      if (this.#formElement === form) {
+        this.#error()
+      }
+    }
+
+    #success() {
+      const answerElement = document.querySelector('e-form-answer')
+
+      if (answerElement) {
+        const successTitle = this.getAttribute('success-title')
+        const successMessage = this.getAttribute('success-message')
+
+        if (successTitle && successMessage) {
+          answerElement.setText(successTitle, successMessage)
+          answerElement.open()
+        }
+      }
+
+      if (this.#isReusable) {
+        this.#inputElements?.forEach((element) => {
+          element.value = ''
+        })
+
+        this.#inputListener()
+      }
+    }
+
+    #error() {
+      const errorMessage = this.getAttribute('error-message')
+
+      alert(errorMessage)
+
+      this.#sended = false
+    }
+
+    #popoverOpenedListener = (e: PopoverEvents['popoverOpened']) => {
+      const trigger = e.detail.trigger
+
+      if (this.#tmpInputsContainerElement && trigger instanceof HTMLElement) {
+        for (const key in trigger.dataset) {
+          const value = trigger.dataset[key]
+
+          if (value && key.toLowerCase().includes('input')) {
+            const inputElement = document.createElement('input')
+            const keyWithoutInput = key.replace('input', '').replace('Input', '')
+
+            if (keyWithoutInput) {
+              inputElement.type = 'hidden'
+              inputElement.name = keyWithoutInput[0]!.toLowerCase() + keyWithoutInput.slice(1)
+              inputElement.value = value
+              this.#tmpInputsContainerElement.appendChild(inputElement)
+            }
+          }
+        }
+      }
+    }
+
+    #popoverClosedListener = () => {
+      if (this.#tmpInputsContainerElement) {
+        this.#tmpInputsContainerElement.innerHTML = ''
+      }
+    }
+  }
+
+  if (!customElements.get('e-form')) {
+    customElements.define('e-form', FormElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-form': FormElement
+    }
+  }
+</script>

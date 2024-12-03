@@ -1,0 +1,19 @@
+{
+  "extends": "astro/tsconfigs/strictest",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@blocks/*": ["src/blocks/*"],
+      "@elements/*": ["src/elements/*"],
+      "@globals/*": ["src/globals/*"],
+      "@layout/*": ["src/layout/*"],
+      "@lib/*": ["src/lib/*"],
+      "@pages/*": ["src/pages/*"],
+      "@singletons/*": ["src/singletons/*"],
+      "@stores/*": ["src/stores/*"],
+      "@utils/*": ["src/utils/*"],
+      "ymaps3": ["@yandex/ymaps3-types"]
+    },
+    "typeRoots": ["./node_modules/@types", "./node_modules/@yandex/ymaps3-types"]
+  }
+}

@@ -1,0 +1,253 @@
+---
+import Button from '@elements/Button.astro'
+import Icon from '@elements/Icon.astro'
+import Review, { type Props as ReviewProps } from '@elements/Review.astro'
+import { chunkArray } from '@utils/array'
+
+export interface Props {
+  heading?: string
+  list?: Array<ReviewProps>
+}
+
+const {
+  heading = 'Отзывы наших клиентов',
+  list = [
+    {
+      stars: 3,
+      name: 'Марк',
+      text: 'Заказал доставку из «Инари» — очень доволен!',
+      order: ['Том Кха с цыпленком', 'Сет «Много рыбы»', 'Сет «Американская классика»'],
+    },
+    {
+      stars: 3,
+      name: 'Марк',
+      text: 'Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!, Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!',
+      order: ['Том Кха с цыпленком', 'Сет «Много рыбы»', 'Сет «Американская классика»'],
+    },
+    {
+      stars: 3,
+      name: 'Марк',
+      text: 'Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!, Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!, Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!',
+      order: ['Том Кха с цыпленком', 'Сет «Много рыбы»', 'Сет «Американская классика»'],
+    },
+    {
+      stars: 3,
+      name: 'Марк',
+      text: 'Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!,Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!,Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие.',
+      order: ['Том Кха с цыпленком', 'Сет «Много рыбы»', 'Сет «Американская классика»'],
+    },
+  ],
+} = Astro.props
+
+const mlist = [...list, ...list, ...list]
+
+const slides = chunkArray(mlist, 5)
+---
+
+<!-- BLOCK -->
+<section class="reviews">
+  <h2
+    class="f-d-48-s f-m-24-s reviews__heading"
+    set:html={heading}
+  />
+  <e-billboard class="reviews__billboard">
+    <div class="reviews__billboard__buttons">
+      <e-billboard-step-button class="reviews__billboard__button reviews__billboard__button_prev">
+        <Icon
+          class="reviews__billboard__button__icon"
+          name="tailless-arrow"
+        />
+      </e-billboard-step-button>
+      <e-billboard-step-button class="reviews__billboard__button reviews__billboard__button_next">
+        <Icon
+          class="reviews__billboard__button__icon"
+          name="tailless-arrow"
+        />
+      </e-billboard-step-button>
+    </div>
+
+    <div class="reviews__billboard__slides">
+      {
+        slides.map((slide) => {
+          return (
+            <div
+              class="reviews__billboard__slide"
+              data-billboard-item
+            >
+              {slide.map((item) => {
+                return (
+                  <Review
+                    class="reviews__billboard__slide__review"
+                    {...item}
+                  />
+                )
+              })}
+            </div>
+          )
+        })
+      }
+    </div>
+  </e-billboard>
+  <div class="reviews__bottom">
+    <h3 class="f-d-24-s f-m-16-s reviews__bottom__title"
+      >Оставьте свой отзыв и помогите нам стать лучше</h3
+    >
+    <Button modal="review">Оставить отзыв</Button>
+  </div>
+</section>
+
+<style is:global>
+  .reviews {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+
+    display: flex;
+    flex-direction: column;
+
+    [aria-hidden='true'] {
+      display: none;
+    }
+  }
+
+  .reviews__heading {
+    margin-bottom: 5rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .reviews__billboard {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 4rem;
+    }
+  }
+
+  .reviews__billboard__slides {
+    display: grid;
+  }
+
+  .reviews__billboard__slide {
+    --gap: 1rem;
+
+    grid-column: 1/1;
+    grid-row: 1/1;
+
+    flex-wrap: wrap;
+    gap: var(--gap);
+
+    display: none;
+
+    &.current {
+      display: flex;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  .reviews__billboard__slide__review {
+    @media (min-width: 769px) {
+      width: calc(100% / 3 - var(--gap) / 1.5);
+
+      &:nth-child(4),
+      &:nth-child(5) {
+        width: calc(100% / 2 - var(--gap) / 2);
+      }
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .reviews__billboard__buttons {
+    display: none;
+    align-items: center;
+    gap: 2rem;
+
+    .has-length & {
+      display: flex;
+    }
+
+    @media (min-width: 769px) {
+      position: absolute;
+      bottom: calc(100% + 2rem);
+      right: 0;
+    }
+
+    @media (max-width: 768px) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .reviews__billboard__button {
+    flex-shrink: 0;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 4.2rem;
+    height: 4.2rem;
+
+    border-radius: 50%;
+    background-color: var(--color-secondary-5);
+    user-select: none;
+
+    @media (max-width: 768px) {
+      width: 3.2rem;
+      height: 3.2rem;
+    }
+  }
+
+  .reviews__billboard__button__icon {
+    width: 80%;
+    height: 80%;
+
+    fill: var(--color-functional-1);
+    transform: translateX(5%);
+  }
+
+  .reviews__billboard__button_prev {
+    transform: scaleX(-1);
+  }
+
+  .reviews__billboard__button_next {
+  }
+
+  .reviews__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 3.5rem 2.4rem;
+    border-radius: var(--border-radius-2);
+    border: 0.1rem solid var(--color-secondary-1);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      padding: 2.4rem 1.6rem;
+
+      --height: 3.4rem;
+    }
+  }
+
+  .reviews__bottom__title {
+    @media (max-width: 768px) {
+      text-align: center;
+
+      margin-bottom: 1.6rem;
+    }
+  }
+</style>

@@ -1,0 +1,331 @@
+---
+import Logo from '@elements/Logo.astro'
+import SocialIconLinks, {
+  type Props as SocialIconLinksProps,
+} from '@elements/SocialIconLinks.astro'
+import { tryCreateHrefFromContact } from '@utils/href'
+
+export interface Props {
+  logo?: string
+  description?: string
+  workingHours?: string
+  contacts?: Array<string>
+  social?: SocialIconLinksProps
+  nav?: { title: string; links: Array<{ href: string; name: string }> }
+  information?: { title: string; links: Array<{ href: string; name: string }> }
+  rights?: string
+}
+
+const {
+  logo,
+  description = 'Доставка суши — онлайн сервис заказа суши и других блюд',
+  workingHours = 'Прием заказов с 10:00 до 21:00',
+  contacts = ['+ 7 (921) 999-84-22', 'sushirestaurant@support.com'],
+  social,
+  nav = {
+    title: 'Инари',
+    links: [
+      { href: '/', name: 'Меню' },
+      { href: '/', name: 'Акции' },
+      { href: '/', name: 'Доставка и оплата' },
+      { href: '/', name: 'О нас' },
+      { href: '/', name: 'Вакансии' },
+      { href: '/', name: 'Контакты' },
+      { href: '/', name: 'Программа лояльности' },
+    ],
+  },
+  information = {
+    title: 'Юридическая информация',
+    links: [
+      { href: '/', name: 'Политика конфиденциальности' },
+      { href: '/', name: 'Пользовательское соглашение' },
+      { href: '/', name: 'Положение по обработке персональных данных' },
+      { href: '/', name: 'Пользовательское соглашение по&nbsp;программе лояльности' },
+    ],
+  },
+  rights = '© 2024 «Инари». Все права принадлежат ИП Иванову Сергею Павловичу, ОГРНИП 319774600012345, 123456, Санкт-Петербург, пр. Невский, д. 15, 3-й этаж',
+} = Astro.props
+---
+
+<!-- SINGLETON -->
+<footer class="footer">
+  <div class="footer__content">
+    <div class="footer__main">
+      <div class="footer__left">
+        <Logo
+          class="footer__logo"
+          src={logo}
+          size={'large'}
+        />
+        <p
+          class="f-d-16-s f-m-14-s footer__description"
+          set:html={description}
+        />
+        <div
+          class="f-d-16-s f-m-14-s footer__working-hours"
+          set:html={workingHours}
+        />
+        <div class="f-d-24-s f-m-18-s footer__contacts">
+          {
+            contacts.map((contact) => {
+              const href = tryCreateHrefFromContact(contact)
+              return (
+                <a
+                  class="footer__contacts__item"
+                  href={href.href}
+                  set:html={contact}
+                />
+              )
+            })
+          }
+        </div>
+        <SocialIconLinks
+          class="footer__social"
+          {...social}
+        />
+      </div>
+
+      <div class="contacts__col contacts__nav">
+        <div
+          class="f-d-16-s f-m-14-s contacts__col__title"
+          set:html={nav.title}
+        />
+        <div class="f-d-16-r f-m-12-r contacts__col__links">
+          {
+            nav.links.map((link) => {
+              return (
+                <a
+                  class="contacts__col__link"
+                  href={link.href}
+                  set:html={link.name}
+                />
+              )
+            })
+          }
+        </div>
+      </div>
+
+      <div class="contacts__right">
+        <div class="contacts__col contacts__information">
+          <div
+            class="f-d-16-s f-m-14-s contacts__col__title"
+            set:html={information.title}
+          />
+          <div class="f-d-16-r f-m-12-r contacts__col__links">
+            {
+              information.links.map((link) => {
+                return (
+                  <a
+                    class="contacts__col__link"
+                    href={link.href}
+                    set:html={link.name}
+                  />
+                )
+              })
+            }
+          </div>
+        </div>
+        <a
+          href="https://google.com"
+          target="_blank"
+          class="f-d-16-r f-m-12-r contacts__studio contacts__right__studio"
+        >
+          Разработка сайта <b>Студия ЯР</b>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="contacts__bottom">
+    <div
+      class="f-d-16-r f-m-12-r contacts__rights"
+      set:html={rights}
+    />
+    <a
+      href="https://google.com"
+      target="_blank"
+      class="f-d-16-r f-m-12-r contacts__studio contacts__bottom__studio"
+    >
+      Разработка сайта <b>Студия ЯР</b>
+    </a>
+  </div>
+</footer>
+
+<style is:global>
+  .footer {
+    padding: 3.2rem var(--screen-horisontal-padding);
+
+    background-color: var(--color-secondary-1);
+
+    @media (max-width: 768px) {
+      padding-bottom: 1.6rem;
+    }
+
+    @media (hover: hover) {
+      a {
+        transition: color var(--duration-button);
+
+        &:hover {
+          color: var(--color-primary-3);
+        }
+      }
+    }
+  }
+
+  .footer__content {
+  }
+
+  .footer__main {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  .footer__left {
+    @media (min-width: 769px) {
+      width: 37.6rem;
+    }
+
+    @media (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .footer__logo {
+    margin-bottom: 1.6rem;
+  }
+
+  .footer__description {
+    margin-bottom: 0.8rem;
+    color: var(--color-secondary-3);
+
+    @media (max-width: 768px) {
+      text-align: center;
+      max-width: 99.9%;
+    }
+  }
+
+  .footer__working-hours {
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      text-align: center;
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .footer__contacts {
+    display: grid;
+    gap: 0.8rem;
+    grid-auto-rows: max-content;
+
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .footer__contacts__item {
+    @media (max-width: 768px) {
+      text-align: center;
+    }
+  }
+
+  .footer__social {
+  }
+
+  .contacts__col {
+    @media (max-width: 768px) {
+      padding-bottom: 1.6rem;
+      border-bottom: 0.1rem solid #444444;
+    }
+  }
+
+  .contacts__col__title {
+    color: var(--color-secondary-3);
+
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .contacts__col__links {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 0.8rem;
+  }
+
+  .contacts__col__link {
+  }
+
+  .contacts__nav {
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+      padding-top: 1.6rem;
+
+      border-top: 0.1rem solid #444444;
+
+      .contacts__col__links {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  }
+
+  .contacts__right {
+    @media (min-width: 769px) {
+      width: 47.1rem;
+    }
+  }
+
+  .contacts__information {
+    @media (min-width: 769px) {
+      margin-bottom: 6.6rem;
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .contacts__studio {
+  }
+
+  .contacts__right__studio {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .contacts__bottom {
+    @media (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .contacts__rights {
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .contacts__bottom__studio {
+    @media (min-width: 769px) {
+      display: none;
+    }
+  }
+</style>

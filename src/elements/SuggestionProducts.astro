@@ -1,0 +1,175 @@
+---
+import SuggestionProduct, { type Props as SuggestionProductProps } from './SuggestionProduct.astro'
+
+export const modal = '#basket'
+
+export interface Props {
+  class?: string
+  title?: string
+  products?: Array<SuggestionProductProps>
+}
+
+const {
+  class: className,
+  title = 'Добавить к заказу?',
+  products = [
+    {
+      price: 250,
+      name: 'Сет «Американская классика», 32 шт.',
+      description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+      pid: '1',
+      image: '/images/food/1.jpg',
+      amount: 1,
+    },
+    {
+      price: 250,
+      name: 'Сет «Американская классика», 32 шт.',
+      description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+      pid: '2',
+      image: '/images/food/1.jpg',
+      amount: 1,
+    },
+    {
+      price: 250,
+      name: 'Сет «Американская классика», 32 шт.',
+      description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+      pid: '3',
+      image: '/images/food/1.jpg',
+      amount: 1,
+    },
+    {
+      price: 250,
+      name: 'Сет «Американская классика», 32 шт.',
+      description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+      pid: '4',
+      image: '/images/food/1.jpg',
+      amount: 1,
+    },
+    {
+      price: 250,
+      name: 'Сет «Американская классика», 32 шт.',
+      description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+      pid: '5',
+      image: '/images/food/1.jpg',
+      amount: 1,
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<e-suggestion-products
+  {...rest}
+  class:list={['suggestion-products', className]}
+>
+  <div
+    class="f-d-18-s f-m-16-s suggestion-products__title"
+    set:html={title}
+  />
+  <div class="suggestion-products__content">
+    {
+      products.map((product) => {
+        return <SuggestionProduct {...product} />
+      })
+    }
+  </div>
+</e-suggestion-products>
+
+<style is:global>
+  .suggestion-products {
+    e-scroll {
+      --gap: 1rem;
+      --axis: x;
+      --sections-in-view: 4;
+      --auto-size: true;
+      --sectional: true;
+
+      display: flex;
+      gap: var(--gap);
+
+      @media (max-width: 768px) {
+        --gap: 0.8rem;
+        --sections-in-view: 2.7;
+      }
+    }
+  }
+
+  .suggestion-products__title {
+    margin-bottom: 1.6rem;
+  }
+</style>
+
+<script>
+  import { basketStore } from '@stores/basketStore'
+  import { ScrollElement } from 'aptechka/scroll'
+  import type { BasketElement } from '@singletons/Basket.astro.0.mjs'
+  import { shuffleArray } from '@utils/array'
+  import type { ProductElement } from './Product.astro.0.mts'
+
+  export class SuggestionProductsElement extends HTMLElement {
+    #basketElement: BasketElement | null = null
+    #contentElement: HTMLElement | null = null
+    #allProductElements: Array<ProductElement> = []
+    #sliderElement: ScrollElement | null = null
+
+    protected connectedCallback() {
+      this.#basketElement = document.querySelector('e-basket')
+
+      this.#contentElement = this.querySelector('.suggestion-products__content')
+
+      this.#allProductElements = [...this.querySelectorAll<ProductElement>('.suggestion-product')]
+      this.#allProductElements.forEach((element) => {
+        element.remove()
+      })
+
+      if (this.#basketElement) {
+        this.#basketElement.addEventListener('popoverOpened', this.#popoverOpenListener)
+      } else {
+        this.#createSlider()
+      }
+    }
+
+    protected disconnectedCallback() {
+      this.#basketElement?.removeEventListener('popoverOpened', this.#popoverOpenListener)
+      this.#sliderElement?.remove()
+
+      if (this.#contentElement) {
+        this.#contentElement.append(...this.#allProductElements)
+      }
+    }
+
+    #popoverOpenListener = () => {
+      this.#createSlider()
+    }
+
+    #createSlider() {
+      if (this.#contentElement) {
+        this.#sliderElement?.remove()
+
+        const filtered = this.#allProductElements.filter((element) => {
+          return !basketStore.items.find((item) => item.pid === element.pid)
+        })
+
+        const randomized = shuffleArray(filtered)
+        const sliced = randomized.slice(0, 4)
+
+        if (sliced.length) {
+          this.#sliderElement = new ScrollElement()
+          this.#sliderElement.append(...sliced)
+
+          this.#contentElement.appendChild(this.#sliderElement)
+        }
+      }
+    }
+  }
+
+  if (!customElements.get('e-suggestion-products')) {
+    customElements.define('e-suggestion-products', SuggestionProductsElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-suggestion-products': SuggestionProductsElement
+    }
+  }
+</script>

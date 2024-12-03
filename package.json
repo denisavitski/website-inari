@@ -1,0 +1,32 @@
+{
+  "name": "website-inari",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "NODE_ENV=development astro dev --host",
+    "start": "astro dev",
+    "build": "astro check && NODE_ENV=production astro build",
+    "build-and-format": "npm run build && npm run format-dist",
+    "bap": "NODE_ENV=production npm run build-and-format && npm run preview",
+    "preview": "astro preview",
+    "astro": "astro",
+    "optimize": "tsx ./optimize/index.ts",
+    "format-dist": "prettier --write \"dist/**/*.html\" --ignore-path=.prettierignore --config=.prettierrc.prod.json"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@types/node": "^22.10.0",
+    "astro": "^4.16.15",
+    "automizer": "^0.3.5",
+    "postcss-preset-env": "^10.1.1",
+    "prettier": "^3.4.1",
+    "prettier-plugin-astro": "^0.14.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.1"
+  },
+  "dependencies": {
+    "aptechka": "^0.47.5",
+    "construct-style-sheets-polyfill": "^3.1.0"
+  }
+}

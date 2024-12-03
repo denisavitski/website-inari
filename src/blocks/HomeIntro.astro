@@ -1,0 +1,106 @@
+---
+import SocialIconLinks from '@elements/SocialIconLinks.astro'
+import Billboard from '@elements/Billboard.astro'
+
+export interface Props {
+  heading?: string
+  description?: string
+}
+
+const {
+  heading = 'Свежие суши <span>каждый день</span>',
+  description = 'Мы&nbsp;готовим для&nbsp;вас&nbsp;лучшие блюда японской кухни, используя только свежие и&nbsp;качественные ингредиенты',
+} = Astro.props
+---
+
+<!-- BLOCK -->
+<div class="home-intro">
+  <div class="home-intro__top">
+    <div class="home-intro__left">
+      <h1
+        class="f-d-48-s f-m-36-s home-intro__heading"
+        set:html={heading}
+      />
+      <p
+        class="f-d-24-s f-m-16-s home-intro__description"
+        set:html={description}
+      />
+    </div>
+    <div class="home-intro__contacts">
+      <a
+        class="f-d-24-s"
+        href="tel:+79219998422"
+        >+ 7 (921) 999-84-22</a
+      >
+      <SocialIconLinks theme={'rw'} />
+    </div>
+  </div>
+  <Billboard class="home-intro__billboard" />
+</div>
+
+<style is:global>
+  .home-intro {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+    padding-top: 1.6rem;
+  }
+
+  .home-intro__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+
+      margin-bottom: 4rem;
+    }
+  }
+
+  .home-intro__left {
+    width: 71.6rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-bottom: 4rem;
+    }
+  }
+
+  .home-intro__heading {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+
+      span {
+        display: block;
+        margin-left: auto;
+      }
+    }
+  }
+
+  .home-intro__description {
+  }
+
+  .home-intro__contacts {
+    display: flex;
+    align-items: center;
+    gap: 2.4rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+  }
+
+  .home-intro__billboard {
+    --width: 100%;
+    --height: 60rem;
+
+    @media (max-width: 768px) {
+      --height: 38rem;
+    }
+  }
+</style>

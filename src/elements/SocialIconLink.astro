@@ -1,0 +1,70 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+import Icon from './Icon.astro'
+
+export interface Props extends HTMLAttributes<'a'> {
+  class?: string
+  icon?: string
+  theme?: 'wr' | 'rw'
+}
+
+const { class: className, icon = 'vk', theme = 'rw', ...rest } = Astro.props
+---
+
+<a
+  {...rest}
+  class:list={['social-icon-link', className]}
+  data-theme={theme}
+>
+  <Icon
+    class="social-icon-link__icon"
+    name={icon}
+  />
+</a>
+
+<style is:global>
+  .social-icon-link {
+    width: 4rem;
+    height: 4rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 1rem;
+
+    border:;
+
+    &[data-theme='wr'] {
+      transition: border-color var(--duration-button);
+      border: 0.1rem solid var(--color-primary-2);
+      fill: var(--color-primary-2);
+    }
+
+    &[data-theme='rw'] {
+      transition: background-color var(--duration-button);
+      background-color: var(--color-primary-3);
+      fill: var(--color-primary-2);
+    }
+
+    @media (hover: hover) {
+      &[data-theme='wr']:hover {
+        border-color: var(--color-primary-3);
+        fill: var(--color-primary-3);
+      }
+
+      &[data-theme='rw']:hover {
+        background-color: var(--color-primary-2);
+        fill: var(--color-primary-3);
+      }
+    }
+  }
+
+  .social-icon-link__icon {
+    width: 60%;
+    height: 60%;
+    fill: inherit;
+
+    transition: fill var(--duration-button);
+  }
+</style>

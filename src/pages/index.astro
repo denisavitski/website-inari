@@ -1,0 +1,18 @@
+---
+import HomeIntro from '@blocks/HomeIntro.astro'
+import Reviews from '@blocks/Reviews.astro'
+import Subscribe from '@blocks/Subscribe.astro'
+import Layout from '@layout/Layout.astro'
+---
+
+<Layout
+  seo={{
+    title: 'Инари',
+    description: 'Свежие суши каждый день',
+    cover: '/images/seo/home.jpg',
+  }}
+>
+  <HomeIntro />
+  <Reviews />
+  <Subscribe />
+</Layout>

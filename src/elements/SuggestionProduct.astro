@@ -1,0 +1,85 @@
+---
+import type { BasketStoreItem } from '@stores/basketStore'
+import Product from './Product.astro'
+import Image from './Image.astro'
+import ProductButton from './ProductButton.astro'
+
+export interface Props extends BasketStoreItem {
+  class?: string
+}
+
+const {
+  class: className,
+  price = 250,
+  name = 'Сет «Американская классика», 32 шт.',
+  description = 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+  pid = '1',
+  image = '/images/food/1.jpg',
+  ...rest
+} = Astro.props
+---
+
+<Product
+  {price}
+  {name}
+  {description}
+  {pid}
+  {image}
+  {...rest}
+  class={`suggestion-product ${className || ''}`}
+>
+  <Image
+    class="suggestion-product__image"
+    src={image}
+    lazy
+    lazyBackground
+    cover
+  />
+  <div
+    class="f-d-14-s f-m-12-s suggestion-product__name"
+    set:html={name}
+  />
+  <ProductButton
+    class="suggestion-product__button"
+    price={price}
+  />
+</Product>
+
+<style is:global>
+  .suggestion-product {
+    display: flex;
+    flex-direction: column;
+
+    width: 15rem;
+    min-height: 21.8rem;
+    padding: 0.8rem;
+
+    border-radius: var(--border-radius-2);
+    border: 0.1rem solid var(--color-secondary-1);
+
+    @media (max-width: 768px) {
+      width: 12rem;
+      min-height: 17rem;
+    }
+  }
+
+  .suggestion-product__image {
+    width: 100%;
+    height: 10rem;
+    border-radius: var(--border-radius-1);
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      height: 7rem;
+    }
+  }
+
+  .suggestion-product__name {
+    margin-bottom: 1.6rem;
+  }
+
+  .suggestion-product__button {
+    margin-top: auto;
+    width: 100%;
+  }
+</style>

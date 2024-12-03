@@ -1,0 +1,94 @@
+---
+export interface Props {
+  class?: string
+  stars?: number | string
+}
+
+const { class: className, stars = 4, ...rest } = Astro.props
+---
+
+<e-rating
+  {...rest}
+  class:list={['class', className]}
+  {stars}
+></e-rating>
+
+<script>
+  import { createStylesheet } from 'aptechka/utils'
+
+  const style = createStylesheet({
+    ':host': {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 'var(--gap, 0.2rem)',
+    },
+
+    svg: {
+      width: 'var(--star-size, 2.4rem)',
+      height: 'var(--star-size, 2.4rem)',
+
+      stroke: 'var(--star-color, var(--color-functional-1))',
+    },
+
+    ':host([stars="1"]) svg:nth-child(1)': {
+      fill: 'var(--star-color, var(--color-functional-1))',
+    },
+
+    ':host([stars="2"]) svg:nth-child(1), :host([stars="2"]) svg:nth-child(2)': {
+      fill: 'var(--star-color, var(--color-functional-1))',
+    },
+
+    ':host([stars="3"]) svg:nth-child(1), :host([stars="3"]) svg:nth-child(2), :host([stars="3"]) svg:nth-child(3)':
+      {
+        fill: 'var(--star-color, var(--color-functional-1))',
+      },
+
+    ':host([stars="4"]) svg:nth-child(1), :host([stars="4"]) svg:nth-child(2), :host([stars="4"]) svg:nth-child(3), :host([stars="4"]) svg:nth-child(4)':
+      {
+        fill: 'var(--star-color, var(--color-functional-1))',
+      },
+
+    ':host([stars="5"]) svg:nth-child(1), :host([stars="5"]) svg:nth-child(2), :host([stars="5"]) svg:nth-child(3), :host([stars="5"]) svg:nth-child(4), :host([stars="5"]) svg:nth-child(5)':
+      {
+        fill: 'var(--star-color, var(--color-functional-1))',
+      },
+  })
+
+  export class RatingElement extends HTMLElement {
+    constructor() {
+      super()
+
+      const shadow = this.attachShadow({ mode: 'open' })
+
+      shadow.innerHTML = `
+        <svg>
+          <use xlink:href="/sprite.svg#sprite:star"></use>
+        </svg>
+        <svg>
+          <use xlink:href="/sprite.svg#sprite:star"></use>
+        </svg>
+        <svg>
+          <use xlink:href="/sprite.svg#sprite:star"></use>
+        </svg>
+        <svg>
+          <use xlink:href="/sprite.svg#sprite:star"></use>
+        </svg>
+        <svg>
+          <use xlink:href="/sprite.svg#sprite:star"></use>
+        </svg>
+      `
+
+      shadow.adoptedStyleSheets = [...shadow.adoptedStyleSheets, style]
+    }
+  }
+
+  if (!customElements.get('e-rating')) {
+    customElements.define('e-rating', RatingElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-rating': RatingElement
+    }
+  }
+</script>

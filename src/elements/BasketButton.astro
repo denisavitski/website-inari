@@ -1,0 +1,157 @@
+---
+import Icon from './Icon.astro'
+
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<e-basket-button
+  {...rest}
+  class:list={['basket-button', className]}
+  target="basket"
+>
+  <div class="basket-button__face">
+    <div class="f-d-16-s basket-button__name">Корзина</div>
+    <Icon
+      class="basket-button__icon"
+      name="basket"
+    />
+  </div>
+  <div class="f-d-16-s f-m-14-s basket-button__value"></div>
+</e-basket-button>
+
+<style is:global>
+  .basket-button {
+    padding: 0 1.6rem;
+    height: 4rem;
+
+    display: inline-flex;
+    align-items: center;
+
+    color: var(--color-primary-2);
+    background-color: var(--color-primary-3);
+    border-radius: var(--border-radius-1);
+    cursor: pointer;
+
+    @media (max-width: 768px) {
+      padding: 0 0.4rem;
+      height: 3.2rem;
+    }
+  }
+
+  .basket-button__face {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .basket-button__name {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .basket-button__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    fill: var(--color-primary-2);
+  }
+
+  .basket-button__value {
+    --line-width: 0.2rem;
+    --padding: 0.8rem;
+
+    position: relative;
+
+    padding-left: var(--padding);
+    margin-left: calc(var(--padding) - var(--line-width));
+
+    display: none;
+
+    .basket-button.has-items & {
+      display: block;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+
+      height: 1.6rem;
+      width: var(--line-width);
+      background-color: var(--color-primary-2);
+      border-radius: 100rem;
+
+      transform: translateY(-50%) scaleY(1);
+      transform-origin: top;
+    }
+
+    @media (max-width: 768px) {
+      --padding: 0.8rem;
+      padding-right: 0.4rem;
+    }
+  }
+</style>
+
+<script>
+  import { PopoverButtonElement } from 'aptechka/popover'
+  import { clamp } from 'aptechka/utils'
+
+  export class BasketButtonElement extends PopoverButtonElement {
+    #valueElement: HTMLElement | null = null
+
+    #counter = 0
+
+    public set(value: number) {
+      this.#counter = clamp(value, 0, Infinity)
+
+      if (this.#valueElement) {
+        if (value) {
+          this.#valueElement.textContent = value.toString()
+          this.classList.add('has-items')
+        } else {
+          this.classList.remove('has-items')
+          this.#valueElement.textContent = ''
+        }
+      }
+    }
+
+    public shift(value: number) {
+      this.set(this.#counter + value)
+    }
+
+    protected override connectedCallback() {
+      super.connectedCallback()
+
+      this.#valueElement = this.querySelector('.basket-button__value')
+
+      /* addEventListener('keydown', (e) => {
+        if (e.key === '1') {
+          this.set(1)
+        } else if (e.key === '2') {
+          this.set(123)
+        } else if (e.key === '3') {
+          this.set(0)
+        }
+      }) */
+    }
+
+    protected override disconnectedCallback() {
+      super.disconnectedCallback()
+    }
+  }
+
+  if (!customElements.get('e-basket-button')) {
+    customElements.define('e-basket-button', BasketButtonElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-basket-button': BasketButtonElement
+    }
+  }
+</script>

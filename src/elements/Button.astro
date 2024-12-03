@@ -1,0 +1,168 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+import Icon from './Icon.astro'
+
+export interface Props extends HTMLAttributes<any> {
+  class?: string
+  theme?: 'small' | 'big' | 'arrow' | 'arrow-reverse'
+  modal?: string
+  href?: string
+  name?: string
+}
+
+const { class: className, theme = 'big', modal, target, href, ...rest } = Astro.props
+
+let Tag = 'button' as any
+
+if (modal) {
+  Tag = 'e-popover-button'
+} else if (href) {
+  Tag = 'a'
+}
+---
+
+<Tag
+  {...rest}
+  target={modal || target}
+  href={href}
+  class:list={['button', className]}
+  data-theme={theme}
+>
+  <span class="button__inner">
+    <span class="f-d-16-s button__name"><slot>Кнопка</slot></span>
+
+    {
+      theme.includes('arrow') && (
+        <Icon
+          class="button__icon"
+          name="tail-arrow"
+        />
+      )
+    }
+  </span>
+</Tag>
+
+<style is:global>
+  .button {
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .button__inner {
+    width: 100%;
+    height: 100%;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: var(--border-radius-1);
+
+    transition-duration: var(--duration-button);
+    transition-property: opacity, color, background-color, border-color;
+
+    .button[data-theme='small'] & {
+      height: var(--height, 3.6rem);
+      padding: 0 1.6rem;
+
+      color: var(--color-primary-1);
+      background-color: var(--color-primary-2);
+      border: 0.1rem solid transparent;
+
+      &:active {
+        background-color: var(--color-primary-3);
+        color: var(--color-primary-2);
+        border-color: var(--color-primary-3);
+      }
+
+      @media (hover: hover) {
+        &:not(:active):hover {
+          color: var(--color-primary-3);
+          border-color: var(--color-primary-3);
+        }
+      }
+    }
+
+    .button[data-theme='big'] & {
+      height: var(--height, 5.1rem);
+      padding: 0 2.4rem;
+
+      color: var(--color-primary-2);
+      background-color: var(--color-primary-3);
+
+      &.active {
+        color: var(--color-primary-3);
+        background-color: var(--color-primary-2);
+      }
+
+      &[disabled] {
+        opacity: 0.4;
+      }
+
+      @media (hover: hover) {
+        &:not(:active):hover {
+          color: var(--color-primary-3);
+          background-color: var(--color-primary-2);
+        }
+      }
+
+      @media (max-width: 768px) {
+        padding: 0 1.6rem;
+      }
+    }
+
+    .button[data-theme='arrow'] &,
+    .button[data-theme='arrow-reverse'] & {
+      height: var(--height, 5.6rem);
+      gap: 1.6rem;
+
+      color: var(--color-primary-2);
+      fill: var(--color-primary-2);
+      background-color: var(--color-primary-3);
+
+      @media (hover: hover) {
+        &:hover {
+          color: var(--color-primary-3);
+          fill: var(--color-primary-3);
+          background-color: var(--color-primary-2);
+        }
+      }
+    }
+
+    .button[data-theme='arrow'] & {
+      padding-left: 2.4rem;
+      padding-right: 1.2rem;
+    }
+
+    .button[data-theme='arrow-reverse'] & {
+      flex-direction: row-reverse;
+      padding-left: 1.2rem;
+      padding-right: 2.4rem;
+    }
+  }
+
+  .button__name {
+    font-size: 1.8rem;
+
+    @media (max-width: 768px) {
+      font-size: 1.6rem;
+    }
+  }
+
+  .button__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+
+    fill: inherit;
+
+    transition-duration: var(--duration-button);
+    transition-property: fill;
+
+    .button[data-theme='arrow-reverse'] & {
+      transform: scaleX(-1);
+    }
+  }
+</style>

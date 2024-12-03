@@ -1,0 +1,536 @@
+---
+import Icon from '@elements/Icon.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  items?: Array<{
+    categories: Array<string>
+    subcategories: Array<string>
+    name: string
+  }>
+}
+
+const {
+  class: className,
+  heading = 'Меню нашего ресторана',
+  items = [
+    {
+      categories: ['Популярное', 'Роллы'],
+      subcategories: ['Хосо маки'],
+      name: 'Филадельфия фреш',
+    },
+  ],
+  ...rest
+} = Astro.props
+
+const categories = new Map<string, Array<{ subcategories: Array<string>; name: string }>>()
+
+items.forEach((item) => {
+  item.categories.forEach((categoryName) => {
+    let category = categories.get(categoryName)
+
+    if (!category) {
+      category = []
+      categories.set(categoryName, category)
+    }
+
+    category.push({
+      name: item.name,
+      subcategories: item.subcategories,
+    })
+  })
+})
+---
+
+<e-menu
+  {...rest}
+  class:list={['menu', className]}
+>
+  <h2
+    class="f-d-48-s f-m-24-s menu__heading"
+    set:html={heading}
+  />
+
+  <div class="menu__main">
+    <div class="menu__nav-wrapper">
+      <e-popover-button
+        class="menu__nav-button"
+        target="menu"
+      >
+        <Icon
+          name="sticks"
+          class="menu__nav-button__sticks"
+        />
+        <div
+          class="f-m-16-s menu__nav-button__value"
+          set:html={Array.from(categories)[0]?.[0]}
+        />
+        <Icon
+          name="tailless-arrow"
+          class="menu__nav-button__arrow"
+        />
+      </e-popover-button>
+
+      <e-popover
+        class="menu__nav-popover"
+        id="menu"
+      >
+        <e-input-group class="menu__nav">
+          {
+            Array.from(categories).map(([name], i) => {
+              return (
+                <label class="menu__nav__item">
+                  <input
+                    type="radio"
+                    name="menu-nav"
+                    class="visually-hidden menu__nav__item__input"
+                    value={name}
+                    checked={i === 0}
+                  />
+                  <span class="menu__nav__item__value">
+                    <Icon
+                      name="sticks"
+                      class="menu__nav__item__value__icon"
+                    />
+                    <span
+                      class="f-d-24-s f-m-16-s menu__nav__item__value__name"
+                      set:html={name}
+                    />
+                  </span>
+                </label>
+              )
+            })
+          }
+        </e-input-group>
+      </e-popover>
+    </div>
+    <div class="menu__categories">
+      {
+        Array.from(categories).map(([categoryName, items]) => {
+          const subcategoryNames = Array.from(
+            new Set(items.map((item) => item.subcategories).flat()),
+          )
+
+          subcategoryNames.unshift('Все')
+
+          return (
+            <div
+              class="menu__category"
+              data-name={categoryName}
+            >
+              <e-input-group class="menu__category__nav">
+                {subcategoryNames.map((name, i) => {
+                  return (
+                    <label class="menu__category__nav__item">
+                      <input
+                        type="radio"
+                        name={categoryName}
+                        class="visually-hidden menu__category__nav__item__input"
+                        value={name === 'Все' ? '' : name}
+                        checked={i === 0}
+                      />
+                      <span
+                        class="f-d-16-s menu__category__nav__item__name"
+                        set:html={name}
+                      />
+                    </label>
+                  )
+                })}
+              </e-input-group>
+
+              <div class="menu__category__items">
+                {items.map((item) => {
+                  return (
+                    <div
+                      class="menu__category__item"
+                      data-subcategories={item.subcategories}
+                    >
+                      {item.name}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })
+      }
+    </div>
+  </div>
+</e-menu>
+
+<style is:global>
+  .menu {
+    display: block;
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+  }
+
+  .menu__heading {
+    margin-bottom: 5rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .menu__main {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 31.5rem 1fr;
+    gap: 4.8rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 100%;
+      gap: 1.6rem;
+    }
+  }
+
+  .menu__nav-wrapper {
+    position: relative;
+    z-index: 1;
+
+    --duration: 0.15s;
+  }
+
+  .menu__nav-button {
+    --type: toggle;
+
+    @media (min-width: 769px) {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0.8rem;
+      height: 4.3rem;
+
+      border-radius: var(--border-radius-1);
+      background-color: var(--color-secondary-2);
+
+      transition: background-color var(--duration);
+
+      user-select: none;
+
+      &.opened {
+        background-color: var(--color-primary-2);
+      }
+    }
+  }
+
+  .menu__nav-button__sticks {
+    width: 2rem;
+    height: 2.7rem;
+    fill: var(--color-functional-1);
+  }
+
+  .menu__nav-button__value {
+    color: var(--color-functional-1);
+
+    @media (max-width: 768px) {
+      transition: opacity var(--duration);
+
+      .menu__nav-button.opened & {
+        opacity: 0;
+      }
+    }
+  }
+
+  .menu__nav-button__arrow {
+    width: 2.4rem;
+    height: 2.4rem;
+
+    fill: var(--color-functional-1);
+
+    transform: scaleY(1) rotate(90deg);
+    transition: transform var(--duration);
+
+    .menu__nav-button.opened & {
+      transform: scaleY(-1) rotate(90deg);
+    }
+  }
+
+  .menu__nav-popover {
+    --escape: true;
+    --click-outside: true;
+
+    @media (min-width: 769px) {
+      opacity: 1 !important;
+      display: block !important;
+    }
+
+    @media (max-width: 768px) {
+      position: absolute;
+      top: calc(100% + 0.8rem);
+      left: 0;
+
+      width: 100%;
+      padding: 0 1.6rem;
+
+      opacity: 1 !important;
+      transition: opacity var(--duration);
+    }
+  }
+
+  .menu__nav {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 2.4rem;
+
+    @media (max-width: 768px) {
+      gap: 1.2rem;
+      padding: 1.6rem;
+
+      background-color: var(--color-primary-2);
+      border-radius: var(--border-radius-1);
+
+      transition: clip-path var(--duration);
+      clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+
+      .menu__nav-popover.opened & {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+      }
+    }
+  }
+
+  .menu__nav__item {
+    --sticks-width: 2.5rem;
+    --sticks-margin: 1.2rem;
+    --sticks-size: calc(var(--sticks-width) + var(--sticks-margin));
+
+    position: relative;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+
+    overflow: hidden;
+
+    @media (min-width: 769px) {
+      height: 4.4rem;
+    }
+  }
+
+  .menu__nav__item__input {
+  }
+
+  .menu__nav__item__value {
+    display: flex;
+    align-items: center;
+  }
+
+  .menu__nav__item__value__icon {
+    width: var(--sticks-width);
+    height: 100%;
+    margin-right: var(--sticks-margin);
+
+    fill: var(--color-functional-1);
+
+    transform: translateX(calc(var(--sticks-size) * -1));
+    transition: transform var(--duration-button);
+
+    .menu__nav__item__input:checked ~ .menu__nav__item__value & {
+      transform: translateX(0);
+    }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .menu__nav__item__value__name {
+    @media (min-width: 769px) {
+      transform: translateX(calc(var(--sticks-size) * -1));
+      transition:
+        transform var(--duration-button),
+        color var(--duration-button);
+
+      .menu__nav__item__input:checked ~ .menu__nav__item__value & {
+        transform: translateX(0);
+        color: var(--color-functional-1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      color: var(--color-primary-1);
+    }
+  }
+
+  .menu__categories {
+    display: grid;
+  }
+
+  .menu__category {
+    grid-column: 1/1;
+    grid-row: 1/1;
+
+    display: none;
+
+    &[aria-hidden='false'] {
+      display: block;
+    }
+  }
+
+  .menu__category__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .menu__category__nav__item {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .menu__category__nav__item__input {
+  }
+
+  .menu__category__nav__item__name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 3.5rem;
+    padding: 0 2.4rem;
+
+    border-radius: var(--border-radius-1);
+    border: 0.1rem solid var(--color-secondary-2);
+
+    transition:
+      background-color var(--duration-button),
+      border-color var(--duration-button);
+
+    .menu__category__nav__item__input:checked ~ & {
+      background-color: var(--color-primary-3);
+      border-color: var(--color-primary-3);
+    }
+
+    @media (max-width: 768px) {
+      height: 2.6rem;
+      padding: 0 1.2rem;
+    }
+  }
+
+  .menu__category__items {
+  }
+
+  .menu__category__item {
+    display: none;
+
+    &[aria-hidden='false'] {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  import type { InputGroupElement } from '@lib/InputGroupElement'
+  import type { PopoverElement } from 'aptechka/popover'
+
+  export class MenuElement extends HTMLElement {
+    #navPopoverElement: PopoverElement | null = null
+    #navButtonValueElement: HTMLElement | null = null
+    #categoryInputGroupElement: InputGroupElement | null = null
+    #categoryElements: Array<HTMLElement> = []
+    #currentSubategoryInputGroupElement: InputGroupElement | null = null
+    #currentCategoryItemElements: Array<HTMLElement> = []
+
+    protected connectedCallback() {
+      this.#navPopoverElement = this.querySelector('.menu__nav-popover')
+      this.#navButtonValueElement = this.querySelector('.menu__nav-button__value')
+      this.#categoryInputGroupElement = this.querySelector('.menu__nav')
+      this.#categoryElements = [...this.querySelectorAll<HTMLElement>('.menu__category')]
+
+      this.#categoryInputGroupElement?.addEventListener(
+        'inputGroupValueChange',
+        this.#categoryChangeListener,
+      )
+
+      this.#categoryChangeListener()
+    }
+
+    protected disconnectedCallback() {
+      this.#categoryInputGroupElement?.removeEventListener(
+        'inputGroupValueChange',
+        this.#categoryChangeListener,
+      )
+
+      this.#currentSubategoryInputGroupElement?.removeEventListener(
+        'inputGroupValueChange',
+        this.#subcategoryChangeListener,
+      )
+    }
+
+    #categoryChangeListener = () => {
+      this.#currentSubategoryInputGroupElement?.removeEventListener(
+        'inputGroupValueChange',
+        this.#subcategoryChangeListener,
+      )
+
+      let currentCategoryElement = null! as HTMLElement
+
+      this.#categoryElements.forEach((category) => {
+        const name = category.getAttribute('data-name')
+
+        if (name === this.#categoryInputGroupElement?.value) {
+          category.ariaHidden = 'false'
+          currentCategoryElement = category
+        } else {
+          category.ariaHidden = 'true'
+        }
+      })
+
+      if (currentCategoryElement) {
+        this.#currentSubategoryInputGroupElement =
+          currentCategoryElement.querySelector('.menu__category__nav')
+
+        this.#currentCategoryItemElements = [
+          ...currentCategoryElement.querySelectorAll<HTMLElement>('.menu__category__item'),
+        ]
+
+        this.#currentSubategoryInputGroupElement?.addEventListener(
+          'inputGroupValueChange',
+          this.#subcategoryChangeListener,
+        )
+
+        this.#subcategoryChangeListener()
+      }
+
+      if (this.#navButtonValueElement && this.#categoryInputGroupElement?.value) {
+        this.#navButtonValueElement.textContent = this.#categoryInputGroupElement.value
+      }
+
+      this.#navPopoverElement?.close()
+    }
+
+    #subcategoryChangeListener = () => {
+      this.#currentCategoryItemElements.forEach((element) => {
+        if (
+          !this.#currentSubategoryInputGroupElement?.value ||
+          element
+            .getAttribute('data-subcategories')
+            ?.split(',')
+            .map((v) => v.trim())
+            .find((subcategory) => subcategory === this.#currentSubategoryInputGroupElement?.value)
+        ) {
+          element.ariaHidden = 'false'
+        } else {
+          element.ariaHidden = 'true'
+        }
+      })
+    }
+  }
+
+  if (!customElements.get('e-menu')) {
+    customElements.define('e-menu', MenuElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-menu': MenuElement
+    }
+  }
+</script>

@@ -1,0 +1,186 @@
+---
+import Form from '@elements/Form.astro'
+import Icon from '@elements/Icon.astro'
+import type { ImageDataProps } from '@elements/Image.astro'
+import Image from '@elements/Image.astro'
+
+export interface Props {
+  heading?: string
+  description?: string
+  image?: ImageDataProps
+}
+
+const {
+  heading = 'Не упустите шанс получить самые выгодные предложения',
+  description = 'Будьте первыми, кто узнает о горячих акциях и&nbsp;скидках',
+  image = { src: '/images/billboard/3.jpg' },
+} = Astro.props
+---
+
+<!-- BLOCK -->
+<div class="subscribe">
+  <div class="subscribe__inner">
+    <Image
+      class="subscribe__image"
+      lazy
+      lazyBackground
+      cover
+      {...image}
+    />
+
+    <div class="subscribe__content">
+      <h2
+        class="f-d-24-s f-m-18-s subscribe__heading"
+        set:html={heading}
+      />
+      <p
+        class="f-d-16-s f-m-14-s subscribe__description"
+        set:html={description}
+      />
+      <Form class="subscribe__form">
+        <div class="subscribe__field">
+          <input
+            class="f-d-16-r f-m-14-r subscribe__input"
+            placeholder="Электронная почта"
+            required
+            type={'email'}
+            name="email"
+          />
+          <button
+            type="submit"
+            class="subscribe__button"
+          >
+            <Icon
+              class="subscribe__button__icon"
+              name="tail-arrow"
+            />
+          </button>
+        </div>
+      </Form>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .subscribe {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+  }
+
+  .subscribe__inner {
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+    height: 40rem;
+
+    border-radius: var(--border-radius-2);
+    overflow: hidden;
+
+    @media (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      height: 60rem;
+    }
+  }
+
+  .subscribe__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    z-index: -1;
+
+    width: 100%;
+    height: 100%;
+
+    @media (max-width: 768px) {
+      img {
+        object-position: 40%;
+      }
+    }
+  }
+
+  .subscribe__content {
+    width: 47.4rem;
+    height: 100%;
+    padding: 3.2rem;
+
+    margin-left: auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    background-color: rgba(229, 57, 53, 0.4);
+    backdrop-filter: blur(0.4rem);
+
+    @media (max-width: 768px) {
+      padding: 0.8rem;
+      padding-top: 1.6rem;
+      width: 100%;
+      height: max-content;
+      margin-top: auto;
+      margin-left: unset;
+    }
+  }
+
+  .subscribe__heading {
+    margin-bottom: 0.8rem;
+  }
+
+  .subscribe__description {
+    margin-bottom: 2.4rem;
+  }
+
+  .subscribe__form {
+  }
+
+  .subscribe__field {
+    position: relative;
+
+    height: 5.6rem;
+
+    background-color: var(--color-primary-1);
+    border-radius: var(--border-radius-2);
+
+    @media (max-width: 768px) {
+      height: 4rem;
+    }
+  }
+
+  .subscribe__input {
+    width: 85%;
+    height: 100%;
+    padding-left: 2.4rem;
+    border-radius: var(--border-radius-2);
+
+    @media (max-width: 768px) {
+      padding-left: 1.6rem;
+      width: 82%;
+    }
+  }
+
+  .subscribe__button {
+    position: absolute;
+    right: 1.6rem;
+    top: 50%;
+
+    width: 2.4rem;
+    height: 2.4rem;
+
+    transform: translateY(-50%);
+
+    transition: opacity var(--duration-button);
+
+    &[disabled] {
+      opacity: 0.1;
+      cursor: not-allowed;
+    }
+  }
+
+  .subscribe__button__icon {
+    width: 100%;
+    height: 100%;
+    fill: var(--color-secondary-3);
+  }
+</style>

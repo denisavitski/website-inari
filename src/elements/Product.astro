@@ -1,0 +1,112 @@
+---
+import type { BasketStoreItem } from '@stores/basketStore'
+
+export interface Props extends Partial<BasketStoreItem> {
+  class?: string
+}
+
+const {
+  class: className,
+  price = '250',
+  name = 'Калифорния лайт, 8 шт.',
+  description = 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+  pid = '1',
+  image = '/images/food/1.jpg',
+  ...rest
+} = Astro.props
+---
+
+<e-product
+  {...rest}
+  class:list={['product', className]}
+  {name}
+  {price}
+  {description}
+  {pid}
+  {image}
+  data-popover-content
+>
+  <slot />
+</e-product>
+
+<script>
+  import { basketStore } from '@stores/basketStore'
+  import type { ProductButtonElement } from './ProductButton.astro.0.mts'
+
+  export class ProductElement extends HTMLElement {
+    #price = 0
+    #name = ''
+    #description = ''
+    #pid = ''
+    #image = ''
+
+    #buttonElement: ProductButtonElement | null = null
+
+    public get pid() {
+      return this.#pid
+    }
+
+    protected connectedCallback() {
+      this.#price = parseInt(this.getAttribute('price') || '0') || 0
+      this.#name = this.getAttribute('name') || ''
+      this.#description = this.getAttribute('description') || ''
+      this.#pid = this.getAttribute('pid') || ''
+      this.#image = this.getAttribute('image') || ''
+
+      this.#buttonElement = this.querySelector('e-product-button')
+
+      this.#buttonElement?.addEventListener(
+        'productButtonCounterChange',
+        this.#counterChangeListener,
+      )
+
+      customElements.whenDefined('e-product-button').then(() => {
+        if (this.isConnected) {
+          basketStore.subscribe(this.#storeChangeListener)
+        }
+      })
+    }
+
+    protected disconnectedCallback() {
+      this.#buttonElement?.removeEventListener(
+        'productButtonCounterChange',
+        this.#counterChangeListener,
+      )
+
+      basketStore.unsubscribe(this.#storeChangeListener)
+    }
+
+    #counterChangeListener = () => {
+      const amount = this.#buttonElement!.counter
+
+      basketStore.setItem({
+        amount: amount,
+        description: this.#description,
+        price: this.#price,
+        name: this.#name,
+        pid: this.#pid,
+        image: this.#image,
+      })
+    }
+
+    #storeChangeListener = () => {
+      const storeItem = basketStore.items.find((item) => item.pid === this.#pid)
+
+      if (storeItem) {
+        this.#buttonElement?.set(storeItem.amount)
+      } else {
+        this.#buttonElement?.set(0)
+      }
+    }
+  }
+
+  if (!customElements.get('e-product')) {
+    customElements.define('e-product', ProductElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-product': ProductElement
+    }
+  }
+</script>

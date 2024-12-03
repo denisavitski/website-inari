@@ -1,0 +1,156 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+import Icon from './Icon.astro'
+import Rating from './Rating.astro'
+
+export interface Props extends HTMLAttributes<'div'> {
+  class?: string
+  name?: string
+  stars?: number
+  text?: string
+  order?: Array<string>
+}
+
+const {
+  class: className,
+  stars = 3,
+  name = 'Марк',
+  text = 'Заказал доставку из «Инари» — очень доволен! Еда приехала вовремя, всё свежее и вкусное. Роллы аккуратно скручены, а порции достаточно большие. Курьер вежливый, упаковка качественная. Буду заказывать снова!',
+  order = ['Том Кха с цыпленком', 'Сет «Много рыбы»', 'Сет «Американская классика»'],
+  ...rest
+} = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['review', className]}
+>
+  <div class="review__head">
+    <Rating
+      {stars}
+      class="review__stars"
+    />
+
+    <div class="review__person">
+      <div
+        class="f-d-16-s f-m-14-s review__person__name"
+        set:html={name}
+      />
+      <Icon
+        class="review__person__icon"
+        name="person"
+      />
+    </div>
+  </div>
+
+  <p
+    class="f-d-16-r f-m-12-r review__text"
+    set:html={text}
+  />
+
+  <div class="review__order">
+    <div class="f-d-16-r f-m-12-r review__order__title">Что заказывали</div>
+    <ul class="review__order__list">
+      {
+        order.map((item) => {
+          return (
+            <li
+              class="f-d-16-s f-m-14-s review__order__list__item"
+              set:html={item}
+            />
+          )
+        })
+      }
+    </ul>
+  </div>
+</div>
+
+<style is:global>
+  .review {
+    padding: 2.4rem;
+    border-radius: var(--border-radius-2);
+    border: 0.1rem solid var(--color-secondary-1);
+
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 768px) {
+      padding: 0.8rem;
+    }
+  }
+
+  .review__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .review__stars {
+    --gap: 0.2rem;
+  }
+
+  .review__person {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 0.4rem;
+  }
+
+  .review__person__name {
+  }
+
+  .review__person__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    fill: var(--color-primary-2);
+  }
+
+  .review__text {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .review__order {
+    padding-top: 1.6rem;
+    border-top: 0.1rem solid var(--color-secondary-1);
+    margin-top: auto;
+
+    @media (max-width: 768px) {
+      padding-top: 0.8rem;
+    }
+  }
+
+  .review__order__title {
+    color: var(--color-secondary-3);
+
+    margin-bottom: 0.8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.6rem;
+    }
+  }
+
+  .review__order__list {
+    display: inline-flex;
+    flex-wrap: wrap;
+  }
+
+  .review__order__list__item {
+    &:not(:first-child)::before {
+      content: '/';
+
+      margin: 0 0.4rem;
+
+      color: var(--color-secondary-3);
+    }
+  }
+</style>

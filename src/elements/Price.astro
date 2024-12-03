@@ -1,0 +1,14 @@
+---
+export interface Props {
+  class?: string
+  value?: string | number
+}
+
+const { class: className, value = '100', ...rest } = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['price', className]}
+  set:html={`${value} ₽`}
+/>

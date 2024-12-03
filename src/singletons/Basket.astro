@@ -1,0 +1,369 @@
+---
+import '@elements/BasketItem.astro'
+
+import Button from '@elements/Button.astro'
+import Form from '@elements/Form.astro'
+import SuggestionProducts from '@elements/SuggestionProducts.astro'
+
+export const modal = '#basket'
+
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<!-- SINGLETON -->
+<e-basket
+  {...rest}
+  class:list={['basket', className]}
+  id="basket"
+  data-outside
+>
+  <div class="basket__inner">
+    <div class="basket__scrollable custom-scrollbar">
+      <div class="f-d-24-s f-m-18-s basket__head"></div>
+
+      <div class="basket__items-container"></div>
+
+      <SuggestionProducts class="basket__suggestions" />
+    </div>
+
+    <div class="basket__bottom">
+      <Form class="basket__promo">
+        <input
+          name="promo-code"
+          required
+          type="text"
+          class="f-d-16-r f-m-14-r basket__promo__input"
+        />
+        <button
+          class="f-d-16-r f-m-12-r basket__promo__button"
+          type="submit"
+          >Применить</button
+        >
+      </Form>
+
+      <div class="f-d-16-s f-m-14-s basket__info">
+        <div class="basket__info__line">
+          <div class="basket__info__line__title">1 товар</div>
+          <div class="basket__info__line__value">2 500 ₽</div>
+        </div>
+        <div class="basket__info__line">
+          <div class="basket__info__line__title">Скидка</div>
+          <div class="basket__info__line__value">– 350 ₽</div>
+        </div>
+        <div class="basket__info__line">
+          <div class="basket__info__line__title">Доставка</div>
+          <div class="basket__info__line__value">Бесплатно</div>
+        </div>
+      </div>
+
+      <div class="basket__final">
+        <div class="basket__final__text">
+          <div class="f-d-24-s f-m-18-s basket__final__title">Сумма заказа</div>
+          <div class="f-d-24-s f-m-18-s basket__final__value">2 150 ₽</div>
+        </div>
+
+        <Button
+          class="basket__final__button"
+          theme={'arrow'}
+          >К оформлению заказа</Button
+        >
+      </div>
+    </div>
+  </div>
+</e-basket>
+
+<style is:global>
+  .basket {
+    --history: true;
+    --escape: true;
+    --click-outside: true;
+    --duration: 0.3s;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    z-index: var(--z-basket);
+
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+    display: none;
+    transition: opacity var(--duration);
+
+    background-color: rgba(26, 26, 26, 0.8);
+
+    @media (min-width: 769px) {
+      padding-right: var(--screen-horisontal-padding);
+    }
+  }
+
+  .basket__inner {
+    display: flex;
+    flex-direction: column;
+
+    width: 73rem;
+    height: 100%;
+    margin-left: auto;
+
+    background-color: var(--color-primary-1);
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .basket__scrollable {
+    position: relative;
+    overflow: hidden auto;
+
+    padding: 5rem;
+
+    @media (max-width: 768px) {
+      padding: 1.6rem;
+    }
+  }
+
+  .basket__scrollbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0.5rem;
+    height: 100%;
+  }
+
+  .basket__head {
+    padding-bottom: 1.6rem;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+    margin-bottom: 1.6rem;
+
+    display: none;
+
+    .basket.has-items & {
+      display: block;
+    }
+  }
+
+  .basket__items-container {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 1rem;
+
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 4rem;
+    }
+  }
+
+  .basket__suggestions {
+  }
+
+  .basket__bottom {
+    margin-top: auto;
+
+    padding: 5rem;
+    padding-bottom: 2.4rem;
+
+    background-color: var(--color-secondary-2);
+
+    @media (max-width: 768px) {
+      padding: 2.4rem 1.6rem;
+    }
+  }
+
+  .basket__promo {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .basket__promo {
+    position: relative;
+    width: 100%;
+    height: 5.1rem;
+
+    background-color: var(--color-secondary-1);
+    border-radius: var(--border-radius-1);
+
+    @media (max-width: 768px) {
+      height: 4.1rem;
+    }
+  }
+
+  .basket__promo__input {
+    width: 78%;
+    height: 100%;
+
+    padding-left: 2.4rem;
+
+    border-radius: var(--border-radius-1);
+
+    @media (max-width: 768px) {
+      padding-left: 1.6rem;
+      width: 68%;
+    }
+  }
+
+  .basket__promo__button {
+    color: var(--color-secondary-6);
+
+    position: absolute;
+    top: 50%;
+    right: 2.4rem;
+
+    transform: translateY(-50%);
+
+    @media (max-width: 768px) {
+      right: 1.6rem;
+    }
+  }
+
+  .basket__info {
+    padding-bottom: 3.2rem;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 0.8rem;
+  }
+
+  .basket__info__line {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .basket__info__line__title {
+  }
+
+  .basket__info__line__value {
+  }
+
+  .basket__final {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-top: 1.6rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  .basket__final__text {
+    display: flex;
+    justify-content: space-between;
+    gap: 4.7rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      gap: 2.4rem;
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .basket__final__title {
+  }
+
+  .basket__final__value {
+  }
+
+  .basket__final__button {
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  import type { BasketItemElement } from '@elements/BasketItem.astro.0.mjs'
+  import { basketStore } from '@stores/basketStore'
+  import { numberToPrice } from '@utils/number'
+  import { productsToString } from '@utils/string'
+  import { PopoverElement } from 'aptechka/popover'
+
+  export class BasketElement extends PopoverElement {
+    #headElement: HTMLElement | null = null
+    #itemsContainerElement: HTMLElement | null = null
+
+    protected override connectedCallback() {
+      super.connectedCallback()
+
+      this.#headElement = this.querySelector('.basket__head')
+      this.#itemsContainerElement = this.querySelector('.basket__items-container')
+
+      if (this.#itemsContainerElement) {
+        basketStore.subscribe(this.#basketStoreChangeListener)
+      }
+    }
+
+    protected override disconnectedCallback() {
+      super.disconnectedCallback()
+
+      basketStore.unsubscribe(this.#basketStoreChangeListener)
+    }
+
+    #basketStoreChangeListener = () => {
+      const itemElements = [...this.#itemsContainerElement!.children] as Array<BasketItemElement>
+
+      basketStore.items.forEach((storeItem) => {
+        const itemElement = itemElements.find((itemElement) => itemElement.pid === storeItem.pid)
+
+        if (itemElement) {
+          itemElement.productButtonElement.set(storeItem.amount)
+        } else {
+          const itemElement = document.createElement('e-basket-item')
+
+          itemElement.setAttribute('pid', storeItem.pid)
+          itemElement.setAttribute('name', storeItem.name)
+          itemElement.setAttribute('image', storeItem.image)
+          itemElement.setAttribute('description', storeItem.description || '')
+          itemElement.setAttribute('price', storeItem.price.toString())
+          itemElement.setAttribute('amount', storeItem.amount.toString())
+
+          this.#itemsContainerElement?.appendChild(itemElement)
+        }
+      })
+
+      itemElements.forEach((itemElement) => {
+        const storeItem = basketStore.items.find((storeItem) => storeItem.pid === itemElement.pid)
+
+        if (!storeItem) {
+          itemElement.remove()
+        }
+      })
+
+      if (basketStore.fullAmount) {
+        this.classList.add('has-items')
+
+        if (this.#headElement) {
+          this.#headElement.textContent = `${basketStore.fullAmount} ${productsToString(basketStore.fullAmount)} товара на ${numberToPrice(basketStore.fullPrice)}`
+        }
+      } else {
+        this.classList.remove('has-items')
+
+        if (this.#headElement) {
+          this.#headElement.textContent = ''
+        }
+      }
+    }
+  }
+
+  if (!customElements.get('e-basket')) {
+    customElements.define('e-basket', BasketElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-basket': BasketElement
+    }
+  }
+</script>
