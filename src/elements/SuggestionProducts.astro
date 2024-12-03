@@ -118,6 +118,7 @@ const {
       this.#contentElement = this.querySelector('.suggestion-products__content')
 
       this.#allProductElements = [...this.querySelectorAll<ProductElement>('.suggestion-product')]
+
       this.#allProductElements.forEach((element) => {
         element.remove()
       })

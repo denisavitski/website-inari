@@ -258,7 +258,7 @@ const {
       customElements.whenDefined('e-product-button').then(() => {
         if (this.isConnected) {
           this.#productButtonElement.set(amountAttr)
-          this.#productButtonElement.setPrice(priceAttr)
+          this.#productButtonElement.setPlaceholder(numberToPrice(priceAttr))
         }
       })
 

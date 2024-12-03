@@ -4,7 +4,7 @@ export interface BasketStoreItem {
   name: string
   pid: string
   amount: number
-  price: number
+  price: number | string
   image: string
   description?: string | undefined
 }
@@ -16,7 +16,7 @@ function createBaksetStore() {
 
   const derived = new Derived(store, (value) => {
     const fullPrice = value.reduce((p, c) => {
-      return p + c.price * c.amount
+      return p + parseInt(c.price.toString()) * c.amount
     }, 0)
 
     const fullAmount = value.reduce((p, c) => {
@@ -76,6 +76,10 @@ function createBaksetStore() {
 
     get items() {
       return store.current
+    },
+
+    get prevItems() {
+      return store.previous
     },
 
     get fullPrice() {

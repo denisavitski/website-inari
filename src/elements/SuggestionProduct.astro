@@ -1,8 +1,8 @@
 ---
 import type { BasketStoreItem } from '@stores/basketStore'
-import Product from './Product.astro'
 import Image from './Image.astro'
 import ProductButton from './ProductButton.astro'
+import Product from './Product.astro'
 
 export interface Props extends BasketStoreItem {
   class?: string
@@ -41,7 +41,7 @@ const {
   />
   <ProductButton
     class="suggestion-product__button"
-    price={price}
+    placeholder={price}
   />
 </Product>
 

@@ -32,27 +32,21 @@ const {
 <script>
   import { basketStore } from '@stores/basketStore'
   import type { ProductButtonElement } from './ProductButton.astro.0.mts'
+  import type { InputGroupElement } from '@lib/InputGroupElement'
 
   export class ProductElement extends HTMLElement {
-    #price = 0
-    #name = ''
-    #description = ''
-    #pid = ''
-    #image = ''
-
     #buttonElement: ProductButtonElement | null = null
+    #variantsGroupElement: InputGroupElement | null = null
 
     public get pid() {
-      return this.#pid
+      return this.getAttribute('pid') || ''
+    }
+
+    public get buttonElement() {
+      return this.#buttonElement
     }
 
     protected connectedCallback() {
-      this.#price = parseInt(this.getAttribute('price') || '0') || 0
-      this.#name = this.getAttribute('name') || ''
-      this.#description = this.getAttribute('description') || ''
-      this.#pid = this.getAttribute('pid') || ''
-      this.#image = this.getAttribute('image') || ''
-
       this.#buttonElement = this.querySelector('e-product-button')
 
       this.#buttonElement?.addEventListener(
@@ -60,9 +54,18 @@ const {
         this.#counterChangeListener,
       )
 
-      customElements.whenDefined('e-product-button').then(() => {
+      this.#variantsGroupElement = this.querySelector('e-input-group')
+
+      this.#variantsGroupElement?.addEventListener('inputGroupValueChange', this.#variantChange)
+
+      Promise.all([
+        customElements.whenDefined('e-product-button'),
+        customElements.whenDefined('e-input-group'),
+      ]).then(() => {
         if (this.isConnected) {
           basketStore.subscribe(this.#storeChangeListener)
+
+          this.#variantChange()
         }
       })
     }
@@ -73,29 +76,83 @@ const {
         this.#counterChangeListener,
       )
 
+      this.#variantsGroupElement?.removeEventListener('inputGroupValueChange', this.#variantChange)
+
       basketStore.unsubscribe(this.#storeChangeListener)
     }
 
     #counterChangeListener = () => {
       const amount = this.#buttonElement!.counter
 
+      const price = parseInt(this.getAttribute('price') || '0') || 0
+      const name = this.getAttribute('name') || ''
+      const description = this.getAttribute('description') || ''
+      const image = this.getAttribute('image') || ''
+
       basketStore.setItem({
         amount: amount,
-        description: this.#description,
-        price: this.#price,
-        name: this.#name,
-        pid: this.#pid,
-        image: this.#image,
+        description: description,
+        price: price,
+        name: name,
+        pid: this.pid,
+        image: image,
       })
     }
 
     #storeChangeListener = () => {
-      const storeItem = basketStore.items.find((item) => item.pid === this.#pid)
+      const storeItem = basketStore.items.find((item) => item.pid === this.pid)
 
       if (storeItem) {
         this.#buttonElement?.set(storeItem.amount)
-      } else {
+      } else if (basketStore.prevItems) {
         this.#buttonElement?.set(0)
+      }
+    }
+
+    #variantChange = () => {
+      if (basketStore.prevItems) {
+        this.#buttonElement?.set(0)
+      }
+
+      const currentInput = this.#variantsGroupElement?.input
+
+      if (currentInput) {
+        const name = currentInput.getAttribute('data-name')
+        const pid = currentInput.getAttribute('data-pid')
+        const price = currentInput.getAttribute('data-price')
+
+        if (name) {
+          this.setAttribute('name', name)
+        }
+
+        if (pid) {
+          this.setAttribute('pid', pid)
+        }
+
+        if (price) {
+          this.setAttribute('price', price)
+        }
+
+        for (const key in currentInput.dataset) {
+          const value = currentInput.dataset[key]
+
+          if (value && key.toLowerCase().includes('variant')) {
+            const keyWithoutVariant = key
+              .replace('variant', '')
+              .replace('Variant', '')
+              .replace('value', '')
+              .replace('Value', '')
+              .toLowerCase()
+
+            if (keyWithoutVariant) {
+              const element = this.querySelector(`[data-variant-${keyWithoutVariant}]`)
+
+              if (element) {
+                element.textContent = value
+              }
+            }
+          }
+        }
       }
     }
   }

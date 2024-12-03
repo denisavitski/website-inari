@@ -8,6 +8,9 @@ export interface Props extends HTMLAttributes<'svg'> {
 const { name, ...rest } = Astro.props
 ---
 
-<svg {...rest}>
+<svg
+  {...rest}
+  data-name={name}
+>
   <use xlink:href={`/sprite.svg#sprite:${name}`}></use>
 </svg>

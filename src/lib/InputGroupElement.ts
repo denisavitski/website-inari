@@ -9,6 +9,7 @@ export class InputGroupElement extends HTMLElement {
 
   #value: string = ''
   #input: HTMLInputElement | null = null
+  #name: string = ''
 
   public get value() {
     return this.#value
@@ -16,6 +17,10 @@ export class InputGroupElement extends HTMLElement {
 
   public get input() {
     return this.#input
+  }
+
+  public get name() {
+    return this.#name
   }
 
   public changeValue(value: string) {
@@ -29,6 +34,16 @@ export class InputGroupElement extends HTMLElement {
 
   protected connectedCallback() {
     this.#inputElements = [...this.querySelectorAll<HTMLInputElement>('input')]
+
+    if (this.hasAttribute('name')) {
+      this.#name = this.getAttribute('name')!
+    } else {
+      this.#name = this.#inputElements[0]?.name || ''
+    }
+
+    this.#inputElements.forEach((element) => {
+      element.name = this.#name
+    })
 
     this.#updateValue()
 

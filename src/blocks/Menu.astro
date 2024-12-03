@@ -1,26 +1,22 @@
 ---
+import { menuItems } from '@dev-data/menuItems'
 import Icon from '@elements/Icon.astro'
+import MenuProduct, { type MenuProductData } from '@elements/MenuProduct.astro'
+
+export interface MenuItem extends MenuProductData {
+  categories: Array<string>
+}
 
 export interface Props {
   class?: string
   heading?: string
-  items?: Array<{
-    categories: Array<string>
-    subcategories: Array<string>
-    name: string
-  }>
+  items?: Array<MenuItem>
 }
 
 const {
   class: className,
   heading = 'Меню нашего ресторана',
-  items = [
-    {
-      categories: ['Популярное', 'Роллы'],
-      subcategories: ['Хосо маки'],
-      name: 'Филадельфия фреш',
-    },
-  ],
+  items = menuItems,
   ...rest
 } = Astro.props
 
@@ -53,108 +49,125 @@ items.forEach((item) => {
   />
 
   <div class="menu__main">
-    <div class="menu__nav-wrapper">
-      <e-popover-button
-        class="menu__nav-button"
-        target="menu"
-      >
-        <Icon
-          name="sticks"
-          class="menu__nav-button__sticks"
-        />
-        <div
-          class="f-m-16-s menu__nav-button__value"
-          set:html={Array.from(categories)[0]?.[0]}
-        />
-        <Icon
-          name="tailless-arrow"
-          class="menu__nav-button__arrow"
-        />
-      </e-popover-button>
+    <div class="menu__nav-col">
+      <div class="menu__nav-wrapper">
+        <e-popover-button
+          class="menu__nav-button"
+          target="menu"
+        >
+          <Icon
+            name="sticks"
+            class="menu__nav-button__sticks"
+          />
+          <div
+            class="f-m-16-s menu__nav-button__value"
+            set:html={Array.from(categories)[0]?.[0]}
+          />
+          <Icon
+            name="tailless-arrow"
+            class="menu__nav-button__arrow"
+          />
+        </e-popover-button>
 
-      <e-popover
-        class="menu__nav-popover"
-        id="menu"
-      >
-        <e-input-group class="menu__nav">
-          {
-            Array.from(categories).map(([name], i) => {
-              return (
-                <label class="menu__nav__item">
-                  <input
-                    type="radio"
-                    name="menu-nav"
-                    class="visually-hidden menu__nav__item__input"
-                    value={name}
-                    checked={i === 0}
-                  />
-                  <span class="menu__nav__item__value">
-                    <Icon
-                      name="sticks"
-                      class="menu__nav__item__value__icon"
+        <e-popover
+          class="menu__nav-popover"
+          id="menu"
+        >
+          <e-input-group class="menu__nav">
+            {
+              Array.from(categories).map(([name], i) => {
+                return (
+                  <label class="menu__nav__item">
+                    <input
+                      type="radio"
+                      name="menu-nav"
+                      class="visually-hidden menu__nav__item__input"
+                      value={name}
+                      checked={i === 0}
                     />
-                    <span
-                      class="f-d-24-s f-m-16-s menu__nav__item__value__name"
-                      set:html={name}
-                    />
-                  </span>
-                </label>
-              )
-            })
-          }
-        </e-input-group>
-      </e-popover>
+                    <span class="menu__nav__item__value">
+                      <Icon
+                        name="sticks"
+                        class="menu__nav__item__value__icon"
+                      />
+                      <span
+                        class="f-d-24-s f-m-16-s menu__nav__item__value__name"
+                        set:html={name}
+                      />
+                    </span>
+                  </label>
+                )
+              })
+            }
+          </e-input-group>
+        </e-popover>
+      </div>
     </div>
-    <div class="menu__categories">
-      {
-        Array.from(categories).map(([categoryName, items]) => {
-          const subcategoryNames = Array.from(
-            new Set(items.map((item) => item.subcategories).flat()),
-          )
+    <div class="menu__content">
+      <div class="menu__content__top">
+        {
+          Array.from(categories).map(([categoryName, items]) => {
+            const subcategories = Array.from(
+              new Set(
+                items
+                  .map((item) => {
+                    return item.subcategories
+                  })
+                  .flat(),
+              ),
+            )
 
-          subcategoryNames.unshift('Все')
+            subcategories.unshift('Все')
 
-          return (
-            <div
-              class="menu__category"
-              data-name={categoryName}
-            >
-              <e-input-group class="menu__category__nav">
-                {subcategoryNames.map((name, i) => {
+            return (
+              <e-input-group
+                class="menu__subcategory-input-group"
+                name={categoryName}
+              >
+                {subcategories.map((subcategoryName, i) => {
                   return (
-                    <label class="menu__category__nav__item">
+                    <label class="menu__subcategory-input-group__item">
                       <input
                         type="radio"
-                        name={categoryName}
-                        class="visually-hidden menu__category__nav__item__input"
-                        value={name === 'Все' ? '' : name}
+                        class="visually-hidden menu__subcategory-input-group__item__input"
+                        value={subcategoryName === 'Все' ? '' : subcategoryName}
                         checked={i === 0}
                       />
                       <span
-                        class="f-d-16-s menu__category__nav__item__name"
-                        set:html={name}
+                        class="f-d-16-s f-m-12-s menu__subcategory-input-group__item__name"
+                        set:html={subcategoryName}
                       />
                     </label>
                   )
                 })}
               </e-input-group>
-
-              <div class="menu__category__items">
-                {items.map((item) => {
-                  return (
-                    <div
-                      class="menu__category__item"
-                      data-subcategories={item.subcategories}
-                    >
-                      {item.name}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })
-      }
+            )
+          })
+        }
+      </div>
+      <div class="menu__items">
+        {
+          items.map((item) => {
+            return (
+              <MenuProduct
+                class="menu__item"
+                amount={item.amount}
+                categories={item.categories}
+                description={item.description}
+                icon={item.icon}
+                image={item.image}
+                info={item.info}
+                labels={item.labels}
+                name={item.name}
+                pid={item.pid}
+                price={item.price}
+                subcategories={item.subcategories}
+                type={item.type}
+              />
+            )
+          })
+        }
+      </div>
     </div>
   </div>
 </e-menu>
@@ -185,11 +198,26 @@ items.forEach((item) => {
     }
   }
 
-  .menu__nav-wrapper {
-    position: relative;
-    z-index: 1;
+  .menu__nav-col {
+    @media (max-width: 768px) {
+      position: sticky;
+      top: 0;
 
-    --duration: 0.15s;
+      z-index: 10;
+    }
+  }
+
+  .menu__nav-wrapper {
+    z-index: 10;
+
+    @media (min-width: 769px) {
+      position: sticky;
+      top: calc(var(--header-height) / 2);
+    }
+
+    @media (max-width: 768px) {
+      position: relative;
+    }
   }
 
   .menu__nav-button {
@@ -210,7 +238,7 @@ items.forEach((item) => {
       border-radius: var(--border-radius-1);
       background-color: var(--color-secondary-2);
 
-      transition: background-color var(--duration);
+      transition: background-color var(--duration-button);
 
       user-select: none;
 
@@ -230,7 +258,7 @@ items.forEach((item) => {
     color: var(--color-functional-1);
 
     @media (max-width: 768px) {
-      transition: opacity var(--duration);
+      transition: opacity var(--duration-button);
 
       .menu__nav-button.opened & {
         opacity: 0;
@@ -245,7 +273,7 @@ items.forEach((item) => {
     fill: var(--color-functional-1);
 
     transform: scaleY(1) rotate(90deg);
-    transition: transform var(--duration);
+    transition: transform var(--duration-button);
 
     .menu__nav-button.opened & {
       transform: scaleY(-1) rotate(90deg);
@@ -270,7 +298,7 @@ items.forEach((item) => {
       padding: 0 1.6rem;
 
       opacity: 1 !important;
-      transition: opacity var(--duration);
+      transition: opacity var(--duration-button);
     }
   }
 
@@ -286,7 +314,7 @@ items.forEach((item) => {
       background-color: var(--color-primary-2);
       border-radius: var(--border-radius-1);
 
-      transition: clip-path var(--duration);
+      transition: clip-path var(--duration-button);
       clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
 
       .menu__nav-popover.opened & {
@@ -341,11 +369,12 @@ items.forEach((item) => {
   }
 
   .menu__nav__item__value__name {
+    transition:
+      transform var(--duration-button),
+      color var(--duration-button);
+
     @media (min-width: 769px) {
       transform: translateX(calc(var(--sticks-size) * -1));
-      transition:
-        transform var(--duration-button),
-        color var(--duration-button);
 
       .menu__nav__item__input:checked ~ .menu__nav__item__value & {
         transform: translateX(0);
@@ -355,40 +384,44 @@ items.forEach((item) => {
 
     @media (max-width: 768px) {
       color: var(--color-primary-1);
+
+      .menu__nav__item__input:checked ~ .menu__nav__item__value & {
+        color: var(--color-functional-1);
+      }
     }
   }
 
-  .menu__categories {
+  .menu__content {
     display: grid;
   }
 
-  .menu__category {
-    grid-column: 1/1;
-    grid-row: 1/1;
-
-    display: none;
-
-    &[aria-hidden='false'] {
-      display: block;
-    }
+  .menu__content__top {
   }
 
-  .menu__category__nav {
-    display: flex;
+  .menu__subcategory-input-group {
+    display: none;
     flex-wrap: wrap;
     gap: 0.8rem;
     margin-bottom: 1.6rem;
+
+    &[aria-hidden='false'] {
+      display: flex;
+    }
+
+    @media (max-width: 768px) {
+      gap: 0.4rem;
+    }
   }
 
-  .menu__category__nav__item {
+  .menu__subcategory-input-group__item {
     position: relative;
     cursor: pointer;
   }
 
-  .menu__category__nav__item__input {
+  .menu__subcategory-input-group__item__input {
   }
 
-  .menu__category__nav__item__name {
+  .menu__subcategory-input-group__item__name {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -403,7 +436,7 @@ items.forEach((item) => {
       background-color var(--duration-button),
       border-color var(--duration-button);
 
-    .menu__category__nav__item__input:checked ~ & {
+    .menu__subcategory-input-group__item__input:checked ~ & {
       background-color: var(--color-primary-3);
       border-color: var(--color-primary-3);
     }
@@ -414,42 +447,67 @@ items.forEach((item) => {
     }
   }
 
-  .menu__category__items {
+  .menu__items {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
   }
 
-  .menu__category__item {
-    display: none;
+  .menu__item {
+    display: none !important;
 
     &[aria-hidden='false'] {
-      display: block;
+      display: grid !important;
     }
   }
 </style>
 
 <script>
+  import type { ProductElement } from '@elements/Product.astro.0.mjs'
   import type { InputGroupElement } from '@lib/InputGroupElement'
   import type { PopoverElement } from 'aptechka/popover'
+  import { scrollToElement } from 'aptechka/utils'
 
   export class MenuElement extends HTMLElement {
     #navPopoverElement: PopoverElement | null = null
     #navButtonValueElement: HTMLElement | null = null
     #categoryInputGroupElement: InputGroupElement | null = null
-    #categoryElements: Array<HTMLElement> = []
-    #currentSubategoryInputGroupElement: InputGroupElement | null = null
-    #currentCategoryItemElements: Array<HTMLElement> = []
+    #itemElements: Array<ProductElement> = []
+    #subcategoryInputGroupElements: Array<InputGroupElement> = []
+    #currentSubcategoryInputGroupElement: InputGroupElement | null = null
 
     protected connectedCallback() {
       this.#navPopoverElement = this.querySelector('.menu__nav-popover')
       this.#navButtonValueElement = this.querySelector('.menu__nav-button__value')
       this.#categoryInputGroupElement = this.querySelector('.menu__nav')
-      this.#categoryElements = [...this.querySelectorAll<HTMLElement>('.menu__category')]
+      this.#itemElements = [...this.querySelectorAll<ProductElement>('.menu__item')]
+      this.#subcategoryInputGroupElements = [
+        ...this.querySelectorAll<InputGroupElement>('.menu__subcategory-input-group'),
+      ]
 
       this.#categoryInputGroupElement?.addEventListener(
         'inputGroupValueChange',
         this.#categoryChangeListener,
       )
 
-      this.#categoryChangeListener()
+      this.#subcategoryInputGroupElements.forEach((element) => {
+        element.addEventListener('inputGroupValueChange', this.#subcategoryChangeListener)
+      })
+
+      Promise.all([
+        customElements.whenDefined('e-popover'),
+        customElements.whenDefined('e-input-group'),
+      ]).then(() => {
+        if (this.isConnected) {
+          this.#changeCategory()
+        }
+      })
     }
 
     protected disconnectedCallback() {
@@ -458,68 +516,77 @@ items.forEach((item) => {
         this.#categoryChangeListener,
       )
 
-      this.#currentSubategoryInputGroupElement?.removeEventListener(
-        'inputGroupValueChange',
-        this.#subcategoryChangeListener,
-      )
+      this.#subcategoryInputGroupElements.forEach((element) => {
+        element.removeEventListener('inputGroupValueChange', this.#subcategoryChangeListener)
+      })
     }
 
     #categoryChangeListener = () => {
-      this.#currentSubategoryInputGroupElement?.removeEventListener(
-        'inputGroupValueChange',
-        this.#subcategoryChangeListener,
-      )
-
-      let currentCategoryElement = null! as HTMLElement
-
-      this.#categoryElements.forEach((category) => {
-        const name = category.getAttribute('data-name')
-
-        if (name === this.#categoryInputGroupElement?.value) {
-          category.ariaHidden = 'false'
-          currentCategoryElement = category
-        } else {
-          category.ariaHidden = 'true'
-        }
-      })
-
-      if (currentCategoryElement) {
-        this.#currentSubategoryInputGroupElement =
-          currentCategoryElement.querySelector('.menu__category__nav')
-
-        this.#currentCategoryItemElements = [
-          ...currentCategoryElement.querySelectorAll<HTMLElement>('.menu__category__item'),
-        ]
-
-        this.#currentSubategoryInputGroupElement?.addEventListener(
-          'inputGroupValueChange',
-          this.#subcategoryChangeListener,
-        )
-
-        this.#subcategoryChangeListener()
-      }
-
-      if (this.#navButtonValueElement && this.#categoryInputGroupElement?.value) {
-        this.#navButtonValueElement.textContent = this.#categoryInputGroupElement.value
-      }
-
-      this.#navPopoverElement?.close()
+      this.#changeCategory(true)
     }
 
     #subcategoryChangeListener = () => {
-      this.#currentCategoryItemElements.forEach((element) => {
-        if (
-          !this.#currentSubategoryInputGroupElement?.value ||
-          element
-            .getAttribute('data-subcategories')
-            ?.split(',')
-            .map((v) => v.trim())
-            .find((subcategory) => subcategory === this.#currentSubategoryInputGroupElement?.value)
-        ) {
-          element.ariaHidden = 'false'
-        } else {
-          element.ariaHidden = 'true'
+      this.#filterItems()
+    }
+
+    #changeCategory(scroll = false) {
+      const categoryName = this.#categoryInputGroupElement?.value
+
+      this.#currentSubcategoryInputGroupElement = null
+
+      if (categoryName) {
+        if (this.#navButtonValueElement) {
+          this.#navButtonValueElement.textContent = categoryName
         }
+
+        this.#currentSubcategoryInputGroupElement =
+          this.#subcategoryInputGroupElements.find((el) => el.name === categoryName) || null
+
+        this.#subcategoryInputGroupElements.forEach((element) => {
+          if (element.name === categoryName) {
+            this.#currentSubcategoryInputGroupElement = element
+            element.ariaHidden = 'false'
+          } else {
+            element.ariaHidden = 'true'
+          }
+        })
+      }
+
+      this.#filterItems()
+      this.#subcategoryChangeListener()
+      this.#navPopoverElement?.close()
+
+      if (scroll) {
+        scrollToElement(this, { offset: '.header', behaviour: 'smooth' })
+      }
+    }
+
+    #filterItems() {
+      const categoryName = this.#categoryInputGroupElement?.value
+      const subcategoryName = this.#currentSubcategoryInputGroupElement?.value
+
+      this.#itemElements.forEach((element) => {
+        const categories = element
+          .getAttribute('data-categories')
+          ?.split(',')
+          .map((v) => v.trim())
+
+        const subcategories = element
+          .getAttribute('data-subcategories')
+          ?.split(',')
+          .map((v) => v.trim())
+
+        let errors = 0
+
+        if (categoryName && !categories?.find((c) => c === categoryName)) {
+          errors++
+        }
+
+        if (subcategoryName && !subcategories?.find((s) => s === subcategoryName)) {
+          errors++
+        }
+
+        element.ariaHidden = errors ? 'true' : 'false'
       })
     }
   }

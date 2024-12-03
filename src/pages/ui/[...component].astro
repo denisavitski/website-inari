@@ -20,6 +20,7 @@ const Component = ComponentModule.default
 const modal = ComponentModule.modal || false
 const header = ComponentModule.header || false
 const footer = ComponentModule.footer || false
+const description = ComponentModule.componentDescription
 ---
 
 <Layout
@@ -27,7 +28,159 @@ const footer = ComponentModule.footer || false
   {footer}
 >
   {Component ? <Component /> : <h1>Компонент не найден</h1>}
+
+  {
+    description && (
+      <>
+        <e-popover-button
+          class="description-button"
+          target="description"
+        >
+          Описание
+        </e-popover-button>
+        <e-popover
+          class="description"
+          id="description"
+        >
+          <div
+            class="description__inner"
+            data-outside
+          >
+            <div
+              class="description__content"
+              set:html={description}
+            />
+          </div>
+        </e-popover>
+      </>
+    )
+  }
 </Layout>
+
+<style>
+  .description-button {
+    font-size: 2.4vmin;
+
+    position: fixed;
+    bottom: 1vmin;
+    left: 50%;
+
+    padding: 1vmin 2vmin;
+
+    background-color: white;
+    color: black;
+
+    transform: translateX(-50%);
+
+    cursor: pointer;
+  }
+
+  .description {
+    --escape: true;
+    --click-outside: true;
+    --history: true;
+    --restore: true;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    z-index: 99999999;
+
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+    display: none;
+
+    transition: opacity 0.3s;
+
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+
+  .description__inner {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .description__content {
+    font-size: 2vmin;
+
+    width: 70vmin;
+    max-height: 80%;
+    white-space: pre-line;
+
+    padding: 2vmin;
+
+    background-color: white;
+    color: black;
+
+    overflow: hidden auto;
+
+    @media (max-width: 768px) {
+      width: 90%;
+    }
+
+    :global(h1) {
+      font-size: 4vmin;
+      margin: 3vmin 0;
+    }
+
+    :global(h2) {
+      font-size: 3.6vmin;
+      margin: 2vmin 0;
+    }
+
+    :global(h3) {
+      font-size: 3.2vmin;
+      margin: 2vmin 0;
+    }
+
+    :global(h4),
+    :global(h5),
+    :global(h6) {
+      font-size: 2.8vmin;
+      margin: 2vmin 0;
+    }
+
+    :global(ul),
+    :global(ol) {
+      display: grid;
+      gap: 1vmin;
+
+      margin: 2vmin 0;
+    }
+
+    :global(ul) {
+      list-style: disc;
+    }
+
+    :global(ol) {
+      list-style: decimal;
+    }
+
+    :global(li) {
+      list-style-position: inside;
+    }
+
+    :global(p) {
+      margin-bottom: 2vmin;
+    }
+
+    :global(code) {
+      display: block;
+      font-size: inherit;
+      color: rgb(0, 0, 0);
+      background-color: #e9e9e9;
+      padding: 0.5vmin;
+      font-size: 105%;
+    }
+  }
+</style>
 
 <script define:vars={{ modal }} is:inline>
   document.documentElement.classList.add('ui')
