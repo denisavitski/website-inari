@@ -1,0 +1,88 @@
+---
+import type { ProductVariant } from './Product.astro'
+
+export interface Props {
+  class?: string
+  name?: string
+  variants?: Array<ProductVariant>
+}
+
+const {
+  class: className,
+  name = 'product-variants',
+  variants = [
+    { shortName: '4 шт.', name: 'Филадельфия фреш 4 шт.', pid: '1', price: 111, size: '10г' },
+    { shortName: '8 шт.', name: 'Филадельфия фреш 8 шт.', pid: '2', price: 222, size: '20г' },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<e-input-group
+  {...rest}
+  class:list={['product-variants', className]}
+  {name}
+>
+  {
+    variants?.map((variant, i) => {
+      return (
+        <label class="f-d-16-s f-m-14-s product-variants__variant">
+          <input
+            type="radio"
+            class="visually-hidden product-variants__variant__input"
+            data-pid={variant.pid}
+            data-name={variant.name}
+            data-price={variant.price}
+            data-old-price={variant.oldPrice}
+            checked={i === 0}
+            data-variant-size-value={variant.size}
+            value={variant.pid}
+          />
+          <span
+            class="product-variants__variant__value"
+            set:html={variant.shortName}
+          />
+        </label>
+      )
+    })
+  }
+</e-input-group>
+
+<style is:global>
+  .product-variants {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+  }
+
+  .product-variants__variant {
+    position: relative;
+    cursor: pointer;
+    display: block;
+  }
+
+  .product-variants__variant__input {
+  }
+
+  .product-variants__variant__value {
+    display: block;
+
+    padding: 0.4rem 1.6rem;
+
+    border: 0.1rem solid var(--color-secondary-2);
+    border-radius: var(--border-radius-1);
+
+    /* transition:
+      border-color var(--duration-button),
+      background-color var(--duration-button); */
+
+    .product-variants__variant__input:checked ~ & {
+      background-color: var(--color-functional-1);
+      border-color: var(--color-functional-1);
+    }
+
+    @media (max-width: 768px) {
+      padding: 0.4rem 1.2rem;
+    }
+  }
+</style>

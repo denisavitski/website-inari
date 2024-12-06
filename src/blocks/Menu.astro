@@ -1,5 +1,5 @@
 ---
-import { menuItems } from '@dev-data/menuItems'
+import { productsData } from '@dev-data/productsData'
 import Icon from '@elements/Icon.astro'
 import MenuProduct, { type MenuProductData } from '@elements/MenuProduct.astro'
 
@@ -16,7 +16,7 @@ export interface Props {
 const {
   class: className,
   heading = 'Меню нашего ресторана',
-  items = menuItems,
+  items = productsData,
   ...rest
 } = Astro.props
 
@@ -33,7 +33,7 @@ items.forEach((item) => {
 
     category.push({
       name: item.name,
-      subcategories: item.subcategories,
+      subcategories: item.subcategories || [],
     })
   })
 })
@@ -151,18 +151,7 @@ items.forEach((item) => {
             return (
               <MenuProduct
                 class="menu__item"
-                amount={item.amount}
-                categories={item.categories}
-                description={item.description}
-                icon={item.icon}
-                image={item.image}
-                info={item.info}
-                labels={item.labels}
-                name={item.name}
-                pid={item.pid}
-                price={item.price}
-                subcategories={item.subcategories}
-                type={item.type}
+                {...item}
               />
             )
           })
@@ -432,9 +421,9 @@ items.forEach((item) => {
     border-radius: var(--border-radius-1);
     border: 0.1rem solid var(--color-secondary-2);
 
-    transition:
+    /* transition:
       background-color var(--duration-button),
-      border-color var(--duration-button);
+      border-color var(--duration-button); */
 
     .menu__subcategory-input-group__item__input:checked ~ & {
       background-color: var(--color-primary-3);
@@ -460,9 +449,11 @@ items.forEach((item) => {
   }
 
   .menu__item {
-    display: none !important;
+    .menu-product__card {
+      display: none !important;
+    }
 
-    &[aria-hidden='false'] {
+    &[aria-hidden='false'] .menu-product__card {
       display: grid !important;
     }
   }

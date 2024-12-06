@@ -59,8 +59,8 @@ const {
       width: '100%',
       padding: '0 1.6rem',
 
-      backgroundColor: 'var(--color-primary-2)',
-      color: 'var(--color-primary-1)',
+      backgroundColor: 'var(--background-color, var(--color-primary-2))',
+      color: 'var(--color, var(--color-primary-1))',
       borderRadius: 'var(--border-radius-1)',
       cursor: 'pointer',
 
@@ -92,7 +92,7 @@ const {
       borderRadius: 'var(--border-radius-1)',
     },
 
-    ':host([size="big"]) .content': {
+    ':host([size="big"]) .content, :host([size="always-big"]) .content': {
       gap: '1.6rem',
     },
 
@@ -104,7 +104,7 @@ const {
       fontVariantNumeric: 'tabular-nums',
     },
 
-    ':host([size="big"]) .value': {
+    ':host([size="big"]) .value, :host([size="always-big"]) .value': {
       fontSize: '1.6rem',
     },
 
@@ -130,7 +130,7 @@ const {
       padding: '0',
     },
 
-    ':host([size="big"]) .sign': {
+    ':host([size="big"]) .sign, :host([size="always-big"]) .sign': {
       fontSize: '2.4rem',
       width: '2.4rem',
       height: '2.4rem',
@@ -171,7 +171,7 @@ const {
     },
   })
 
-  export type ProductButtonSize = 'big' | 'small'
+  export type ProductButtonSize = 'big' | 'small' | 'always-big'
 
   export class ProductButtonElement extends HTMLElement {
     #placeholderElement: HTMLElement

@@ -1,33 +1,47 @@
 ---
 import type { BasketStoreItem } from '@stores/basketStore'
-import Icon from './Icon.astro'
-import Image from './Image.astro'
-import Product from './Product.astro'
-import ProductButton from './ProductButton.astro'
-import { numberToPrice } from '@utils/number'
+import Image from '@elements/Image.astro'
+import Product, { type ProductVariant } from '@elements/Product.astro'
+import ProductButton from '@elements/ProductButton.astro'
+import Labels, { type Props as LabelsProps } from '@elements/Labels.astro'
+import type { ProductFeatureIcon } from '@elements/ProductFeature.astro'
+import ProductFeature from '@elements/ProductFeature.astro'
+import Price from '@elements/Price.astro'
+import ProductVariants from '@elements/ProductVariants.astro'
+import MenuProductDetails from '@elements/MenuProductDetails.astro'
+import { type Props as EnergyProps } from '@elements/Energy.astro'
 
 export const componentDescription = `
   <code>\
     &lt;e-input-group&gt;CONTENT&lt;/e-input-group&gt;
   </code>
 `
-export interface MenuProductData extends BasketStoreItem {
-  icon?: 'spicy' | 'eco' | undefined
+
+export interface MenuProductStat {
+  title: string
+  value: string
+  variantProp?: string
+  border?: boolean
+}
+
+export interface MenuProductSetItem
+  extends Pick<BasketStoreItem, 'description' | 'image' | 'name' | 'pid'> {
+  feature?: ProductFeatureIcon | undefined | false
+}
+
+export interface MenuProductData extends Omit<BasketStoreItem, 'image'> {
+  feature?: ProductFeatureIcon | undefined | false
+  oldPrice?: string | number | undefined | false
   categories: Array<string>
-  subcategories: Array<string>
-  labels: Array<{ color: string; value: string }>
-  info: {
-    title: string
-    value?: string | undefined
-    variants?: Array<{
-      shortName: string
-      name: string
-      pid: string
-      size: string
-      price: string
-    }>
-  }
+  subcategories?: Array<string> | undefined | false
+  labels?: LabelsProps['list'] | undefined | false
+  stats: Array<MenuProductStat>
+  variants?: Array<ProductVariant> | undefined | false
   type: 'small' | 'large'
+  detailsType: 'set' | 'simple' | 'variants'
+  energy: Omit<EnergyProps, 'class'>
+  images: Array<string>
+  setItems?: Array<MenuProductSetItem> | undefined | false
 }
 
 export interface Props extends Partial<MenuProductData> {
@@ -39,7 +53,7 @@ const {
   pid = '1',
   amount = 0,
   price = '1000',
-  image = '/images/food/1.jpg',
+  oldPrice = '2000',
   categories = ['Популярное', 'Роллы'],
   subcategories = ['Хосо маки'],
   labels = [
@@ -48,18 +62,56 @@ const {
   ],
   name = 'Филадельфия фреш',
   description = 'Филе лосося, сливочный сыр, свежий огурец',
-  icon = 'spicy',
-  info = {
-    title: 'Вес',
-    value: '',
-    variants: [
-      { shortName: '4 шт.', name: 'Филадельфия фреш 4 шт.', pid: '1', price: 111, size: '10г' },
-      { shortName: '8 шт.', name: 'Филадельфия фреш 8 шт.', pid: '2', price: 222, size: '20г' },
-    ],
-  },
+  feature = 'spicy',
+  stats = [
+    {
+      title: 'Вес',
+      value: '111 г',
+      variantProp: '',
+    },
+  ],
+  variants = [
+    { shortName: '4 шт.', name: 'Филадельфия фреш 4 шт.', pid: '1', price: 111, size: '10г' },
+    { shortName: '8 шт.', name: 'Филадельфия фреш 8 шт.', pid: '2', price: 222, size: '20г' },
+  ],
   type = 'large',
+  energy = { proteins: '111', fats: '111', carbohydrates: '111', calories: '111' },
+  images = ['/images/food/1.jpg', '/images/food/2.jpg'],
+  detailsType = 'set',
+  setItems = [
+    {
+      image: '/images/food/1.jpg',
+      pid: '5',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+    {
+      image: '/images/food/2.jpg',
+      pid: '6',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+    {
+      image: '/images/food/3.jpg',
+      pid: '7',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+    {
+      image: '/images/food/1.jpg',
+      pid: '7',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+  ],
   ...rest
 } = Astro.props
+
+const modalId = `product-${pid}`
 ---
 
 <Product
@@ -67,110 +119,129 @@ const {
   class={`menu-product ${className || ''}`}
   {pid}
   {price}
-  {image}
+  image={images[0]!}
   {name}
   {description}
   data-type={type}
   data-categories={categories}
   data-subcategories={subcategories}
 >
-  <div class="menu-product__labels">
+  <div class="menu-product__card">
+    <e-popover-button
+      class="menu-product__popover-button"
+      target={modalId}
+    ></e-popover-button>
+
     {
-      labels.map((label) => {
-        return (
-          <div
-            class="f-d-14-s f-m-12-s menu-product__label"
-            set:html={label.value}
-            style={{ backgroundColor: label.color }}
+      labels && (
+        <Labels
+          list={labels}
+          class="menu-product__labels"
+        />
+      )
+    }
+
+    <Image
+      class="menu-product__image"
+      src={images[0]!}
+      lazy
+      lazyBackground
+      cover
+    />
+
+    <div class="menu-product__name">
+      <div
+        class="f-d-18-s f-m-14-s menu-product__name__value"
+        set:html={name}
+      />
+
+      {
+        feature && (
+          <ProductFeature
+            class="menu-product__name__icon"
+            icon={feature}
           />
         )
-      })
-    }
-  </div>
-
-  <Image
-    class="menu-product__image"
-    src={image}
-    lazy
-    lazyBackground
-    cover
-  />
-
-  <div class="menu-product__name">
-    <div
-      class="f-d-18-s f-m-14-s menu-product__name__value"
-      set:html={name}
-    />
-
-    <Icon
-      class="menu-product__name__icon"
-      name={icon}
-    />
-  </div>
-
-  <div
-    class="f-d-14-r f-m-12-r menu-product__description"
-    set:html={description}
-  />
-
-  <div class="menu-product__info">
-    <div class="menu-product__info__left">
-      <div
-        class="f-d-16-s f-m-14-s menu-product__info__title"
-        set:html={info.title}
-      />
-      <div
-        class="f-d-16-s f-m-14-s menu-product__info__value"
-        data-variant-size
-        set:html={info.value}
-      />
+      }
     </div>
 
     {
-      info.variants && (
-        <e-input-group class="menu-product__info__variants">
-          {info.variants?.map((variant, i) => {
-            return (
-              <label class="f-d-16-s f-m-14-s menu-product__info__variant">
-                <input
-                  type="radio"
-                  name={name}
-                  class="visually-hidden menu-product__info__variant__input"
-                  data-pid={variant.pid}
-                  data-name={variant.name}
-                  data-price={variant.size}
-                  checked={i === 0}
-                  data-variant-size-value={variant.size}
-                  data-variant-price-value={numberToPrice(variant.price)}
-                />
-                <span
-                  class="menu-product__info__variant__value"
-                  set:html={variant.shortName}
-                />
-              </label>
-            )
-          })}
-        </e-input-group>
+      description && (
+        <div
+          class="f-d-14-r f-m-12-r menu-product__description"
+          set:html={description}
+        />
       )
     }
+
+    <div class="menu-product__info">
+      {
+        stats.map((stat) => {
+          return (
+            <div class="menu-product__stat">
+              <div
+                class="f-d-16-s f-m-14-s menu-product__stat__title"
+                set:html={stat.title}
+              />
+              <div
+                class="f-d-16-s f-m-14-s menu-product__stat__value"
+                set:html={stat.value}
+                data-variant-prop={stat.variantProp}
+                data-border={stat.border}
+              />
+            </div>
+          )
+        })
+      }
+
+      {
+        variants && (
+          <ProductVariants
+            class="menu-product__variants"
+            variants={variants}
+            name={`${name}-variants`}
+          />
+        )
+      }
+    </div>
+
+    <div class="menu-product__bottom">
+      <Price
+        class="menu-product__price"
+        value={price}
+        oldValue={oldPrice}
+      />
+      <ProductButton
+        class="menu-product__button"
+        placeholder="В корзину"
+        counter={amount}
+      />
+    </div>
   </div>
 
-  <div class="menu-product__bottom">
-    <div
-      class="f-d-24-s f-d-18-s menu-product__price"
-      data-variant-price
-      set:html={numberToPrice(price)}
-    />
-    <ProductButton
-      class="menu-product__button"
-      placeholder="В корзину"
-      counter={amount}
-    />
-  </div>
+  <MenuProductDetails
+    pid={modalId}
+    {detailsType}
+    {price}
+    {oldPrice}
+    {images}
+    {labels}
+    {feature}
+    {name}
+    {description}
+    {energy}
+    {stats}
+    {variants}
+    {setItems}
+  />
 </Product>
 
 <style is:global>
   .menu-product {
+    display: contents;
+  }
+
+  .menu-product__card {
     position: relative;
 
     display: block;
@@ -180,10 +251,18 @@ const {
     border-radius: var(--border-radius-2);
     border: 0.1rem solid var(--color-secondary-2);
 
+    @media (hover: hover) {
+      transition: background-color var(--duration-button);
+
+      &:hover {
+        background-color: var(--color-secondary-2);
+      }
+    }
+
     @media (max-width: 768px) {
       padding: 0.8rem;
 
-      &[data-type='large'] {
+      .menu-product[data-type='large'] & {
         display: grid;
         grid-template-columns: max-content 1fr;
         grid-template-rows: max-content max-content max-content max-content;
@@ -196,6 +275,17 @@ const {
     }
   }
 
+  .menu-product__popover-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    z-index: 2;
+
+    width: 100%;
+    height: 100%;
+  }
+
   .menu-product__labels {
     position: absolute;
     top: 2.6rem;
@@ -203,20 +293,11 @@ const {
 
     z-index: 2;
 
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
     @media (max-width: 768px) {
       left: unset;
       top: 0.8rem;
       right: 0.8rem;
     }
-  }
-
-  .menu-product__label {
-    padding: 0.4rem 0.6rem;
-    border-radius: 0.5rem;
   }
 
   .menu-product__image {
@@ -258,17 +339,7 @@ const {
   }
 
   .menu-product__name__icon {
-    width: 2.2rem;
-    height: 2.2rem;
     margin-left: 0.8rem;
-
-    &[data-name='spicy'] {
-      fill: var(--color-functional-1);
-    }
-
-    &[data-name='eco'] {
-      fill: var(--color-secondary-7);
-    }
   }
 
   .menu-product__description {
@@ -286,6 +357,9 @@ const {
   .menu-product__info {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem 1.8rem;
+    flex-wrap: wrap;
 
     margin-bottom: 1.6rem;
 
@@ -296,37 +370,38 @@ const {
 
         flex-direction: column;
         align-items: flex-end;
-        gap: 1.2rem;
+        gap: 0.6rem 1.2rem;
 
         margin-bottom: 1.2rem;
       }
 
       .menu-product[data-type='small'] & {
+        gap: 0.6rem 1.2rem;
         margin-bottom: 3.3rem;
       }
     }
   }
 
-  .menu-product__info__left {
-    display: contents;
+  .menu-product__stat {
+    display: flex;
+    gap: 1.2rem;
 
     @media (max-width: 768px) {
-      .menu-product[data-type='large'] & {
-        display: flex;
-      }
+      gap: 0.8rem;
     }
   }
 
-  .menu-product__info__title {
-    margin-right: 1.2rem;
+  .menu-product__stat__title {
     color: var(--color-secondary-3);
-
-    @media (max-width: 768px) {
-      margin-right: 0.8rem;
-    }
   }
 
-  .menu-product__info__value {
+  .menu-product__stat__value {
+    &[data-border] {
+      border: 0.1rem solid var(--color-secondary-2);
+      border-radius: var(--border-radius-1);
+      padding: 0.4rem 1.6rem;
+    }
+
     @media (min-width: 769px) {
       margin-left: auto;
     }
@@ -335,44 +410,20 @@ const {
       .menu-product[data-type='small'] & {
         margin-left: auto;
       }
+
+      &[data-border] {
+        padding: 0.4rem 1.2rem;
+      }
     }
   }
 
-  .menu-product__info__variants {
-    margin-left: auto;
-
-    flex-grow: 2;
-
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.8rem;
-  }
-
-  .menu-product__info__variant {
+  .menu-product__variants {
     position: relative;
-    cursor: pointer;
-    display: block;
-  }
+    z-index: 3;
 
-  .menu-product__info__variant__input {
-  }
-
-  .menu-product__info__variant__value {
-    display: block;
-
-    padding: 0.4rem 1.6rem;
-
-    border: 0.1rem solid var(--color-secondary-2);
-    border-radius: var(--border-radius-1);
-
-    transition:
-      border-color var(--duration-button),
-      background-color var(--duration-button);
-
-    .menu-product__info__variant__input:checked ~ & {
-      background-color: var(--color-functional-1);
-      border-color: var(--color-functional-1);
-    }
+    flex-shrink: 0;
+    margin-left: auto;
+    flex-grow: 2;
   }
 
   .menu-product__bottom {
@@ -399,6 +450,9 @@ const {
   }
 
   .menu-product__button {
+    position: relative;
+    z-index: 3;
+
     flex-shrink: 0;
 
     width: 12rem;

@@ -1,0 +1,578 @@
+---
+import Modal from '@elements/Modal.astro'
+import Image from '@elements/Image.astro'
+import Energy from '@elements/Energy.astro'
+import SliderButton from '@elements/SliderButton.astro'
+import ProductButton from '@elements/ProductButton.astro'
+import Price from '@elements/Price.astro'
+import Labels from '@elements/Labels.astro'
+import SliderBullets from '@elements/SliderBullets.astro'
+import ProductVariants from '@elements/ProductVariants.astro'
+import ProductFeature from '@elements/ProductFeature.astro'
+import type { MenuProductData } from './MenuProduct.astro'
+
+export const modal = '#product-details'
+
+export interface Props extends Partial<MenuProductData> {
+  class?: string
+}
+
+const {
+  class: className,
+  detailsType = 'set',
+  pid,
+  price = '1000',
+  oldPrice = '2000',
+  images = ['/images/food/1.jpg', '/images/food/2.jpg'],
+  labels = [
+    { value: 'Новинка', color: '#1A8704' },
+    { value: 'Акция 10%', color: '#E53935' },
+  ],
+  feature = 'spicy',
+  name = 'Филадельфия фреш',
+  description = 'Филе лосося, сливочный сыр, свежий огурец',
+  energy = { proteins: '111', fats: '111', carbohydrates: '111', calories: '111' },
+  stats = [{ title: 'Вес', value: '1 245 г.', variantProp: 'size' }],
+  variants = [
+    { shortName: '4 шт.', name: 'Филадельфия фреш 4 шт.', pid: '1', price: 111, size: '10г' },
+    { shortName: '8 шт.', name: 'Филадельфия фреш 8 шт.', pid: '2', price: 222, size: '20г' },
+  ],
+  setItems = [
+    {
+      image: '/images/food/1.jpg',
+      pid: '5',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+    {
+      image: '/images/food/2.jpg',
+      pid: '6',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+    {
+      image: '/images/food/3.jpg',
+      pid: '7',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+    {
+      image: '/images/food/1.jpg',
+      pid: '7',
+      name: 'Филадельфия фреш, 8 шт.',
+      description: 'Филе лосося, сливочный сыр, огурец',
+      feature: 'spicy',
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<Modal
+  {...rest}
+  class:list={['product-details', className]}
+  id={pid || 'product-details'}
+  data-type={detailsType}
+>
+  <div class="product-details__content">
+    <div class="product-details__text">
+      <h3 class="f-d-24-s f-m-18-s product-details__title">
+        <span set:html={name} />
+        {
+          feature && (
+            <ProductFeature
+              icon={feature}
+              class="product-details__title__icon"
+            />
+          )
+        }
+      </h3>
+
+      {
+        description && (
+          <p
+            class="f-d-16-r f-m-14-r product-details__description"
+            set:html={description}
+          />
+        )
+      }
+    </div>
+
+    {
+      setItems && detailsType === 'set' && (
+        <div class="product-details__set">
+          {setItems.map((item) => {
+            return (
+              <e-popover-button
+                target={`product-${item.pid}`}
+                class="product-details__set__item"
+              >
+                <Image
+                  src={item.image}
+                  class="product-details__set__item__image"
+                />
+                <div class="product-details__set__item__text">
+                  <div
+                    class="f-d-18-s f-m-14-s product-details__set__item__title"
+                    set:html={item.name}
+                  />
+                  <div
+                    class="f-d-16-r f-m-12-r product-details__set__item__description"
+                    set:html={item.description}
+                  />
+                </div>
+                {item.feature && (
+                  <ProductFeature
+                    class="product-details__set__item__feature"
+                    icon={item.feature}
+                  />
+                )}
+              </e-popover-button>
+            )
+          })}
+        </div>
+      )
+    }
+
+    <e-billboard class="product-details__slider">
+      {
+        labels && (
+          <Labels
+            list={labels}
+            class="product-details__labels"
+          />
+        )
+      }
+
+      <div class="product-details__slider__images">
+        {
+          images.map((image) => {
+            return (
+              <Image
+                class="product-details__slider__image"
+                data-billboard-item
+                lazy
+                cover
+                lazyBackground
+                src={image}
+              />
+            )
+          })
+        }
+      </div>
+      <div class="product-details__slider__bottom">
+        <SliderBullets class="product-details__slider__bullets" />
+
+        <div class="product-details__slider__buttons">
+          <SliderButton type="prev" />
+          <SliderButton type="next" />
+        </div>
+      </div>
+    </e-billboard>
+
+    <Energy class="product-details__energy" />
+
+    <div class="product-details__stats">
+      {
+        stats.map((stat) => {
+          return (
+            <div class="f-d-18-s f-d-14-s product-details__stat">
+              <div
+                class="product-details__stat__title"
+                set:html={stat.title}
+              />
+              <div
+                class="product-details__stat__value"
+                set:html={stat.value}
+                data-variant-prop={stat.variantProp}
+              />
+            </div>
+          )
+        })
+      }
+
+      {
+        variants && variants?.length && detailsType !== 'set' ? (
+          <ProductVariants
+            class="product-details__variants"
+            variants={variants}
+            name={name}
+          />
+        ) : null
+      }
+    </div>
+
+    <div class="product-details__bottom">
+      <Price
+        class="product-details__price"
+        value={price}
+        oldValue={oldPrice}
+      />
+      <ProductButton
+        class="product-details__product-button"
+        placeholder="В корзину"
+        size={'always-big'}
+      />
+    </div>
+  </div>
+</Modal>
+
+<style is:global>
+  .product-details {
+    --group: product-details;
+    --dominance: -1;
+    z-index: calc(var(--z-modal) + var(--open-index, 0));
+  }
+
+  .product-details__content {
+    position: relative;
+
+    display: grid;
+
+    .product-details[data-type='variants'] & {
+      grid-template-columns: 46.9rem 44.8rem;
+      grid-template-rows: 1fr max-content max-content max-content;
+      grid-template-areas:
+        'slider text'
+        'slider energy'
+        'slider stats'
+        'slider bottom';
+      gap: 0rem 5rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 100%;
+        grid-template-rows: max-content max-content max-content max-content max-content;
+        grid-template-areas:
+          'slider'
+          'text'
+          'energy'
+          'stats'
+          'bottom';
+        gap: 0rem;
+      }
+    }
+
+    .product-details[data-type='simple'] & {
+      grid-template-columns: 35.2rem 44.8rem;
+      grid-template-rows: 1fr max-content max-content max-content;
+      grid-template-areas:
+        'slider text'
+        'slider energy'
+        'slider stats'
+        'slider bottom';
+      gap: 0rem 5rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 100%;
+        grid-template-rows: unset;
+        grid-auto-rows: max-content;
+        grid-template-areas:
+          'slider'
+          'text'
+          'energy'
+          'stats'
+          'bottom';
+        gap: 0rem;
+      }
+    }
+
+    .product-details[data-type='set'] & {
+      grid-template-columns: 46.9rem 55.8rem;
+      grid-template-rows: unset;
+      grid-auto-rows: max-content;
+      grid-template-areas:
+        'slider text'
+        'slider set'
+        'energy stats'
+        'energy bottom';
+      gap: 0rem 5rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 100%;
+        grid-template-rows: unset;
+        grid-auto-rows: max-content;
+        grid-template-areas:
+          'slider'
+          'text'
+          'set'
+          'energy'
+          'stats'
+          'bottom';
+        gap: 0rem;
+      }
+    }
+  }
+
+  .product-details__text {
+    grid-area: text;
+  }
+
+  .product-details__title {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .product-details__description {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .product-details__set {
+    grid-area: set;
+
+    display: grid;
+    gap: 0.8rem;
+
+    width: 100%;
+    margin-bottom: 2.4rem;
+  }
+
+  .product-details__set__item {
+    position: relative;
+
+    display: flex;
+    gap: 2.4rem;
+    padding: 0.8rem;
+    border: 0.1rem solid var(--color-secondary-1);
+    border-radius: var(--border-radius-2);
+
+    @media (hover: hover) {
+      transition: background-color var(--duration-button);
+
+      &:hover {
+        background-color: var(--color-secondary-2);
+      }
+    }
+  }
+
+  .product-details__set__item__image {
+    width: 9rem;
+    height: 7rem;
+    border-radius: var(--border-radius-1);
+  }
+
+  .product-details__set__item__text {
+  }
+
+  .product-details__set__item__title {
+    margin-bottom: 0.8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.4rem;
+    }
+  }
+
+  .product-details__set__item__description {
+  }
+
+  .product-details__set__item__feature {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+  }
+
+  .product-details__slider {
+    --autoplay: 4s;
+    --duration: 0.3s;
+
+    grid-area: slider;
+
+    display: block;
+
+    @media (min-width: 769px) {
+      .product-details[data-type='set'] & {
+        margin-bottom: 2.4rem;
+      }
+    }
+  }
+
+  .product-details__labels {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+
+    z-index: 2;
+  }
+
+  .product-details__slider__images {
+    display: grid;
+    width: 100%;
+
+    margin-bottom: 1.6rem;
+
+    overflow: hidden;
+    border-radius: var(--border-radius-1);
+
+    .product-details[data-type='variants'] & {
+      height: 36.1rem;
+
+      @media (max-width: 768px) {
+        height: 25rem;
+      }
+    }
+
+    .product-details[data-type='set'] & {
+      height: 38.9rem;
+
+      @media (max-width: 768px) {
+        height: 25rem;
+      }
+    }
+
+    .product-details[data-type='simple'] & {
+      height: 28.7rem;
+
+      @media (max-width: 768px) {
+        height: 25rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .product-details__slider__image {
+    grid-column: 1/1;
+    grid-row: 1/1;
+
+    transition: opacity var(--duration);
+
+    opacity: 0;
+    pointer-events: none;
+
+    &.current {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  .product-details__slider__bottom {
+    position: relative;
+
+    width: 100%;
+    height: 3.2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+      height: max-content;
+      margin-bottom: 1.6rem;
+      justify-content: flex-end;
+    }
+  }
+
+  .product-details__slider__bullets {
+  }
+
+  .product-details__slider__buttons {
+    position: absolute;
+    right: 0.8rem;
+
+    display: flex;
+    gap: 0.8rem;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .product-details__energy {
+    grid-area: energy;
+
+    .product-details[data-type='variants'] &,
+    .product-details[data-type='simple'] & {
+      margin-bottom: 2.4rem;
+
+      @media (max-width: 768px) {
+        margin-bottom: 1.6rem;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .product-details[data-type='set'] & {
+        .energy__title {
+          text-align: center;
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding-bottom: 1.6rem;
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .product-details__stats {
+    grid-area: stats;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+
+    height: max-content;
+    margin-bottom: 2.4rem;
+
+    .product-details[data-type='variants'] &,
+    .product-details[data-type='simple'] & {
+      padding-top: 2.4rem;
+      border-top: 0.1rem solid var(--color-secondary-1);
+
+      @media (max-width: 768px) {
+        padding-top: 1.6rem;
+      }
+    }
+  }
+
+  .product-details__stat {
+    display: flex;
+    gap: 1.2rem;
+  }
+
+  .product-details__stat__title {
+    color: var(--color-secondary-3);
+  }
+
+  .product-details__stat__value {
+  }
+
+  .product-details__bottom {
+    grid-area: bottom;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3.2rem;
+
+    height: max-content;
+    width: 100%;
+
+    @media (max-width: 768px) {
+      justify-content: space-between;
+      flex-direction: row-reverse;
+    }
+  }
+
+  .product-details__price {
+  }
+
+  .product-details__product-button {
+    width: 13.6rem;
+    height: 4.3rem;
+
+    --color: var(--color-primary-2);
+    --background-color: var(--color-functional-1);
+  }
+</style>

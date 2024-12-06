@@ -40,8 +40,8 @@ body {
 
   --color-functional-1: #e53935;
 
-  --z-common-modal: 103;
-  --z-basket: 102;
+  --z-modal: 102;
+  --z-basket: 101;
   --z-header: 100;
 
   --border-radius-1: 1rem;
@@ -97,6 +97,7 @@ body {
     --header-height: 6.4rem;
     --border-radius-1: 1rem;
     --border-radius-2: 1rem;
+    --z-basket: 99;
   }
 
   @supports (height: 100dvh) {

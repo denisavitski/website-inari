@@ -3,6 +3,7 @@ import '@elements/BasketItem.astro'
 
 import Button from '@elements/Button.astro'
 import Form from '@elements/Form.astro'
+import Icon from '@elements/Icon.astro'
 import SuggestionProducts from '@elements/SuggestionProducts.astro'
 
 export const modal = '#basket'
@@ -22,55 +23,67 @@ const { class: className, ...rest } = Astro.props
   data-outside
 >
   <div class="basket__inner">
-    <div class="basket__scrollable custom-scrollbar">
-      <div class="f-d-24-s f-m-18-s basket__head"></div>
+    <e-popover-button
+      class="basket__close-button"
+      target="basket"
+    >
+      <Icon
+        class="basket__close-button__icon"
+        name={'close'}
+      />
+    </e-popover-button>
 
-      <div class="basket__items-container"></div>
+    <div class="basket__clip">
+      <div class="basket__scrollable custom-scrollbar">
+        <div class="f-d-24-s f-m-18-s basket__head"></div>
 
-      <SuggestionProducts class="basket__suggestions" />
-    </div>
+        <div class="basket__items-container"></div>
 
-    <div class="basket__bottom">
-      <Form class="basket__promo">
-        <input
-          name="promo-code"
-          required
-          type="text"
-          class="f-d-16-r f-m-14-r basket__promo__input"
-        />
-        <button
-          class="f-d-16-r f-m-12-r basket__promo__button"
-          type="submit"
-          >Применить</button
-        >
-      </Form>
-
-      <div class="f-d-16-s f-m-14-s basket__info">
-        <div class="basket__info__line">
-          <div class="basket__info__line__title">1 товар</div>
-          <div class="basket__info__line__value">2 500 ₽</div>
-        </div>
-        <div class="basket__info__line">
-          <div class="basket__info__line__title">Скидка</div>
-          <div class="basket__info__line__value">– 350 ₽</div>
-        </div>
-        <div class="basket__info__line">
-          <div class="basket__info__line__title">Доставка</div>
-          <div class="basket__info__line__value">Бесплатно</div>
-        </div>
+        <SuggestionProducts class="basket__suggestions" />
       </div>
 
-      <div class="basket__final">
-        <div class="basket__final__text">
-          <div class="f-d-24-s f-m-18-s basket__final__title">Сумма заказа</div>
-          <div class="f-d-24-s f-m-18-s basket__final__value">2 150 ₽</div>
+      <div class="basket__bottom">
+        <Form class="basket__promo">
+          <input
+            name="promo-code"
+            required
+            type="text"
+            class="f-d-16-r f-m-14-r basket__promo__input"
+          />
+          <button
+            class="f-d-16-r f-m-12-r basket__promo__button"
+            type="submit"
+            >Применить</button
+          >
+        </Form>
+
+        <div class="f-d-16-s f-m-14-s basket__info">
+          <div class="basket__info__line">
+            <div class="basket__info__line__title">1 товар</div>
+            <div class="basket__info__line__value">2 500 ₽</div>
+          </div>
+          <div class="basket__info__line">
+            <div class="basket__info__line__title">Скидка</div>
+            <div class="basket__info__line__value">– 350 ₽</div>
+          </div>
+          <div class="basket__info__line">
+            <div class="basket__info__line__title">Доставка</div>
+            <div class="basket__info__line__value">Бесплатно</div>
+          </div>
         </div>
 
-        <Button
-          class="basket__final__button"
-          theme={'arrow'}
-          >К оформлению заказа</Button
-        >
+        <div class="basket__final">
+          <div class="basket__final__text">
+            <div class="f-d-24-s f-m-18-s basket__final__title">Сумма заказа</div>
+            <div class="f-d-24-s f-m-18-s basket__final__value">2 150 ₽</div>
+          </div>
+
+          <Button
+            class="basket__final__button"
+            theme={'arrow'}
+            >К оформлению заказа</Button
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -80,8 +93,9 @@ const { class: className, ...rest } = Astro.props
   .basket {
     --history: true;
     --escape: true;
-    --click-outside: true;
-    --duration: 0.2s;
+
+    --duration: 0.3s;
+    --dominance: 2;
 
     position: fixed;
     top: 0;
@@ -92,30 +106,100 @@ const { class: className, ...rest } = Astro.props
     width: 100%;
     height: 100%;
 
-    opacity: 0;
+    opacity: 1 !important;
     display: none;
-    transition: opacity var(--duration);
+    transition: opacity var(--duration) ease-in;
 
-    background-color: rgba(26, 26, 26, 0.8);
+    &::before {
+      content: '';
+
+      position: absolute;
+
+      width: 100%;
+      height: 100%;
+
+      z-index: -1;
+
+      transition: opacity var(--duration);
+
+      background-color: rgba(26, 26, 26, 0.8);
+
+      opacity: 0;
+    }
+
+    &.opened::before {
+      opacity: 1;
+    }
 
     @media (min-width: 769px) {
+      --click-outside: true;
       padding-right: var(--screen-horisontal-padding);
     }
   }
 
   .basket__inner {
-    display: flex;
-    flex-direction: column;
+    position: relative;
 
     width: 73rem;
     height: 100%;
     margin-left: auto;
 
-    background-color: var(--color-primary-1);
-
     @media (max-width: 768px) {
       width: 100%;
     }
+  }
+
+  .basket__clip {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    background-color: var(--color-primary-1);
+
+    transition: clip-path var(--duration);
+
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+
+    .basket.opened & {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+    }
+
+    .basket.closing & {
+      clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0% 100%);
+    }
+  }
+
+  .basket__close-button {
+    --type: close;
+
+    position: absolute;
+    right: 100%;
+    top: 0;
+
+    z-index: 3;
+
+    width: 4rem;
+    height: 4rem;
+
+    opacity: 0;
+    transition: opacity var(--duration);
+
+    .basket.opened & {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .basket__close-button__icon {
+    width: 100%;
+    height: 100%;
+
+    fill: var(--color-secondary-3);
   }
 
   .basket__scrollable {
@@ -126,6 +210,7 @@ const { class: className, ...rest } = Astro.props
 
     @media (max-width: 768px) {
       padding: 1.6rem;
+      padding-top: calc(var(--header-height) + 2.4rem);
     }
   }
 

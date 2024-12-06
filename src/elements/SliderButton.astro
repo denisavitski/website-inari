@@ -1,0 +1,62 @@
+---
+import Icon from './Icon.astro'
+
+export interface Props {
+  class?: string
+  type?: 'next' | 'prev'
+}
+
+const { class: className, type = 'next', ...rest } = Astro.props
+---
+
+<e-billboard-step-button
+  {...rest}
+  class:list={['slider-button', className]}
+  type={type}
+>
+  <Icon
+    class="slider-button__icon"
+    name="tailless-arrow"
+  />
+</e-billboard-step-button>
+
+<style is:global>
+  .slider-button {
+    flex-shrink: 0;
+
+    cursor: pointer;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    width: 3.2rem;
+    height: 3.2rem;
+
+    border-radius: 50%;
+    background-color: var(--color-secondary-5);
+    user-select: none;
+
+    &[type='prev'] {
+      --step: -1;
+      transform: scaleX(-1);
+    }
+
+    &[type='next'] {
+      --step: 1;
+      transform: scaleX(1);
+    }
+
+    .has-length & {
+      display: flex;
+    }
+  }
+
+  .slider-button__icon {
+    width: 80%;
+    height: 80%;
+
+    fill: var(--color-functional-1);
+    transform: translateX(5%);
+  }
+</style>

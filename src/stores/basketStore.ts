@@ -6,7 +6,7 @@ export interface BasketStoreItem {
   amount: number
   price: number | string
   image: string
-  description?: string | undefined
+  description?: string | undefined | false
 }
 
 export type BasketStoreState = Array<BasketStoreItem>

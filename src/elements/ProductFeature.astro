@@ -1,0 +1,33 @@
+---
+import Icon from './Icon.astro'
+
+export type ProductFeatureIcon = 'spicy' | 'eco'
+
+export interface Props {
+  class?: string
+  icon?: ProductFeatureIcon
+}
+
+const { class: className, icon = 'spicy', ...rest } = Astro.props
+---
+
+<Icon
+  {...rest}
+  name={icon}
+  class:list={['product-feature', className]}
+/>
+
+<style is:global>
+  .product-feature {
+    width: 2.2rem;
+    height: 2.2rem;
+
+    &[data-name='spicy'] {
+      fill: var(--color-functional-1);
+    }
+
+    &[data-name='eco'] {
+      fill: var(--color-secondary-7);
+    }
+  }
+</style>

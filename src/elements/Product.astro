@@ -1,6 +1,15 @@
 ---
 import type { BasketStoreItem } from '@stores/basketStore'
 
+export interface ProductVariant {
+  shortName: string
+  name: string
+  pid: string
+  size: string
+  price: string | number
+  oldPrice?: string | number | undefined
+}
+
 export interface Props extends Partial<BasketStoreItem> {
   class?: string
 }
@@ -24,7 +33,6 @@ const {
   {description}
   {pid}
   {image}
-  data-popover-content
 >
   <slot />
 </e-product>
@@ -33,56 +41,66 @@ const {
   import { basketStore } from '@stores/basketStore'
   import type { ProductButtonElement } from './ProductButton.astro.0.mts'
   import type { InputGroupElement } from '@lib/InputGroupElement'
+  import type { PriceElement } from './Price.astro.0.mts'
 
   export class ProductElement extends HTMLElement {
-    #buttonElement: ProductButtonElement | null = null
-    #variantsGroupElement: InputGroupElement | null = null
+    #buttonElements: Array<ProductButtonElement> = []
+    #variantsGroupElements: Array<InputGroupElement> = []
+    #priceElements: Array<PriceElement> = []
 
     public get pid() {
       return this.getAttribute('pid') || ''
     }
 
-    public get buttonElement() {
-      return this.#buttonElement
+    public get buttonElements() {
+      return this.#buttonElements
     }
 
     protected connectedCallback() {
-      this.#buttonElement = this.querySelector('e-product-button')
+      this.#buttonElements = [...this.querySelectorAll('e-product-button')]
 
-      this.#buttonElement?.addEventListener(
-        'productButtonCounterChange',
-        this.#counterChangeListener,
-      )
+      this.#buttonElements.forEach((element) => {
+        element.addEventListener('productButtonCounterChange', this.#counterChangeListener)
+      })
 
-      this.#variantsGroupElement = this.querySelector('e-input-group')
+      this.#variantsGroupElements = [...this.querySelectorAll('e-input-group')]
 
-      this.#variantsGroupElement?.addEventListener('inputGroupValueChange', this.#variantChange)
+      this.#variantsGroupElements.forEach((element) => {
+        element.addEventListener('inputGroupValueChange', this.#variantChangeListener)
+      })
+
+      this.#priceElements = [...this.querySelectorAll('e-price')]
 
       Promise.all([
         customElements.whenDefined('e-product-button'),
         customElements.whenDefined('e-input-group'),
+        customElements.whenDefined('e-price'),
       ]).then(() => {
         if (this.isConnected) {
           basketStore.subscribe(this.#storeChangeListener)
 
-          this.#variantChange()
+          if (this.#variantsGroupElements.length) {
+            this.#changeVariant(this.#variantsGroupElements[0]!)
+          }
         }
       })
     }
 
     protected disconnectedCallback() {
-      this.#buttonElement?.removeEventListener(
-        'productButtonCounterChange',
-        this.#counterChangeListener,
-      )
+      this.#buttonElements.forEach((element) => {
+        element.removeEventListener('productButtonCounterChange', this.#counterChangeListener)
+      })
 
-      this.#variantsGroupElement?.removeEventListener('inputGroupValueChange', this.#variantChange)
+      this.#variantsGroupElements.forEach((element) => {
+        element.removeEventListener('inputGroupValueChange', this.#variantChangeListener)
+      })
 
       basketStore.unsubscribe(this.#storeChangeListener)
     }
 
-    #counterChangeListener = () => {
-      const amount = this.#buttonElement!.counter
+    #counterChangeListener = (event: Event) => {
+      const ct = event.currentTarget as ProductButtonElement
+      const amount = ct.counter
 
       const price = parseInt(this.getAttribute('price') || '0') || 0
       const name = this.getAttribute('name') || ''
@@ -103,23 +121,43 @@ const {
       const storeItem = basketStore.items.find((item) => item.pid === this.pid)
 
       if (storeItem) {
-        this.#buttonElement?.set(storeItem.amount)
+        this.#buttonElements.forEach((element) => {
+          element?.set(storeItem.amount)
+        })
       } else if (basketStore.prevItems) {
-        this.#buttonElement?.set(0)
+        this.#buttonElements.forEach((element) => {
+          element?.set(0)
+        })
       }
     }
 
-    #variantChange = () => {
+    #variantChangeListener = (e: Event) => {
+      const element = e.currentTarget as InputGroupElement
+      this.#changeVariant(element)
+    }
+
+    #changeVariant(actigeGroupElement: InputGroupElement) {
       if (basketStore.prevItems) {
-        this.#buttonElement?.set(0)
+        this.#buttonElements.forEach((element) => {
+          element?.set(0)
+        })
       }
 
-      const currentInput = this.#variantsGroupElement?.input
+      const currentInput = actigeGroupElement.input
 
       if (currentInput) {
+        this.#variantsGroupElements.forEach((element) => {
+          const currentValue = currentInput!.value
+
+          if (actigeGroupElement !== element && element.value !== actigeGroupElement.value) {
+            element.changeValue(currentValue)
+          }
+        })
+
         const name = currentInput.getAttribute('data-name')
         const pid = currentInput.getAttribute('data-pid')
         const price = currentInput.getAttribute('data-price')
+        const oldPrice = currentInput.getAttribute('data-old-price')
 
         if (name) {
           this.setAttribute('name', name)
@@ -133,6 +171,8 @@ const {
           this.setAttribute('price', price)
         }
 
+        this.#priceElements.forEach((element) => element?.updateValue(price, oldPrice))
+
         for (const key in currentInput.dataset) {
           const value = currentInput.dataset[key]
 
@@ -145,11 +185,13 @@ const {
               .toLowerCase()
 
             if (keyWithoutVariant) {
-              const element = this.querySelector(`[data-variant-${keyWithoutVariant}]`)
+              const elements = this.querySelectorAll(`[data-variant-prop="${keyWithoutVariant}"]`)
 
-              if (element) {
-                element.textContent = value
-              }
+              elements.forEach((element) => {
+                if (element) {
+                  element.textContent = value
+                }
+              })
             }
           }
         }

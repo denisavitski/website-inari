@@ -21,10 +21,16 @@ const { class: className, ...rest } = Astro.props
     />
   </div>
   <div class="f-d-16-s f-m-14-s basket-button__value"></div>
+  <Icon
+    class="basket-button__back-icon"
+    name="tailless-arrow"
+  />
 </e-basket-button>
 
 <style is:global>
   .basket-button {
+    --type: toggle;
+
     padding: 0 1.6rem;
     height: 4rem;
 
@@ -36,9 +42,15 @@ const { class: className, ...rest } = Astro.props
     border-radius: var(--border-radius-1);
     cursor: pointer;
 
+    user-select: none;
+
     @media (max-width: 768px) {
       padding: 0 0.4rem;
       height: 3.2rem;
+
+      &.opened {
+        width: 3.2rem;
+      }
     }
   }
 
@@ -46,6 +58,12 @@ const { class: className, ...rest } = Astro.props
     display: flex;
     align-items: center;
     gap: 0.8rem;
+
+    @media (max-width: 768px) {
+      .basket-button.opened & {
+        display: none;
+      }
+    }
   }
 
   .basket-button__name {
@@ -68,11 +86,18 @@ const { class: className, ...rest } = Astro.props
 
     padding-left: var(--padding);
     margin-left: calc(var(--padding) - var(--line-width));
+    font-variant-numeric: tabular-nums;
 
     display: none;
 
     .basket-button.has-items & {
       display: block;
+    }
+
+    @media (max-width: 768px) {
+      .basket-button.opened & {
+        display: none;
+      }
     }
 
     &::after {
@@ -95,9 +120,26 @@ const { class: className, ...rest } = Astro.props
       padding-right: 0.4rem;
     }
   }
+
+  .basket-button__back-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    transform: scaleX(-1);
+
+    fill: var(--color-primary-2);
+
+    display: none;
+
+    @media (max-width: 768px) {
+      .basket-button.opened & {
+        display: block;
+      }
+    }
+  }
 </style>
 
 <script>
+  import { basketStore } from '@stores/basketStore'
   import { PopoverButtonElement } from 'aptechka/popover'
   import { clamp } from 'aptechka/utils'
 
@@ -138,10 +180,18 @@ const { class: className, ...rest } = Astro.props
           this.set(0)
         }
       }) */
+
+      basketStore.subscribe(this.#basketChangeListener)
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
+
+      basketStore.unsubscribe(this.#basketChangeListener)
+    }
+
+    #basketChangeListener = () => {
+      this.set(basketStore.fullAmount)
     }
   }
 

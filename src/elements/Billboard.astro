@@ -1,6 +1,7 @@
 ---
 import type { ImageDataProps } from './Image.astro'
 import Image from './Image.astro'
+import SliderBullets from './SliderBullets.astro'
 
 export interface Props {
   class?: string
@@ -68,13 +69,13 @@ const {
       })
     }
   </div>
-  <e-billboard-bullets class="billboard__buttons"></e-billboard-bullets>
+  <SliderBullets class="billboard__buttons" />
 </e-billboard>
 
 <style is:global>
   .billboard {
     --autoplay: 5s;
-    --dur: 0.5s;
+    --duration: 0.5s;
 
     display: flex;
     flex-direction: column;
@@ -97,7 +98,7 @@ const {
 
     position: relative;
 
-    transition: opacity var(--dur);
+    transition: opacity var(--duration);
     opacity: 0;
 
     &.current {
@@ -145,28 +146,8 @@ const {
   }
 
   .billboard__buttons {
-    display: flex;
-    gap: 0.8rem;
-
     margin-left: auto;
     margin-right: 2rem;
-
-    button {
-      width: 2rem;
-      height: 0.5rem;
-      border-radius: var(--border-radius-1);
-      background-color: var(--color-primary-3);
-      transition:
-        width 0.4s,
-        opacity 0.4s;
-      will-change: width;
-      opacity: 0.3;
-    }
-
-    button.current {
-      width: 4rem;
-      opacity: 1;
-    }
 
     @media (max-width: 768px) {
       margin-right: 0.8rem;

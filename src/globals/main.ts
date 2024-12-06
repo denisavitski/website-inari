@@ -11,6 +11,7 @@ import '@lib/SegmentElement'
 import '@lib/ImageCloak'
 import '@lib/InputGroupElement'
 import '@lib/PortionalElement'
+import '@lib/SwipePopoverElement'
 
 import './dev'
 import './page'

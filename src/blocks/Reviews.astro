@@ -1,7 +1,7 @@
 ---
 import Button from '@elements/Button.astro'
-import Icon from '@elements/Icon.astro'
 import Review, { type Props as ReviewProps } from '@elements/Review.astro'
+import SliderButton from '@elements/SliderButton.astro'
 import { chunkArray } from '@utils/array'
 
 export interface Props {
@@ -52,18 +52,8 @@ const slides = chunkArray(mlist, 5)
   />
   <e-billboard class="reviews__billboard">
     <div class="reviews__billboard__buttons">
-      <e-billboard-step-button class="reviews__billboard__button reviews__billboard__button_prev">
-        <Icon
-          class="reviews__billboard__button__icon"
-          name="tailless-arrow"
-        />
-      </e-billboard-step-button>
-      <e-billboard-step-button class="reviews__billboard__button reviews__billboard__button_next">
-        <Icon
-          class="reviews__billboard__button__icon"
-          name="tailless-arrow"
-        />
-      </e-billboard-step-button>
+      <SliderButton type="prev" />
+      <SliderButton type="next" />
     </div>
 
     <div class="reviews__billboard__slides">
@@ -187,43 +177,6 @@ const slides = chunkArray(mlist, 5)
     @media (max-width: 768px) {
       margin-bottom: 1rem;
     }
-  }
-
-  .reviews__billboard__button {
-    flex-shrink: 0;
-
-    cursor: pointer;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 4.2rem;
-    height: 4.2rem;
-
-    border-radius: 50%;
-    background-color: var(--color-secondary-5);
-    user-select: none;
-
-    @media (max-width: 768px) {
-      width: 3.2rem;
-      height: 3.2rem;
-    }
-  }
-
-  .reviews__billboard__button__icon {
-    width: 80%;
-    height: 80%;
-
-    fill: var(--color-functional-1);
-    transform: translateX(5%);
-  }
-
-  .reviews__billboard__button_prev {
-    transform: scaleX(-1);
-  }
-
-  .reviews__billboard__button_next {
   }
 
   .reviews__bottom {

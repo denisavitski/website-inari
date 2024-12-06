@@ -1,13 +1,13 @@
 ---
 import Button from '@elements/Button.astro'
-import CommonModal from '@elements/CommonModal.astro'
+import Modal from '@elements/Modal.astro'
 import Image from '@elements/Image.astro'
 
 export const modal = '#form-answer'
 ---
 
 <!-- SINGLETON -->
-<CommonModal
+<Modal
   tag="e-form-answer"
   id="form-answer"
   class="form-answer"
@@ -29,7 +29,7 @@ export const modal = '#form-answer'
       >Продолжить</Button
     >
   </div>
-</CommonModal>
+</Modal>
 
 <style is:global>
   .form-answer {

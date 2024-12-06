@@ -1,0 +1,46 @@
+---
+export interface Props {
+  class?: string
+  list?: Array<{ color: string; value: string }>
+}
+
+const {
+  class: className,
+  list = [
+    { value: 'Новинка', color: '#1A8704' },
+    { value: 'Акция 10%', color: '#E53935' },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['labels', className]}
+>
+  {
+    list.map((label) => {
+      return (
+        <div
+          class="f-d-14-s f-m-12-s labels__item"
+          set:html={label.value}
+          style={{ backgroundColor: label.color }}
+        />
+      )
+    })
+  }
+</div>
+
+<style is:global>
+  .labels {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .labels__item {
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+  }
+</style>

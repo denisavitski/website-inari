@@ -1,0 +1,39 @@
+---
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<e-billboard-bullets
+  {...rest}
+  class:list={['slider-bullets', className]}
+></e-billboard-bullets>
+
+<style is:global>
+  .slider-bullets {
+    display: none;
+    gap: 0.8rem;
+
+    button {
+      width: 2rem;
+      height: 0.5rem;
+      border-radius: var(--border-radius-1);
+      background-color: var(--color-primary-3);
+      transition-duration: var(--duration, 0s);
+      transition-property: width, opacity;
+      will-change: width;
+      opacity: 0.3;
+    }
+
+    button.current {
+      width: 4rem;
+      opacity: 1;
+    }
+
+    .has-length & {
+      display: flex;
+    }
+  }
+</style>
