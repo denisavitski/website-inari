@@ -1,0 +1,331 @@
+---
+import Icon from '@elements/Icon.astro'
+import { tryCreateHrefFromContact } from '@utils/href'
+
+export interface Props {
+  class?: string
+  heading?: string
+  description?: string
+  vacancies?: {
+    heading: string
+    list: Array<{
+      title: string
+      description: string
+      address: string
+      type: string
+    }>
+  }
+  contacts?: {
+    heading: string
+    list: Array<{
+      title: string
+      value: string
+    }>
+  }
+}
+
+const {
+  class: className,
+  heading = 'Хочешь стать частью команды?',
+  description = 'Если вы чувствуете, что японская культура и гастрономия — это ваша страсть, и вы хотите стать частью нашей команды, мы всегда рады новым талантам! Мы ищем людей, которые готовы развиваться вместе с нами, поддерживать высокий уровень сервиса и, конечно, дарить гостям радость и удовольствие',
+  vacancies = {
+    heading: 'Открытые вакансии',
+    list: [
+      {
+        title: 'Шеф-повар японской кухни',
+        description:
+          'если вы искусны в создании традиционных японских блюд и&nbsp;готовы экспериментировать, принося свежие идеи в нашу кухню, мы ждём вас',
+        address: 'улица Щербакова, 48, Зеленоград, Москва',
+        type: 'Фудмолл',
+      },
+      {
+        title: 'Сушист',
+        description:
+          'мы ищем мастеров, которые разделяют нашу любовь к качеству и&nbsp;точности в&nbsp;каждом движении',
+        address: 'улица Щербакова, 48, Зеленоград, Москва',
+        type: 'Фудмолл',
+      },
+      {
+        title: 'Администратор зала',
+        description:
+          'если вы любите общение с людьми и готовы сделать визит каждого гостя незабываемым, это место для вас',
+        address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+        type: 'Пункт самовывоза',
+      },
+    ],
+  },
+  contacts = {
+    heading:
+      'Мы предлагаем гибкий график, возможность профессионального роста и работу в дружной команде, вдохновлённой общими целями',
+    list: [
+      {
+        title: 'Чтобы присоединиться к нам, отправьте своё резюме на почту',
+        value: 'sushirestaurant@support.com',
+      },
+      {
+        title: 'или позвоните по телефону',
+        value: '+ 7 (921) 999-84-22',
+      },
+    ],
+  },
+  ...rest
+} = Astro.props
+---
+
+<section
+  {...rest}
+  class:list={['work', className]}
+>
+  <div class="work__intro">
+    <h3
+      class="f-d-36-s f-m-18-s work__heading"
+      set:html={heading}
+    />
+    <p
+      class="f-d-18-r f-m-14-r work__description"
+      set:html={description}
+    />
+  </div>
+
+  <div class="work__vacancies">
+    <h3
+      class="f-d-24-s f-m-18-s work__vacancies__heading"
+      set:html={vacancies.heading}
+    />
+    <ul class="work__vacancies__list">
+      {
+        vacancies.list.map((item) => {
+          return (
+            <li class="work__vacancy">
+              <div
+                class="f-d-18-s f-m-14-s work__vacancy__title"
+                set:html={item.title}
+              />
+              <div
+                class="f-d-16-r f-m-14-r work__vacancy__description"
+                set:html={item.description}
+              />
+              <div class="work__vacancy__location">
+                <Icon
+                  name="geo-1"
+                  class="work__vacancy__location__icon"
+                />
+                <div class="f-d-16-r f-m-14-r work__vacancy__location__text">
+                  <div
+                    class="work__vacancy__location__address"
+                    set:html={item.address}
+                  />
+                  <div
+                    class="work__vacancy__location__type"
+                    set:html={item.type}
+                  />
+                </div>
+              </div>
+            </li>
+          )
+        })
+      }
+    </ul>
+  </div>
+
+  <div class="work__contacts">
+    <h3
+      class="f-d-18-s f-m-14-s work__contacts__heading"
+      set:html={contacts.heading}
+    />
+
+    <ul class="work__contacts__list">
+      {
+        contacts.list.map((item) => {
+          const href = tryCreateHrefFromContact(item.value)
+          return (
+            <li class="work__contact">
+              <div
+                class="f-d-18-r f-m-14-r work__contact__title"
+                set:html={item.title}
+              />
+              <a
+                class="f-d-24-s f-m-18-s  work__contact__link"
+                href={href.href}
+                set:html={item.value}
+              />
+            </li>
+          )
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .work {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+  }
+
+  .work__intro {
+    width: 71.6rem;
+
+    margin-bottom: 8rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-bottom: 6rem;
+    }
+  }
+
+  .work__heading {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .work__description {
+  }
+
+  .work__vacancies {
+    margin-bottom: 8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 6rem;
+    }
+  }
+
+  .work__vacancies__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .work__vacancies__list {
+  }
+
+  .work__vacancy {
+    display: flex;
+
+    padding: 1.6rem;
+    padding-bottom: 2rem;
+
+    &:first-of-type {
+      padding-top: 0;
+    }
+
+    &:not(:last-of-type) {
+      border-bottom: 0.1rem solid var(--color-secondary-1);
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+
+      padding: 1.6rem 0.8rem;
+    }
+  }
+
+  .work__vacancy__title {
+    width: 27.1rem;
+    margin-right: 3.2rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-right: unset;
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .work__vacancy__description {
+    width: 68.2rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .work__vacancy__location {
+    width: 40rem;
+    margin-left: auto;
+
+    display: flex;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-left: unset;
+    }
+  }
+
+  .work__vacancy__location__icon {
+    flex-shrink: 0;
+
+    width: 2.4rem;
+    height: 2.4rem;
+    margin-right: 1.8rem;
+
+    fill: var(--color-primary-2);
+
+    @media (max-width: 768px) {
+      margin-right: 1.2rem;
+    }
+  }
+
+  .work__vacancy__location__text {
+  }
+
+  .work__vacancy__location__address {
+    margin-bottom: 0.4rem;
+
+    @media (max-width: 768px) {
+    }
+  }
+
+  .work__vacancy__location__type {
+    color: var(--color-secondary-3);
+  }
+
+  .work__contacts {
+    width: 71.6rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .work__contacts__heading {
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .work__contacts__list {
+    display: grid;
+    gap: 1.6rem;
+    grid-auto-rows: max-content;
+  }
+
+  .work__contact {
+  }
+
+  .work__contact__title {
+    color: var(--color-secondary-3);
+
+    margin-bottom: 0.8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.6rem;
+    }
+  }
+
+  .work__contact__link {
+    @media (hover: hover) {
+      transition: color var(--duration-button);
+
+      &:hover {
+        color: var(--color-functional-1);
+      }
+    }
+  }
+</style>
