@@ -1,0 +1,76 @@
+---
+import IntroContacts from '@elements/IntroContacts.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  description?: string
+}
+
+const {
+  class: className,
+  heading = 'Добро пожаловать <span>в Инари</span>',
+  description = '— место, где оживают древние японские легенды, а&nbsp;каждый вкус переносит вас в&nbsp;мир традиций и&nbsp;духовной силы',
+  ...rest
+} = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['about-intro', className]}
+>
+  <div class="about-intro__left">
+    <h1
+      class="f-d-48-s f-m-24-s about-intro__heading"
+      set:html={heading}
+    />
+    <p
+      class="f-d-24-s f-m-16-s about-intro__description"
+      set:html={description}
+    />
+  </div>
+  <IntroContacts />
+</div>
+
+<style is:global>
+  .about-intro {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  .about-intro__left {
+    width: 71.6rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-bottom: 4rem;
+    }
+  }
+
+  .about-intro__heading {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+
+      margin-bottom: 1.2rem;
+
+      span {
+        font-size: 3.6rem;
+        margin-left: auto;
+        display: block;
+      }
+    }
+  }
+
+  .about-intro__description {
+  }
+</style>

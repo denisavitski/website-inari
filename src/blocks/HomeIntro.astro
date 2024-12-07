@@ -1,6 +1,6 @@
 ---
-import SocialIconLinks from '@elements/SocialIconLinks.astro'
 import Billboard from '@elements/Billboard.astro'
+import IntroContacts from '@elements/IntroContacts.astro'
 
 export interface Props {
   heading?: string
@@ -26,14 +26,7 @@ const {
         set:html={description}
       />
     </div>
-    <div class="home-intro__contacts">
-      <a
-        class="f-d-24-s"
-        href="tel:+79219998422"
-        >+ 7 (921) 999-84-22</a
-      >
-      <SocialIconLinks theme={'rw'} />
-    </div>
+    <IntroContacts />
   </div>
   <Billboard class="home-intro__billboard" />
 </div>
@@ -82,17 +75,6 @@ const {
   }
 
   .home-intro__description {
-  }
-
-  .home-intro__contacts {
-    display: flex;
-    align-items: center;
-    gap: 2.4rem;
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 1.6rem;
-    }
   }
 
   .home-intro__billboard {
