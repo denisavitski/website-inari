@@ -1,0 +1,58 @@
+---
+export interface Props {
+  class?: string
+  heading?: string
+  description?: string
+}
+
+const {
+  class: className,
+  heading = 'Ждем вас на нашем фудкорте',
+  description = 'Не упустите возможность насладиться вкусом и атмосферой. Приходите и позволяйте Инари дарить вам радость и незабываемые моменты!',
+  ...rest
+} = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['wfy', className]}
+>
+  <h2
+    class="f-d-36-s f-m-18-s wfy__heading"
+    set:html={heading}
+  />
+  <p
+    class="f-d-18-r f-m-14-r wfy__description"
+    set:html={description}
+  />
+</div>
+
+<style is:global>
+  .wfy {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .wfy__heading {
+    text-align: center;
+    width: 71.6rem;
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .wfy__description {
+    text-align: center;
+    width: 71.6rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+</style>

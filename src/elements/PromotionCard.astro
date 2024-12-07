@@ -1,0 +1,140 @@
+---
+import type { ImageDataProps } from './Image.astro'
+import Image from './Image.astro'
+
+export interface Props {
+  class?: string
+  href?: string
+  image?: ImageDataProps
+  title?: string
+  duration?: string
+  description?: string
+}
+
+const {
+  class: className,
+  href = '/',
+  image = { src: '/images/food/1.jpg' },
+  title = 'Дары Инари',
+  duration = 'Каждая среда',
+  description = 'Закажите любое блюдо из раздела суши и&nbsp;получите второе такого же&nbsp;размера в&nbsp;подарок. Пусть Инари одарит вас ещё одним незабываемым вкусом в знак благодарности за&nbsp;ваш визит',
+  ...rest
+} = Astro.props
+---
+
+<a
+  {...rest}
+  href={href}
+  class:list={['promotion-card', className]}
+>
+  <Image
+    class="promotion-card__image"
+    {...image}
+    lazy
+    lazyBackground
+    cover
+  />
+  <span
+    class="f-d-24-s f-m-18-s promotion-card__title"
+    set:html={title}
+  />
+  <span class="promotion-card__duration">
+    <span
+      class="f-d-18-r f-m-14-r promotion-card__duration__title"
+      set:html={'Действие акции'}
+    />
+    <span
+      class="f-d-18-s f-m-14-s promotion-card__duration__value"
+      set:html={duration}
+    />
+  </span>
+  <span
+    class="f-d-18-r f-m-14-r promotion-card__description"
+    set:html={description}
+  />
+
+  <span
+    class="f-d-18-r f-m-14-r promotion-card__more"
+    set:html={'Подробнее'}
+  />
+</a>
+
+<style is:global>
+  .promotion-card {
+    width: 100%;
+    height: 100%;
+
+    padding: 1.6rem;
+
+    display: flex;
+    flex-direction: column;
+
+    border-radius: var(--border-radius-2);
+    border: 0.1rem solid var(--color-secondary-1);
+
+    @media (hover: hover) {
+      transition: background-color var(--duration-button);
+
+      &:hover {
+        background-color: var(--color-secondary-2);
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding: 0.8rem;
+    }
+  }
+
+  .promotion-card__image {
+    width: 100%;
+    height: 40rem;
+    margin-bottom: 2.4rem;
+
+    border-radius: var(--border-radius-1);
+
+    @media (max-width: 768px) {
+      border-radius: 0.5rem;
+      margin-bottom: 1.2rem;
+      height: 25rem;
+    }
+  }
+
+  .promotion-card__title {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .promotion-card__duration {
+    margin-bottom: 1.6rem;
+    display: flex;
+    justify-content: space-between;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .promotion-card__duration__title {
+    color: var(--color-secondary-3);
+  }
+
+  .promotion-card__duration__value {
+  }
+
+  .promotion-card__description {
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .promotion-card__more {
+    margin-top: auto;
+    margin-left: auto;
+    color: var(--color-secondary-3);
+  }
+</style>

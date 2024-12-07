@@ -1,0 +1,156 @@
+---
+import Image, { type ImageDataProps } from '@elements/Image.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  text?: string
+  image?: ImageDataProps
+}
+
+const {
+  class: className,
+  heading = 'Дары Инари',
+  text = `\
+    <h2>Условия акции</h2>\
+    <p>Закажите любое блюдо из раздела суши</p>\
+    <p>Получите второе такое же блюда в подарок</p>\
+    <p>Предложение действительно на суши одинакового размера (например, стандартные роллы, нигири и т. д.)</p>\
+    
+    <h2>Примечания</h2>\
+    <p>Акция доступна для все гостей нашего фудкорта</p>\
+    <p>Не ограничивайте себя: можете заказывать несколько различных блюд, но бесплатное блюдо будет предоставлено только за каждую заказанную порцию</p>\
+    <p>Данная акция <b>не комбинируется</b> с другими скидками и&nbsp;предложениями</p>\
+
+    <h2>Почему стоит попробовать?</h2>\
+    <p>Позвольте одарить вас еще одним незабываемым вкусом! Это отличный способ попробовать новые сочетания и поделиться радостью с&nbsp;друзьями или близкими. Мы уверены, что наш вкусный и свежий выбор суши сделает ваш визит в "Инари" особенным!</p>
+  `,
+  image = { src: '/images/food/1.jpg' },
+  ...rest
+} = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['promotion', className]}
+>
+  <div class="promotion__left">
+    <h1
+      class="f-d-36-s f-m-24-s promotion__heading"
+      set:html={heading}
+    />
+    <div
+      class="promotion__text"
+      set:html={text}
+    />
+  </div>
+  <Image
+    {...image}
+    class="promotion__image"
+    lazy
+    lazyBackground
+    cover
+  />
+</div>
+
+<style is:global>
+  .promotion {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+    padding-top: 0;
+
+    display: flex;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  .promotion__left {
+    width: 71.6rem;
+
+    @media (max-width: 768px) {
+      display: contents;
+      width: 100%;
+    }
+  }
+
+  .promotion__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      order: 1;
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .promotion__text {
+    order: 3;
+
+    font-size: 1.8rem;
+    font-weight: 400;
+    line-height: 120%;
+
+    white-space: pre-line;
+
+    @media (max-width: 768px) {
+      font-size: 1.4rem;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-size: 2.4rem;
+      font-weight: 600;
+      line-height: 120%;
+      margin-bottom: 1.6rem;
+
+      @media (max-width: 768px) {
+        font-size: 1.6rem;
+        margin-bottom: 0.8rem;
+      }
+    }
+
+    ul {
+      list-style: disc;
+    }
+
+    ul {
+      list-style: decimal;
+    }
+
+    li {
+      list-style-position: inside;
+    }
+
+    p {
+      margin-bottom: 0.8rem;
+
+      @media (max-width: 768px) {
+        margin-bottom: 0.4rem;
+      }
+    }
+
+    b {
+      font-weight: 400;
+      color: var(--color-functional-1);
+    }
+  }
+
+  .promotion__image {
+    width: 71.6rem;
+    height: max-content;
+    border-radius: var(--border-radius-2);
+
+    @media (max-width: 768px) {
+      order: 2;
+      width: 100%;
+      height: 40rem;
+      margin-bottom: 2.4rem;
+    }
+  }
+</style>

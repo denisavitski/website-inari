@@ -190,7 +190,7 @@ export const productsData: Array<MenuProductData> = [
       { color: '#E53935', value: 'Акция 10%' },
     ],
     name: 'Карточка со всем вместе',
-    description: 'Описание карточки',
+    description: false,
     feature: 'spicy',
     stats: [
       {

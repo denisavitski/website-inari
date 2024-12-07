@@ -1,0 +1,102 @@
+---
+import PromotionCard, { type Props as PromotionCardProps } from '@elements/PromotionCard.astro'
+
+export interface Props {
+  heading?: string
+  list?: Array<Omit<PromotionCardProps, 'class'>>
+}
+
+const {
+  heading = 'Акции ресторана Инари',
+  list = [
+    {
+      href: '/promotions/promotion',
+      image: { src: '/images/food/1.jpg' },
+      title: 'Дары Инари',
+      duration: 'Каждая среда',
+      description: 'Закажите любое блюдо из раздела суши',
+    },
+    {
+      href: '/promotions/promotion',
+      image: { src: '/images/food/2.jpg' },
+      title: 'Дары Инари',
+      duration: 'Каждая среда',
+      description:
+        'Закажите любое блюдо из раздела суши и&nbsp;получите второе такого же&nbsp;размера в&nbsp;подарок. Пусть Инари одарит вас ещё одним незабываемым вкусом в знак благодарности за&nbsp;ваш визит',
+    },
+    {
+      href: '/promotions/promotion',
+      image: { src: '/images/food/3.jpg' },
+      title: 'Дары Инари',
+      duration: 'Каждая среда',
+      description:
+        'Закажите любое блюдо из раздела суши и&nbsp;получите второе такого же&nbsp;размера в&nbsp;подарок.',
+    },
+    {
+      href: '/promotions/promotion',
+      image: { src: '/images/food/1.jpg' },
+      title: 'Дары Инари',
+      duration: 'Каждая среда',
+      description:
+        'Закажите любое блюдо из раздела суши и&nbsp;получите второе такого же&nbsp;размера в&nbsp;подарок. Пусть Инари одарит вас ещё одним незабываемым вкусом в знак благодарности за&nbsp;ваш визит',
+    },
+  ],
+} = Astro.props
+---
+
+<div class="promotions">
+  <h1
+    class="f-d-48-s f-m-24-s promotions__heading"
+    set:html={heading}
+  />
+
+  <ul class="promotions__list">
+    {
+      list.map((item) => {
+        return (
+          <li class="promotions__list__item">
+            <PromotionCard {...item} />
+          </li>
+        )
+      })
+    }
+  </ul>
+</div>
+
+<style is:global>
+  .promotions {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+
+    padding-top: 3.2rem;
+
+    @media (max-width: 768px) {
+      padding-top: 2.4rem;
+    }
+  }
+
+  .promotions__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .promotions__list {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      gap: 0.8rem;
+      grid-template-columns: 100%;
+      grid-auto-rows: max-content;
+    }
+  }
+
+  .promotions__list__item {
+    height: 100%;
+  }
+</style>

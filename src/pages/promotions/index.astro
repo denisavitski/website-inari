@@ -1,0 +1,17 @@
+---
+import Layout from '@layout/Layout.astro'
+
+import PromotionsSection from '@blocks/Promotions.astro'
+import Subscribe from '@blocks/Subscribe.astro'
+---
+
+<Layout
+  seo={{
+    title: 'Инари: Акции',
+    description: 'Свежие суши каждый день',
+    cover: '/images/seo/home.jpg',
+  }}
+>
+  <PromotionsSection />
+  <Subscribe />
+</Layout>

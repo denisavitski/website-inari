@@ -1,0 +1,72 @@
+---
+import Icon from '@elements/Icon.astro'
+
+export interface Props {
+  class?: string
+  href?: string
+}
+
+const { class: className, href = '/', ...rest } = Astro.props
+---
+
+<!-- BLOCK -->
+<a
+  {...rest}
+  class:list={['back', className]}
+  {href}
+>
+  <Icon
+    name="tail-arrow"
+    class="back__arrow"
+  />
+  <span class="f-d-16-s back__name"><slot /></span>
+</a>
+
+<style is:global>
+  .back {
+    --color: var(--color-secondary-3);
+
+    margin: 3.2rem var(--screen-horisontal-padding);
+    padding-left: 1.2rem;
+    padding-right: 2.4rem;
+    height: 4.8rem;
+
+    display: inline-flex;
+    gap: 1.6rem;
+    align-items: center;
+    justify-content: center;
+
+    border: 0.1rem solid var(--color);
+    border-radius: var(--border-radius-1);
+
+    @media (hover: hover) {
+      transition: border-color var(--duration-button);
+
+      &:hover {
+        --color: var(--color-functional-1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding-left: 1.2rem;
+      padding-right: 1.2rem;
+      width: calc(100% - var(--screen-horisontal-padding) * 2);
+      height: 4rem;
+      margin: 1.6rem var(--screen-horisontal-padding);
+    }
+  }
+
+  .back__arrow {
+    width: 2.4rem;
+    height: 2.4rem;
+
+    fill: var(--color);
+    transform: scaleX(-1);
+    transition: fill var(--duration-button);
+  }
+
+  .back__name {
+    color: var(--color);
+    transition: color var(--duration-button);
+  }
+</style>
