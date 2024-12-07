@@ -1,0 +1,114 @@
+---
+import { tryCreateHrefFromContact } from '@utils/href'
+import Icon from './Icon.astro'
+
+export interface AddressData {
+  tag: string
+  address: string
+  type: string
+  workingHours: string
+  phone: string
+}
+
+export interface Props extends Partial<AddressData> {
+  class?: string
+}
+
+const {
+  class: className,
+  tag = 'div',
+  address = 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+  type = 'Пункт самовывоза',
+  workingHours = '11:00 — 23:00',
+  phone = '+ 7 (921) 999-84-22',
+  ...rest
+} = Astro.props
+
+const Tag = tag
+---
+
+<Tag
+  {...rest}
+  class:list={['f-d-18-r f-m-14-r address', className]}
+>
+  <Icon
+    name="geo-1"
+    class="address__icon"
+  />
+
+  <div
+    class="address__address"
+    set:html={address}
+  />
+  <div
+    class="address__type"
+    set:html={type}
+  />
+  <div class="address__hours">
+    <div class="address__hours__title">График работы:</div>
+    <div
+      class="address__hours__value"
+      set:html={workingHours}
+    />
+  </div>
+
+  <a
+    class="address__phone"
+    href={tryCreateHrefFromContact(phone).href}
+    set:html={phone}
+  />
+</Tag>
+
+<style is:global>
+  .address {
+    width: 100%;
+    height: 100%;
+
+    padding: 1.2rem 1.6rem;
+
+    border: 0.1rem solid var(--color-secondary-1);
+    border-radius: var(--border-radius-1);
+
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 1.2rem;
+
+    @media (max-width: 768px) {
+      gap: 0.8rem;
+      padding: 0.8rem;
+    }
+  }
+
+  .address__icon {
+    width: 3.2rem;
+    height: 3.2rem;
+
+    fill: var(--color-primary-2);
+  }
+
+  .address__address {
+  }
+
+  .address__type {
+    color: var(--color-secondary-3);
+  }
+
+  .address__hours {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6rem;
+
+    @media (max-width: 768px) {
+      gap: 0.8rem;
+    }
+  }
+
+  .address__hours__title {
+  }
+
+  .address__hours__value {
+  }
+
+  .address__phone {
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+import Addresses from '@elements/Addresses.astro'
+import Departments from '@elements/Departments.astro'
+import Social from '@elements/Social.astro'
+
+export interface Props {
+  heading?: string
+}
+
+const { heading = 'Контакты' } = Astro.props
+---
+
+<!-- BLOCK -->
+<div class="contacts">
+  <h1
+    class="f-d-48-s f-m-24-s contacts__heading"
+    set:html={heading}
+  />
+
+  <Addresses class="contacts__addresses" />
+  <Departments class="contacts__departments" />
+  <Social />
+</div>
+
+<style>
+  .contacts {
+    padding: 0 var(--screen-horisontal-padding);
+    padding-top: 3.2rem;
+    padding-bottom: 15rem;
+
+    @media (max-width: 768px) {
+      padding-top: 2.4rem;
+      padding-bottom: 12rem;
+    }
+  }
+
+  .contacts__heading {
+    margin-bottom: 4rem;
+  }
+
+  .contacts__addresses {
+    margin-bottom: 8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 12rem;
+    }
+  }
+
+  .contacts__departments {
+    margin-bottom: 8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 12rem;
+    }
+  }
+</style>

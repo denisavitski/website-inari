@@ -1,0 +1,109 @@
+---
+import Address, { type AddressData } from '@elements/Address.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  list?: Array<AddressData>
+}
+
+const {
+  class: className,
+  heading = 'Наши адреса',
+  list = [
+    {
+      tag: 'div',
+      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+      type: 'Пункт самовывоза',
+      workingHours: '11:00 — 23:00',
+      phone: '+ 7 (921) 999-84-22',
+    },
+    {
+      tag: 'div',
+      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+      type: 'Пункт самовывоза',
+      workingHours: '11:00 — 23:00',
+      phone: '+ 7 (921) 999-84-22',
+    },
+    {
+      tag: 'div',
+      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+      type: 'Пункт самовывоза',
+      workingHours: '11:00 — 23:00',
+      phone: '+ 7 (921) 999-84-22',
+    },
+    {
+      tag: 'div',
+      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+      type: 'Пункт самовывоза',
+      workingHours: '11:00 — 23:00',
+      phone: '+ 7 (921) 999-84-22',
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<section
+  {...rest}
+  class:list={['addresses', className]}
+>
+  <h3
+    class="f-d-36-s f-m-18-s addresses__heading"
+    set:html={heading}
+  />
+  <ul class="addresses__list">
+    {
+      list.map((item) => {
+        return (
+          <li class="contacts__list__item">
+            <Address {...item} />
+          </li>
+        )
+      })
+    }
+  </ul>
+  <div class="addresses__map"></div>
+</section>
+
+<style is:global>
+  .addresses {
+  }
+
+  .addresses__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .addresses__list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 100%;
+      gap: 0.8rem;
+
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .contacts__list__item {
+  }
+
+  .addresses__map {
+    height: 50rem;
+    border-radius: var(--border-radius-2);
+
+    background-color: var(--color-secondary-3);
+
+    @media (max-width: 768px) {
+      height: 25rem;
+    }
+  }
+</style>

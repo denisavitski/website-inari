@@ -42,6 +42,7 @@ items.forEach((item) => {
 <e-menu
   {...rest}
   class:list={['menu', className]}
+  id="menu"
 >
   <h2
     class="f-d-48-s f-m-24-s menu__heading"
@@ -548,7 +549,7 @@ items.forEach((item) => {
       this.#navPopoverElement?.close()
 
       if (scroll) {
-        scrollToElement(this, { offset: '.header', behaviour: 'smooth' })
+        scrollToElement(this, { offset: '.header', behavior: 'smooth' })
       }
     }
 

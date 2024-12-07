@@ -1,0 +1,131 @@
+---
+import { tryCreateHrefFromContact } from '@utils/href'
+
+export interface Props {
+  class?: string
+  heading?: string
+  list?: Array<{
+    title: string
+    values: Array<string>
+  }>
+}
+
+const {
+  class: className,
+  heading = 'Для связи',
+  list = [
+    {
+      title: 'Прием заказов',
+      values: ['+7 (921) 999-84-22'],
+    },
+    {
+      title: 'Служба поддержки',
+      values: ['+7 (965) 662-56-59', 'feedback@sushirestaurant.com'],
+    },
+    {
+      title: 'По вопросам партнёрства и&nbsp;сотрудничества',
+      values: ['+7 (921) 999-84-22', 'sushirestaurant@support.com'],
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<section
+  {...rest}
+  class:list={['departments', className]}
+>
+  <h2
+    class="f-d-36-s f-m-18-s departments__heading"
+    set:html={heading}
+  />
+  <ul class="departments__list">
+    {
+      list.map((item) => {
+        return (
+          <li class="departments__item">
+            <div
+              class="f-d-18-r f-m-14-r departments__item__title"
+              set:html={item.title}
+            />
+            <div class="f-d-24-s f-m-18-s departments__item__values">
+              {item.values.map((value) => {
+                return (
+                  <a
+                    href={tryCreateHrefFromContact(value).href}
+                    class="departments__item__value"
+                    set:html={value}
+                  />
+                )
+              })}
+            </div>
+          </li>
+        )
+      })
+    }
+  </ul>
+</section>
+
+<style is:global>
+  .departments {
+  }
+
+  .departments__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .departments__list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 100%;
+    }
+  }
+
+  .departments__item {
+    padding: 1.6rem;
+    min-height: 13.6rem;
+    border-radius: var(--border-radius-1);
+    border: 0.1rem solid var(--color-secondary-1);
+
+    @media (max-width: 768px) {
+      min-height: unset;
+    }
+  }
+
+  .departments__item__title {
+    margin-bottom: 1.6rem;
+
+    color: var(--color-secondary-3);
+
+    @media (max-width: 768px) {
+      margin-bottom: 0;
+      max-width: 90%;
+    }
+  }
+
+  .departments__item__values {
+    display: grid;
+    gap: 0.8rem;
+    grid-auto-rows: max-content;
+    justify-items: center;
+    align-content: center;
+    min-height: 9.3rem;
+  }
+
+  .departments__item__value {
+    @media (hover: hover) {
+      transition: color var(--duration-button);
+
+      &:hover {
+        color: var(--color-functional-1);
+      }
+    }
+  }
+</style>

@@ -1,0 +1,156 @@
+---
+import Icon from './Icon.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  list?: Array<{
+    icon: string
+    name: string
+    href: string
+  }>
+}
+
+const {
+  class: className,
+  heading = 'Наши соцсети',
+  list = [
+    {
+      icon: 'vk',
+      name: 'Vk',
+      href: 'https://google.com',
+    },
+    {
+      icon: 'tg',
+      name: 'Telegram',
+      href: 'https://google.com',
+    },
+    {
+      icon: 'wa',
+      name: 'WhatsApp',
+      href: 'https://google.com',
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<section
+  {...rest}
+  class:list={['social', className]}
+>
+  <h2
+    class="f-d-36-s f-m-18-s social__heading"
+    set:html={heading}
+  />
+  <ul class="social__list">
+    {
+      list.map((item) => {
+        return (
+          <li class="social__item">
+            <a
+              href={item.href}
+              class="social__link"
+              target="_blank"
+            >
+              <div class="social__link__icon-box">
+                <Icon
+                  class="social__link__icon"
+                  name={item.icon}
+                />
+              </div>
+              <div
+                class="f-d-24-s social__link__name"
+                set:html={item.name}
+              />
+            </a>
+          </li>
+        )
+      })
+    }
+  </ul>
+</section>
+
+<style is:global>
+  .social {
+  }
+
+  .social__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .social__list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 100%;
+    }
+  }
+
+  .social__item {
+  }
+
+  .social__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.4rem;
+
+    padding: 1.6rem;
+    height: 10.8rem;
+    border-radius: var(--border-radius-1);
+    border: 0.1rem solid var(--color-secondary-1);
+
+    @media (hover: hover) {
+      transition: background-color var(--duration-button);
+
+      &:hover {
+        background-color: var(--color-secondary-2);
+      }
+    }
+
+    @media (max-width: 768px) {
+      justify-content: flex-start;
+      gap: 1.6rem;
+      height: 7.2rem;
+    }
+  }
+
+  .social__link__icon-box {
+    width: 6rem;
+    height: 6rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0.1rem solid var(--color-primary-2);
+    border-radius: var(--border-radius-1);
+
+    @media (max-width: 768px) {
+      width: 4rem;
+      height: 4rem;
+    }
+  }
+
+  .social__link__icon {
+    width: 3.2rem;
+    height: 3.2rem;
+
+    fill: var(--color-primary-2);
+
+    @media (max-width: 768px) {
+      width: 1.9rem;
+      height: 1.9rem;
+    }
+  }
+
+  .social__link__name {
+  }
+</style>
