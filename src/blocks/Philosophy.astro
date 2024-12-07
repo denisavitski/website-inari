@@ -38,22 +38,25 @@ const {
       class="f-d-36-s f-m-18-s philosophy__heading"
       set:html={heading}
     />
-    {
-      blocks.map((block) => {
-        return (
-          <div class="philosophy__block">
-            <h3
-              class="f-d-24-s f-m-16-s philosophy__block__title"
-              set:html={block.title}
-            />
-            <p
-              class="f-d-18-r f-m-14-r philosophy__block__description"
-              set:html={block.description}
-            />
-          </div>
-        )
-      })
-    }
+
+    <div class="philosophy__blocks">
+      {
+        blocks.map((block) => {
+          return (
+            <div class="philosophy__block">
+              <h3
+                class="f-d-24-s f-m-16-s philosophy__block__title"
+                set:html={block.title}
+              />
+              <p
+                class="f-d-18-r f-m-14-r philosophy__block__description"
+                set:html={block.description}
+              />
+            </div>
+          )
+        })
+      }
+    </div>
   </div>
   <Image
     class="philosophy__image"
@@ -83,6 +86,9 @@ const {
     min-height: 100%;
     padding: 3.2rem;
 
+    display: flex;
+    flex-direction: column;
+
     border-radius: var(--border-radius-2);
 
     background-color: var(--color-secondary-5);
@@ -97,11 +103,11 @@ const {
     margin-bottom: 2.4rem;
   }
 
-  .philosophy__block {
-    &:first-child {
-      margin-top: auto;
-    }
+  .philosophy__blocks {
+    margin-top: auto;
+  }
 
+  .philosophy__block {
     margin-bottom: 2.4rem;
 
     @media (max-width: 768px) {

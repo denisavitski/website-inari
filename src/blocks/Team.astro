@@ -1,0 +1,138 @@
+---
+import type { ImageDataProps } from '@elements/Image.astro'
+import Image from '@elements/Image.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  description?: string
+  images?: Array<ImageDataProps>
+}
+
+const {
+  class: className,
+  heading = 'Наша команда',
+  description = '— это не просто сотрудники ресторана, это семья, связанная общей философией и стремлением подарить каждому гостю настоящий вкус Японии. Мы верим, что магия рождается не только на кухне, но и в сердцах тех, кто делает всё возможное, чтобы вы чувствовали себя как дома',
+  images = [
+    {
+      src: '/images/about/2.jpg',
+    },
+    {
+      src: '/images/about/4.jpg',
+    },
+    {
+      src: '/images/about/3.jpg',
+    },
+    {
+      src: '/images/about/5.jpg',
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<section
+  {...rest}
+  class:list={['team', className]}
+>
+  <div class="team__layout">
+    <div class="team__text-card">
+      <h2
+        class="f-d-36-s f-m-18-s team__heading"
+        set:html={heading}
+      />
+      <p
+        class="f-d-18-r f-m-14-r team__description"
+        set:html={description}
+      />
+    </div>
+    {
+      images.map((image) => {
+        return (
+          <Image
+            class="team__image"
+            {...image}
+            cover
+            lazy
+            lazyBackground
+          />
+        )
+      })
+    }
+  </div>
+</section>
+
+<style is:global>
+  .team {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+  }
+
+  .team__layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 23.3rem 23.3rem 46.6rem 70rem;
+    gap: 1rem;
+    grid-template-areas:
+      'image1 text'
+      'image1 image3'
+      'image2 image3'
+      'image4 image4';
+
+    @media (max-width: 768px) {
+      gap: 0.4rem;
+      grid-template-rows: max-content 20rem 20rem 40rem;
+      grid-template-areas:
+        'text text'
+        'image4 image4'
+        'image2 image3'
+        'image1 image1';
+    }
+  }
+
+  .team__text-card {
+    grid-area: text;
+    width: 100%;
+    padding: 3.2rem;
+
+    display: flex;
+    flex-direction: column;
+
+    border-radius: var(--border-radius-2);
+    background-color: var(--color-secondary-5);
+
+    @media (max-width: 768px) {
+      padding: 1.6rem;
+    }
+  }
+
+  .team__heading {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .team__description {
+  }
+
+  .team__image {
+    border-radius: var(--border-radius-2);
+
+    &:nth-of-type(1) {
+      grid-area: image1;
+    }
+
+    &:nth-of-type(2) {
+      grid-area: image2;
+    }
+
+    &:nth-of-type(3) {
+      grid-area: image3;
+    }
+
+    &:nth-of-type(4) {
+      grid-area: image4;
+    }
+  }
+</style>
