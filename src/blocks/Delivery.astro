@@ -1,0 +1,404 @@
+---
+import type { ImageDataProps } from '@elements/Image.astro'
+import Image from '@elements/Image.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  conditions?: {
+    title: string
+    items: Array<{ title: string; value?: string }>
+  }
+  area?: {
+    title: string
+    description: string
+    zones: Array<{ name: string; type: '1' | '2' | '3'; title: string; description: string }>
+  }
+  payment?: {
+    title: string
+    variants: Array<string>
+    logos: Array<ImageDataProps>
+  }
+}
+
+const {
+  class: className,
+  heading = 'Доставка и оплата',
+  conditions = {
+    title: 'Условия доставки',
+    items: [
+      {
+        title: 'Время доставки:',
+        value: '11:00 — 23:00',
+      },
+      {
+        title: 'Время приема и обработки заказов:',
+        value: '10:00 — 21:00',
+      },
+      {
+        title: '<b>Стоимость доставки</b> зависит от зоны доставки',
+      },
+      {
+        title: 'Доступна <b>возможность предзаказа</b> с указанием точного времени доставки',
+      },
+    ],
+  },
+  area = {
+    title: 'Зона доставки',
+    description:
+      'Мы предлагаем гибкие условия доставки и&nbsp;персонализированные решения&nbsp;для&nbsp;каждого клиента',
+    zones: [
+      {
+        name: 'Зона 1',
+        title: 'Бесплатная доставка при заказе от 1 500 рублей',
+        description: 'Если сумма заказа меньше 1 500 рублей — стоимость доставки 200 рублей',
+        type: '1',
+      },
+      {
+        name: 'Зона 2',
+        title: 'Бесплатная доставка при заказе от 2500 рублей',
+        description: 'Если сумма заказа меньше — доставка 300 рублей',
+        type: '2',
+      },
+      {
+        name: 'Зона 3',
+        title: 'Стоимость доставки — 400 рублей, независимо от суммы заказа',
+        description:
+          'Возможность доставки за город или на удаленные районы обсуждается индивидуально',
+        type: '3',
+      },
+    ],
+  },
+  payment = {
+    title: 'Способы оплаты',
+    variants: ['Наличными при получении заказа', 'Оплата через терминал (банковская карта)'],
+    logos: [
+      { src: '/images/logos/mir.svg' },
+      { src: '/images/logos/mastercard.svg' },
+      { src: '/images/logos/visa.svg' },
+    ],
+  },
+  ...rest
+} = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['delivery', className]}
+>
+  <h1
+    class="f-d-48-s f-m-24-s delivery__heading"
+    set:html={heading}
+  />
+
+  <div class="delivery__conditions">
+    <h2
+      class="f-d-36-s f-m-18-s delivery__conditions__title"
+      set:html={conditions.title}
+    />
+    <ul class="delivery__conditions__list">
+      {
+        conditions.items.map((item) => {
+          return (
+            <li class="delivery__conditions__item">
+              <div
+                class="f-d-18-r f-m-14-r delivery__conditions__item__title"
+                set:html={item.title}
+              />
+              {item.value && (
+                <div
+                  class="f-d-18-s f-m-14-s delivery__conditions__item__value"
+                  set:html={item.value}
+                />
+              )}
+            </li>
+          )
+        })
+      }
+    </ul>
+  </div>
+
+  <div class="delivery__area">
+    <div class="delivery__area__content">
+      <h2
+        class="f-d-36-s f-m-18-s delivery__area__title"
+        set:html={area.title}
+      />
+      <p
+        class="f-d-18-r f-m-14-r delivery__area__description"
+        set:html={area.description}
+      />
+
+      <ul class="delivery__area__list">
+        {
+          area.zones.map((item) => {
+            return (
+              <li
+                class="delivery__area__item"
+                data-type={item.type}
+              >
+                <div class="delivery__area__item__head">
+                  <div
+                    class="f-d-24-s f-m-18-s delivery__area__item__name"
+                    set:html={item.name}
+                  />
+                </div>
+                <div
+                  class="f-d-18-s f-m-14-s delivery__area__item__title"
+                  set:html={item.title}
+                />
+                <div
+                  class="f-d-18-r f-m-14-r delivery__area__item__description"
+                  set:html={item.description}
+                />
+              </li>
+            )
+          })
+        }
+      </ul>
+    </div>
+
+    <div class="delivery__area__map"></div>
+  </div>
+
+  <div class="delivery__payment">
+    <h2
+      class="f-d-36-s f-m-18-s delivery__payment__title"
+      set:html={payment.title}
+    />
+    <ul class="delivery__payment__variants">
+      {
+        payment.variants.map((item) => {
+          return (
+            <li
+              class="f-d-18-r f-d-14-r delivery__payment__variant"
+              set:html={item}
+            />
+          )
+        })
+      }
+    </ul>
+
+    <div class="delivery__payment__logos">
+      {
+        payment.logos.map((logo) => {
+          return (
+            <Image
+              class="delivery__payment__logo"
+              lazy
+              contain
+              {...logo}
+            />
+          )
+        })
+      }
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .delivery {
+    padding: 0 var(--screen-horisontal-padding);
+    padding-top: 3.2rem;
+    padding-bottom: 15rem;
+
+    @media (max-width: 768px) {
+      padding-top: 2.4rem;
+      padding-bottom: 12rem;
+    }
+  }
+
+  .delivery__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .delivery__conditions {
+    margin-bottom: 8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 6rem;
+    }
+  }
+
+  .delivery__conditions__title {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .delivery__conditions__list {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 0.8rem;
+  }
+
+  .delivery__conditions__item {
+  }
+
+  .delivery__conditions__item__title {
+    display: inline-block;
+  }
+
+  .delivery__conditions__item__value {
+    display: inline-block;
+    margin-left: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-left: 0.4rem;
+    }
+  }
+
+  .delivery__area {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+
+    margin-bottom: 8rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 2.4rem;
+
+      margin-bottom: 12rem;
+    }
+  }
+
+  .delivery__area__content {
+    width: 71.6rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .delivery__area__map {
+    width: 71.6rem;
+    height: 50rem;
+
+    border-radius: var(--border-radius-2);
+    background-color: var(--color-secondary-3);
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 24rem;
+    }
+  }
+
+  .delivery__area__title {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .delivery__area__description {
+    margin-bottom: 2.4rem;
+  }
+
+  .delivery__area__list {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 2.4rem;
+  }
+
+  .delivery__area__item {
+  }
+
+  .delivery__area__item__head {
+    margin-bottom: 1.6rem;
+
+    display: flex;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+
+    &::after {
+      content: '';
+
+      display: block;
+
+      width: 10rem;
+      height: 1rem;
+      margin-left: 3.8rem;
+
+      border-radius: var(--border-radius-1);
+
+      @media (max-width: 768px) {
+        height: 0.4rem;
+      }
+    }
+
+    .delivery__area__item[data-type='1'] &::after {
+      background-color: var(--color-secondary-7);
+    }
+
+    .delivery__area__item[data-type='2'] &::after {
+      background-color: var(--color-secondary-6);
+    }
+
+    .delivery__area__item[data-type='3'] &::after {
+      background-color: var(--color-functional-1);
+    }
+  }
+
+  .delivery__area__item__name {
+    color: var(--color-secondary-3);
+  }
+
+  .delivery__area__item__title {
+    margin-bottom: 0.4rem;
+  }
+
+  .delivery__area__item__description {
+  }
+
+  .delivery__payment {
+  }
+
+  .delivery__payment__title {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .delivery__payment__variants {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 0.8rem;
+
+    margin-bottom: 1.2rem;
+
+    @media (max-width: 768px) {
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .delivery__payment__variant {
+  }
+
+  .delivery__payment__logos {
+    display: flex;
+    gap: 2.4rem;
+
+    @media (max-width: 768px) {
+      gap: 1.6rem;
+    }
+  }
+
+  .delivery__payment__logo {
+    max-width: 9rem;
+    height: 3.5rem;
+  }
+</style>
