@@ -155,10 +155,7 @@ export const productsData: Array<MenuProductData> = [
     oldPrice: false,
     categories: ['Простые карточки'],
     subcategories: ['Несколько изображений'],
-    labels: [
-      { color: '#1A8704', value: 'Новинка' },
-      { color: '#E53935', value: 'Акция 10%' },
-    ],
+    labels: false,
     name: 'Карточка с несколькими изображениями',
     description: false,
     feature: false,

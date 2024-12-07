@@ -23,39 +23,39 @@ const {
 
 <div
   {...rest}
-  class:list={['review', className]}
+  class:list={['review-card', className]}
 >
-  <div class="review__head">
+  <div class="review-card__head">
     <Rating
       {stars}
-      class="review__stars"
+      class="review-card__stars"
     />
 
-    <div class="review__person">
+    <div class="review-card__person">
       <div
-        class="f-d-16-s f-m-14-s review__person__name"
+        class="f-d-16-s f-m-14-s review-card__person__name"
         set:html={name}
       />
       <Icon
-        class="review__person__icon"
+        class="review-card__person__icon"
         name="person"
       />
     </div>
   </div>
 
   <p
-    class="f-d-16-r f-m-12-r review__text"
+    class="f-d-16-r f-m-12-r review-card__text"
     set:html={text}
   />
 
-  <div class="review__order">
-    <div class="f-d-16-r f-m-12-r review__order__title">Что заказывали</div>
-    <ul class="review__order__list">
+  <div class="review-card__order">
+    <div class="f-d-16-r f-m-12-r review-card__order__title">Что заказывали</div>
+    <ul class="review-card__order__list">
       {
         order.map((item) => {
           return (
             <li
-              class="f-d-16-s f-m-14-s review__order__list__item"
+              class="f-d-16-s f-m-14-s review-card__order__list__item"
               set:html={item}
             />
           )
@@ -66,7 +66,7 @@ const {
 </div>
 
 <style is:global>
-  .review {
+  .review-card {
     padding: 2.4rem;
     border-radius: var(--border-radius-2);
     border: 0.1rem solid var(--color-secondary-1);
@@ -79,7 +79,7 @@ const {
     }
   }
 
-  .review__head {
+  .review-card__head {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -91,27 +91,27 @@ const {
     }
   }
 
-  .review__stars {
+  .review-card__stars {
     --gap: 0.2rem;
   }
 
-  .review__person {
+  .review-card__person {
     display: inline-flex;
     align-items: center;
 
     gap: 0.4rem;
   }
 
-  .review__person__name {
+  .review-card__person__name {
   }
 
-  .review__person__icon {
+  .review-card__person__icon {
     width: 2.4rem;
     height: 2.4rem;
     fill: var(--color-primary-2);
   }
 
-  .review__text {
+  .review-card__text {
     margin-bottom: 1.6rem;
 
     @media (max-width: 768px) {
@@ -119,7 +119,7 @@ const {
     }
   }
 
-  .review__order {
+  .review-card__order {
     padding-top: 1.6rem;
     border-top: 0.1rem solid var(--color-secondary-1);
     margin-top: auto;
@@ -129,7 +129,7 @@ const {
     }
   }
 
-  .review__order__title {
+  .review-card__order__title {
     color: var(--color-secondary-3);
 
     margin-bottom: 0.8rem;
@@ -139,12 +139,12 @@ const {
     }
   }
 
-  .review__order__list {
+  .review-card__order__list {
     display: inline-flex;
     flex-wrap: wrap;
   }
 
-  .review__order__list__item {
+  .review-card__order__list__item {
     &:not(:first-child)::before {
       content: '/';
 

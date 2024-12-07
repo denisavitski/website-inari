@@ -82,7 +82,7 @@ const {
     #popoverElement: PopoverElement | null = null
     #formElement: HTMLFormElement | null = null
     #buttonElement: HTMLButtonElement | null = null
-    #inputElements: Array<HTMLInputElement> | null = null
+    #inputElements: Array<HTMLInputElement | HTMLTextAreaElement> | null = null
     #tmpInputsContainerElement: HTMLElement | null = null
     #sended = false
     #handler = '/test'
@@ -101,7 +101,10 @@ const {
 
         this.#formElement.addEventListener('submit', this.#submitListener)
 
-        this.#inputElements = [...this.#formElement.querySelectorAll('input')]
+        this.#inputElements = [
+          ...this.#formElement.querySelectorAll('input'),
+          ...this.#formElement.querySelectorAll('textarea'),
+        ]
 
         this.#inputElements.forEach((inputElement) => {
           inputElement.addEventListener('input', this.#inputListener)

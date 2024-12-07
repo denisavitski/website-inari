@@ -1,0 +1,93 @@
+---
+import Rating from './Rating.astro'
+
+export interface Props {
+  class?: string
+  description?: string
+  stars?: number
+  checked?: boolean
+}
+
+const {
+  class: className,
+  description = 'Высший пилотаж',
+  stars = 5,
+  checked,
+  ...rest
+} = Astro.props
+---
+
+<label
+  {...rest}
+  class:list={['rating-input', className]}
+>
+  <input
+    type="radio"
+    value="4"
+    class="visually-hidden rating-input__input"
+    {checked}
+  />
+  <div class="rating-input__inner">
+    <Rating
+      stars={stars}
+      class="rating-input__stars"
+      hideEmpty
+    />
+    <div
+      class="f-d-16-s f-m-12-s rating-input__description"
+      set:html={description}
+    />
+  </div>
+</label>
+
+<style is:global>
+  .rating-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .rating-input__input {
+  }
+
+  .rating-input__inner {
+    --star-color: var(--color-secondary-1);
+    --transition-duration: var(--duration-button);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 17.6rem;
+    padding: 0.8rem;
+
+    border-radius: var(--border-radius-1);
+    border: 0.1rem solid var(--star-color);
+
+    transition: border-color var(--transition-duration);
+
+    .rating-input__input:checked ~ & {
+      --star-color: var(--color-functional-1);
+    }
+
+    @media (max-width: 768px) {
+      min-width: 16.9rem;
+    }
+  }
+
+  .rating-input__stars {
+    margin-bottom: 0.4rem;
+  }
+
+  .rating-input__description {
+    text-align: center;
+
+    transition: color var(--duration-button);
+
+    .rating-input__input:checked ~ .rating-input__inner & {
+      color: var(--star-color);
+    }
+  }
+</style>

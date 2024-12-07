@@ -2,15 +2,18 @@
 export interface Props {
   class?: string
   stars?: number | string
+  hideEmpty?: boolean
 }
 
-const { class: className, stars = 4, ...rest } = Astro.props
+const { class: className, stars = 4, hideEmpty, ...rest } = Astro.props
 ---
 
 <e-rating
   {...rest}
   class:list={['class', className]}
   {stars}
+  hide-empty={hideEmpty}
+  data-popover-content
 ></e-rating>
 
 <script>
@@ -28,6 +31,8 @@ const { class: className, stars = 4, ...rest } = Astro.props
       height: 'var(--star-size, 2.4rem)',
 
       stroke: 'var(--star-color, var(--color-functional-1))',
+      transitionDuration: 'var(--transition-duration, 0s)',
+      transitionProperty: 'fill, stroke',
     },
 
     ':host([stars="1"]) svg:nth-child(1)': {
@@ -52,6 +57,25 @@ const { class: className, stars = 4, ...rest } = Astro.props
       {
         fill: 'var(--star-color, var(--color-functional-1))',
       },
+
+    ':host([stars="1"][hide-empty]) svg:nth-child(5), :host([stars="1"][hide-empty]) svg:nth-child(4), :host([stars="1"][hide-empty]) svg:nth-child(3) , :host([stars="1"][hide-empty]) svg:nth-child(2)':
+      {
+        display: 'none',
+      },
+
+    ':host([stars="2"][hide-empty]) svg:nth-child(5), :host([stars="2"][hide-empty]) svg:nth-child(4), :host([stars="2"][hide-empty]) svg:nth-child(3)':
+      {
+        display: 'none',
+      },
+
+    ':host([stars="3"][hide-empty]) svg:nth-child(5), :host([stars="3"][hide-empty]) svg:nth-child(4)':
+      {
+        display: 'none',
+      },
+
+    ':host([stars="4"][hide-empty]) svg:nth-child(5)': {
+      display: 'none',
+    },
   })
 
   export class RatingElement extends HTMLElement {

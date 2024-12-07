@@ -1,0 +1,176 @@
+---
+import Button from '@elements/Button.astro'
+import Form from '@elements/Form.astro'
+import Modal from '@elements/Modal.astro'
+import RatingInput from '@elements/RatingInput.astro'
+
+export const modal = '#review'
+---
+
+<Modal
+  id="review"
+  class="review"
+>
+  <div class="review__content">
+    <div class="f-d-24-s f-m-18-s review__heading"
+      >Оставьте свой отзыв и помогите нам стать лучше</div
+    >
+
+    <Form class="review__form">
+      <e-input-group
+        name="review"
+        class="review__rating"
+      >
+        <RatingInput
+          class="review__rating__item"
+          stars={5}
+          description="Высший пилотаж"
+          checked
+        />
+        <RatingInput
+          class="review__rating__item"
+          stars={4}
+          description="На высоте"
+        />
+        <RatingInput
+          class="review__rating__item"
+          stars={3}
+          description="Приемлемо"
+        />
+        <RatingInput
+          class="review__rating__item"
+          stars={2}
+          description="Нужно доработать"
+        />
+        <RatingInput
+          class="review__rating__item"
+          stars={1}
+          description="Печально"
+        />
+      </e-input-group>
+
+      <input
+        type="text"
+        required
+        name="name"
+        placeholder="Ваше имя"
+        class="f-d-16-r f-m-14-r review__input"
+      />
+      <input
+        type="text"
+        required
+        name="product"
+        placeholder="Блюдо, которое попробовали у нас"
+        class="f-d-16-r f-m-14-r review__input"
+      />
+      <textarea
+        required
+        name="review"
+        placeholder="Отзыв"
+        class="f-d-16-r f-m-14-r review__input review__input_textarea custom-scrollbar"
+      ></textarea>
+
+      <Button
+        type="submit"
+        class="review__submit-button"
+        >Отправить</Button
+      >
+    </Form>
+  </div>
+</Modal>
+
+<style is:global>
+  .review {
+  }
+
+  .review__content {
+    width: 73.8rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .review__heading {
+    text-align: center;
+    margin-bottom: 3.2rem;
+
+    @media (min-width: 769px) {
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .review__form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .review__rating {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    margin-bottom: 3.2rem;
+    padding: 0 4.5rem;
+
+    @media (max-width: 768px) {
+      gap: 0.4rem;
+      margin-bottom: 2.4rem;
+      padding: 0;
+    }
+  }
+
+  .review__rating__item {
+    @media (max-width: 768px) {
+      width: calc(100% / 2 - 0.2rem);
+
+      &:first-child {
+        margin: 0 2rem;
+        width: 15.35rem;
+      }
+
+      .rating-input__inner {
+        min-width: unset;
+        width: 100%;
+      }
+    }
+  }
+
+  .review__input {
+    width: 100%;
+    height: 4.3rem;
+
+    padding: 1.2rem 1.6rem;
+    margin-bottom: 1rem;
+
+    background-color: var(--color-secondary-2);
+    border-radius: var(--border-radius-1);
+
+    &::placeholder {
+      color: var(--color-secondary-3);
+    }
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.4rem;
+    }
+  }
+
+  .review__input_textarea {
+    resize: none;
+    min-height: 13.1rem;
+    color: inherit;
+  }
+
+  .review__submit-button {
+    width: 25rem;
+    --height: 4.3rem;
+    margin: 0 auto;
+    margin-top: 2.2rem;
+
+    @media (max-width: 768px) {
+      margin-top: 2rem;
+      width: 100%;
+    }
+  }
+</style>
