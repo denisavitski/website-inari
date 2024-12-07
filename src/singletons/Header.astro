@@ -27,7 +27,7 @@ const {
     },
     {
       name: 'О нас',
-      href: '/',
+      href: '/about',
     },
     {
       name: 'Контакты',
@@ -279,6 +279,10 @@ const {
 
   .header__nav__link {
     transition: color var(--duration-button);
+
+    &.current {
+      color: var(--color-primary-1);
+    }
 
     @media (min-width: 769px) {
       color: var(--color-primary-3);

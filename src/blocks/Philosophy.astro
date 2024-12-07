@@ -1,0 +1,133 @@
+---
+import type { ImageDataProps } from '@elements/Image.astro'
+import Image from '@elements/Image.astro'
+
+export interface Props {
+  class?: string
+  heading?: string
+  image?: ImageDataProps
+  blocks?: Array<{ title: string; description: string }>
+}
+
+const {
+  class: className,
+  heading = 'Философия нашего ресторана',
+  image = { src: '/images/about/1.jpg' },
+  blocks = [
+    {
+      title: 'Почему Инари',
+      description:
+        'В основе философии нашего ресторана лежит образ Инари — таинственного божества в облике лисы, которая в японской мифологии олицетворяет проницательность, защиту и магическую связь между людьми и миром духов',
+    },
+    {
+      title: 'Инари — это больше, чем просто ресторан',
+      description:
+        'Это храм вкуса и гармонии, где каждая деталь, продумана до&nbsp;мелочей. Мы создали атмосферу, которая отражает философию Инари: элегантную, но загадочную, спокойную, но&nbsp;полную жизни и&nbsp;энергии. Лиса-божество символизирует перемены, и наши блюда меняются в зависимости от времени года, принося вам дары природы в&nbsp;её&nbsp;лучших проявлениях<br><br>Мы чтим вековые японские традиции приготовления пищи, но&nbsp;при&nbsp;этом добавляем к ним свой авторский взгляд, используем только самые свежие и качественные ингредиенты, чтобы каждая трапеза стала ритуалом, который пробуждает ваши чувства',
+    },
+  ],
+  ...rest
+} = Astro.props
+---
+
+<section
+  {...rest}
+  class:list={['philosophy', className]}
+>
+  <div class="philosophy__content">
+    <h2
+      class="f-d-36-s f-m-18-s philosophy__heading"
+      set:html={heading}
+    />
+    {
+      blocks.map((block) => {
+        return (
+          <div class="philosophy__block">
+            <h3
+              class="f-d-24-s f-m-16-s philosophy__block__title"
+              set:html={block.title}
+            />
+            <p
+              class="f-d-18-r f-m-14-r philosophy__block__description"
+              set:html={block.description}
+            />
+          </div>
+        )
+      })
+    }
+  </div>
+  <Image
+    class="philosophy__image"
+    lazy
+    lazyBackground
+    cover
+    {...image}
+  />
+</section>
+
+<style is:global>
+  .philosophy {
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+    padding-top: 0;
+
+    display: flex;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      gap: 0.8rem;
+      flex-direction: column-reverse;
+    }
+  }
+
+  .philosophy__content {
+    width: 71.6rem;
+    min-height: 100%;
+    padding: 3.2rem;
+
+    border-radius: var(--border-radius-2);
+
+    background-color: var(--color-secondary-5);
+
+    @media (max-width: 768px) {
+      width: 100%;
+      padding: 1.6rem;
+    }
+  }
+
+  .philosophy__heading {
+    margin-bottom: 2.4rem;
+  }
+
+  .philosophy__block {
+    &:first-child {
+      margin-top: auto;
+    }
+
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .philosophy__block__title {
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .philosophy__block__description {
+  }
+
+  .philosophy__image {
+    height: 70rem;
+    width: 71.6rem;
+    border-radius: var(--border-radius-2);
+
+    @media (max-width: 768px) {
+      height: 35rem;
+      width: 100%;
+    }
+  }
+</style>

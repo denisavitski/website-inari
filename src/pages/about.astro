@@ -1,0 +1,16 @@
+---
+import AboutIntro from '@blocks/AboutIntro.astro'
+import Philosophy from '@blocks/Philosophy.astro'
+import Layout from '@layout/Layout.astro'
+---
+
+<Layout
+  seo={{
+    title: 'Инари: О нас',
+    description: 'Свежие суши каждый день',
+    cover: '/images/seo/home.jpg',
+  }}
+>
+  <AboutIntro />
+  <Philosophy />
+</Layout>
