@@ -28,32 +28,21 @@ if (modal) {
   class:list={['button', className]}
   data-theme={theme}
 >
-  <span class="button__inner">
-    <span class="f-d-16-s button__name"><slot>Кнопка</slot></span>
+  <span class="f-d-16-s button__name"><slot>Кнопка</slot></span>
 
-    {
-      theme.includes('arrow') && (
-        <Icon
-          class="button__icon"
-          name="tail-arrow"
-        />
-      )
-    }
-  </span>
+  {
+    theme.includes('arrow') && (
+      <Icon
+        class="button__icon"
+        name="tail-arrow"
+      />
+    )
+  }
 </Tag>
 
 <style is:global>
   .button {
     flex-shrink: 0;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .button__inner {
-    width: 100%;
-    height: 100%;
 
     display: inline-flex;
     align-items: center;
@@ -64,7 +53,7 @@ if (modal) {
     transition-duration: var(--duration-button);
     transition-property: opacity, color, background-color, border-color;
 
-    .button[data-theme='small'] & {
+    &[data-theme='small'] {
       height: var(--height, 3.6rem);
       padding: 0 1.6rem;
 
@@ -72,38 +61,34 @@ if (modal) {
       background-color: var(--color-primary-2);
       border: 0.1rem solid transparent;
 
-      &:active {
+      &:not([disabled]):not([data-disabled]):active {
         background-color: var(--color-primary-3);
         color: var(--color-primary-2);
         border-color: var(--color-primary-3);
       }
 
       @media (hover: hover) {
-        &:not(:active):hover {
+        &:not(:active):not([disabled]):not([data-disabled]):hover {
           color: var(--color-primary-3);
           border-color: var(--color-primary-3);
         }
       }
     }
 
-    .button[data-theme='big'] & {
+    &[data-theme='big'] {
       height: var(--height, 5.1rem);
       padding: 0 2.4rem;
 
       color: var(--color-primary-2);
       background-color: var(--color-primary-3);
 
-      &.active {
+      &:not([disabled]):not([data-disabled]):active {
         color: var(--color-primary-3);
         background-color: var(--color-primary-2);
       }
 
-      &[disabled] {
-        opacity: 0.4;
-      }
-
       @media (hover: hover) {
-        &:not(:active):hover {
+        &:not(:active):not([disabled]):not([data-disabled]):hover {
           color: var(--color-primary-3);
           background-color: var(--color-primary-2);
         }
@@ -114,8 +99,8 @@ if (modal) {
       }
     }
 
-    .button[data-theme='arrow'] &,
-    .button[data-theme='arrow-reverse'] & {
+    &[data-theme='arrow'],
+    &[data-theme='arrow-reverse'] {
       height: var(--height, 5.6rem);
       gap: 1.6rem;
 
@@ -124,7 +109,7 @@ if (modal) {
       background-color: var(--color-primary-3);
 
       @media (hover: hover) {
-        &:hover {
+        &:not([disabled]):not([data-disabled]):hover {
           color: var(--color-primary-3);
           fill: var(--color-primary-3);
           background-color: var(--color-primary-2);
@@ -132,15 +117,20 @@ if (modal) {
       }
     }
 
-    .button[data-theme='arrow'] & {
+    &[data-theme='arrow'] {
       padding-left: 2.4rem;
       padding-right: 1.2rem;
     }
 
-    .button[data-theme='arrow-reverse'] & {
+    &[data-theme='arrow-reverse'] {
       flex-direction: row-reverse;
       padding-left: 1.2rem;
       padding-right: 2.4rem;
+    }
+
+    &[disabled],
+    &[data-disabled] {
+      opacity: 0.4;
     }
   }
 

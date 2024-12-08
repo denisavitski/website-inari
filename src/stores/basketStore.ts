@@ -7,6 +7,7 @@ export interface BasketStoreItem {
   price: number | string
   image: string
   description?: string | undefined | false
+  skipBasket?: boolean
 }
 
 export type BasketStoreState = Array<BasketStoreItem>

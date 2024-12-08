@@ -73,7 +73,7 @@ const Tag = tag as any
 
     transition: opacity var(--modal-transition);
 
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.8);
 
     @media (max-width: 768px) {
       --swipe-enabled: true;
@@ -112,6 +112,10 @@ const Tag = tag as any
 
       transition: transform var(--modal-transition);
       transform: translateY(101%);
+
+      .modal.triggered & {
+        will-change: transform;
+      }
 
       .modal.opened & {
         transform: translateY(0);

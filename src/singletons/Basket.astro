@@ -362,6 +362,10 @@ const { class: className, ...rest } = Astro.props
       const itemElements = [...this.#itemsContainerElement!.children] as Array<BasketItemElement>
 
       basketStore.items.forEach((storeItem) => {
+        if (storeItem.skipBasket) {
+          return
+        }
+
         const itemElement = itemElements.find((itemElement) => itemElement.pid === storeItem.pid)
 
         if (itemElement) {

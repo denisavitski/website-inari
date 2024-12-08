@@ -1,0 +1,66 @@
+---
+export interface Props {
+  class?: string
+  value?: string
+  name?: string
+  required?: boolean
+  checked?: boolean
+}
+
+const {
+  class: className,
+  value = 'Через ≈ 60 мин.',
+  name = 'Время доставки',
+  required,
+  checked,
+  ...rest
+} = Astro.props
+---
+
+<label
+  {...rest}
+  class:list={['radio-button', className]}
+>
+  <input
+    type="radio"
+    class="visually-hidden radio-button__input"
+    name={name}
+    title={name}
+    value={value}
+    {required}
+    {checked}
+  />
+  <span class="f-d-16-s f-m-12-s radio-button__value">{value}</span>
+</label>
+
+<style is:global>
+  .radio-button {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .radio-button__value {
+    --color: var(--color-secondary-3);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    padding: 0 2.4rem;
+    height: 3.5rem;
+    border-radius: var(--border-radius-1);
+
+    border: 0.1rem solid var(--color);
+    color: var(--color);
+
+    .radio-button__input:checked ~ & {
+      --color: var(--color-primary-2);
+    }
+
+    @media (max-width: 768px) {
+      padding: 0 1.2rem;
+      height: 2.6rem;
+    }
+  }
+</style>

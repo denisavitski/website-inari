@@ -5,18 +5,11 @@ export interface Props {
   class?: string
   size?: ProductButtonSize
   counter?: string | number
-  placeholder?: string | number
+  placeholder?: string | number | false
   max?: string | number
 }
 
-const {
-  class: className,
-  size = 'big',
-  counter = 0,
-  placeholder = '100',
-  max = 99,
-  ...rest
-} = Astro.props
+const { class: className, size = 'big', counter = 0, placeholder, max = 99, ...rest } = Astro.props
 ---
 
 <e-product-button
@@ -52,7 +45,7 @@ const {
       position: 'relative',
       zIndex: 1,
 
-      display: 'flex',
+      display: 'none',
       alignItems: 'center',
       justifyContent: 'center',
 
@@ -65,6 +58,10 @@ const {
       cursor: 'pointer',
 
       userSelect: 'none',
+    },
+
+    ':host(.has-placeholder) .placeholder': {
+      display: 'flex',
     },
 
     ':host(.positive-value) .placeholder': {
@@ -85,7 +82,7 @@ const {
       justifyContent: 'space-between',
 
       width: '100%',
-      padding: '0.6rem',
+      padding: 'var(--padding, 0.6rem)',
 
       color: 'var(--color-primary-2)',
       border: '0.1rem solid var(--color-primary-2)',
@@ -155,6 +152,10 @@ const {
         fontSize: '1.4rem',
       },
 
+      '.content': {
+        borderRadius: '0.8rem',
+      },
+
       ':host([size="big"]) .content': {
         gap: '1.2rem',
       },
@@ -211,7 +212,7 @@ const {
       })
 
       this.addEventListener('click', () => {
-        if (this.#clickAllowed) {
+        if (this.#clickAllowed && this.classList.contains('has-placeholder')) {
           this.set(1)
         }
       })
@@ -226,12 +227,12 @@ const {
 
       this.#counter = clamp(value, 0, this.#max)
 
-      if (prev === this.#counter) {
-        return
+      if (this.#valueElement) {
+        this.#valueElement.textContent = this.#counter.toString() || '0'
       }
 
-      if (this.#valueElement) {
-        this.#valueElement.textContent = this.#counter.toString()
+      if (prev === this.#counter) {
+        return
       }
 
       this.classList.toggle('positive-value', !!this.#counter)
@@ -239,8 +240,6 @@ const {
       requestIdleCallback(() => {
         this.#clickAllowed = !this.#counter
       })
-
-      this.#clickAllowed
 
       dispatchEvent(this, 'productButtonCounterChange', {
         detail: {
@@ -255,6 +254,7 @@ const {
 
     public setPlaceholder(value: string) {
       this.#placeholderElement.textContent = value
+      this.classList.toggle('has-placeholder', !!value)
     }
 
     protected connectedCallback() {

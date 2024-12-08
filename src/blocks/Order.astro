@@ -1,0 +1,599 @@
+---
+import Form from '@elements/Form.astro'
+import OrderField from '@elements/OrderField.astro'
+import RadioButton from '@elements/RadioButton.astro'
+import Back from './Back.astro'
+import Button from '@elements/Button.astro'
+import Product from '@elements/Product.astro'
+import ProductButton from '@elements/ProductButton.astro'
+---
+
+<div class="order">
+  <h1
+    class="f-d-48-s f-m-18-s order__heading"
+    set:html={'Заказ на доставку'}
+  />
+
+  <div class="order__flex">
+    <Form class="order__form">
+      <OrderField title="Имя">
+        <input
+          type="text"
+          class="order__input"
+          name="Имя"
+          title="Имя"
+        />
+      </OrderField>
+      <OrderField title="Номер телефона *">
+        <input
+          type="text"
+          class="order__input"
+          name="Номер телефона"
+          title="Номер телефона"
+          required
+        />
+      </OrderField>
+
+      <OrderField title="Адрес доставки *">
+        <div class="order__address">
+          <div class="order__address__house">
+            <input
+              type="text"
+              class="visually-hidden"
+              name="Адрес"
+              title="Адрес"
+              required
+            />
+            <div class="order__input order__address__input">
+              <div class="order__address__value">Адрес</div>
+              <span class="order__address__change-button">Изменить</span>
+            </div>
+          </div>
+          <input
+            type="text"
+            class="order__input"
+            name="Подъезд"
+            title="Подъезд"
+            placeholder="Подъезд"
+            required
+          />
+          <div class="order__address__cols">
+            <input
+              type="text"
+              class="order__input"
+              name="Этаж"
+              title="Этаж"
+              placeholder="Этаж"
+              required
+            />
+            <input
+              type="text"
+              class="order__input"
+              name="Квартира"
+              title="Квартира"
+              placeholder="Квартира"
+              required
+            />
+          </div>
+          <textarea
+            class="order__input order__input_textarea custom-scrollbar"
+            name="Комментарии к адресу"
+            title="Комментарии к адресу"
+            placeholder="Комментарии к адресу"
+          ></textarea>
+        </div>
+      </OrderField>
+
+      <OrderField title="Время доставки *">
+        <div class="order__time">
+          <RadioButton
+            class="order__time__input"
+            name="Время доставки"
+            value="Через ≈ 60 мин."
+            required
+            checked
+          />
+          <RadioButton
+            required
+            class="order__time__input"
+            name="Время доставки"
+            value="14:30 - 15:00"
+          />
+          <RadioButton
+            required
+            class="order__time__input"
+            name="Время доставки"
+            value="15:00 - 15:30"
+          />
+          <RadioButton
+            required
+            class="order__time__input"
+            name="Время доставки"
+            value="16:00 - 16:30"
+          />
+          <RadioButton
+            required
+            class="order__time__input"
+            name="Время доставки"
+            value="16:30 - 17:00"
+          />
+          <RadioButton
+            required
+            class="order__time__input"
+            name="Время доставки"
+            value="17:00 - 17:30"
+          />
+          <RadioButton
+            required
+            class="order__time__input"
+            name="Время доставки"
+            value="17:30 - 18:00"
+          />
+          <RadioButton
+            required
+            class="order__time__input"
+            name="Время доставки"
+            value="Другое время"
+          />
+        </div>
+      </OrderField>
+      <OrderField title="Способ оплаты">
+        <div class="order__payment">
+          <RadioButton
+            class="order__payment__input"
+            name="Способ оплаты"
+            value="Картой курьеру"
+            checked
+            required
+          />
+          <RadioButton
+            class="order__payment__input"
+            name="Способ оплаты"
+            value="Наличными курьеру"
+            required
+          />
+        </div>
+      </OrderField>
+
+      <div class="order__form__bottom">
+        <Back
+          href="/#menu"
+          class="order__form__back"
+          >Назад к меню</Back
+        >
+        <Button
+          theme={'arrow'}
+          type="submit"
+          class="order__form__submit"
+          >Оформить заказ на <span data-total-price>3 420 ₽</span>
+        </Button>
+      </div>
+    </Form>
+
+    <div class="order__contents">
+      <h2
+        class="f-d-24-s f-m-16-s order__contents__title"
+        set:html={'Состав заказа'}
+      />
+
+      <ul class="f-d-16-r f-m-12-r order__products">
+        <li class="order__product">
+          <div
+            class="order__product__title"
+            set:html={'Калифорния лайт, 8 шт.'}
+          />
+          <div
+            class="order__product__amount"
+            set:html={'1'}
+          />
+          <div
+            class="order__product__price"
+            set:html={'550 ₽'}
+          />
+        </li>
+      </ul>
+
+      <div class="order__devices">
+        <h3
+          class="f-d-16-s f-m-14-s order__devices__title"
+          set:html="Добавьте приборы"
+        />
+
+        <div class="order__devices__list">
+          <Product
+            name="Палочки"
+            pid="111"
+            price="10"
+            class="order__device"
+            skipBasket
+          >
+            <div
+              class="f-d-16-r f-m-14-r order__device__name"
+              set:html="Палочки"
+            />
+            <ProductButton
+              class="order__device__button"
+              placeholder={false}
+              size={'small'}
+            />
+          </Product>
+          <Product
+            name="Палочки"
+            pid="Ложка"
+            price="10"
+            class="order__device"
+            skipBasket
+          >
+            <div
+              class="f-d-16-r f-m-14-r order__device__name"
+              set:html="Ложка"
+            />
+            <ProductButton
+              class="order__device__button"
+              placeholder={false}
+              size={'small'}
+            />
+          </Product>
+          <Product
+            name="Палочки"
+            pid="Вилка"
+            price="10"
+            class="order__device"
+            skipBasket
+          >
+            <div
+              class="f-d-16-r f-m-14-r order__device__name"
+              set:html="Вилка"
+            />
+            <ProductButton
+              class="order__device__button"
+              placeholder={false}
+              size={'small'}
+            />
+          </Product>
+        </div>
+      </div>
+
+      <div class="order__price">
+        <div class="f-d-16-s f-m-14-s order__price__products">
+          <div
+            class="order__price__products__title"
+            set:html="4 товара"
+          />
+          <div
+            class="order__price__products__value"
+            set:html="3 420 ₽"
+          />
+        </div>
+        <div class="f-d-16-s f-m-14-s order__price__delivery">
+          <div
+            class="order__price__delivery__title"
+            set:html="Доставка"
+          />
+          <div
+            class="order__price__delivery__value"
+            set:html="Бесплатно"
+          />
+        </div>
+        <div class="f-d-18-s f-m-16-s order__price__full">
+          <div
+            class="order__price__full__title"
+            set:html="Сумма заказа"
+          />
+          <div
+            class="order__price__full__value"
+            set:html="3 420 ₽"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .order {
+    --gap: 1rem;
+    padding: 0 var(--screen-horisontal-padding);
+    padding-top: 3.2rem;
+    padding-bottom: 15rem;
+
+    @media (max-width: 768px) {
+      --gap: 0.8rem;
+      padding-top: 2.4rem;
+      padding-bottom: 12rem;
+    }
+  }
+
+  .order__heading {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .order__form {
+    width: 76.8rem;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-auto-rows: max-content;
+    gap: 2.4rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      gap: 1.6rem;
+    }
+  }
+
+  .order__flex {
+    display: flex;
+    gap: 7.9rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column-reverse;
+      gap: 1.6rem;
+    }
+  }
+
+  .order__input {
+    font-size: 1.6rem;
+    font-weight: 400;
+
+    width: 100%;
+    height: 4.3rem;
+    padding: 1.2rem 1.6rem;
+
+    border-radius: var(--border-radius-1);
+    background-color: var(--color-secondary-2);
+
+    @media (max-width: 768px) {
+      font-size: 1.4rem;
+    }
+  }
+
+  .order__input_textarea {
+    resize: none;
+    height: 13.1rem;
+  }
+
+  .order__address {
+    display: grid;
+    grid-template-columns: 100%;
+    gap: var(--gap);
+  }
+
+  .order__address__house {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+  }
+
+  .order__address__input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .order__address__value {
+    width: 39.5rem;
+  }
+
+  .order__address__change-button {
+    font-size: 1.6rem;
+    color: var(--color-secondary-6);
+
+    @media (max-width: 768px) {
+      font-size: 1.2rem;
+    }
+  }
+
+  .order__address__cols {
+    display: flex;
+    gap: var(--gap);
+  }
+
+  .order__time {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+  }
+
+  .order__payment {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+
+  .order__payment__input {
+    width: 100%;
+  }
+
+  .order__form__bottom {
+    --height: 4.8rem;
+
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 2.4rem;
+
+    @media (max-width: 768px) {
+      --height: 4rem;
+
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+  }
+
+  .order__form__back {
+    margin: 0;
+    height: var(--height);
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .order__form__submit {
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  /*
+  --------------
+  CONTENTS
+  --------------
+  */
+
+  .order__contents {
+    width: 59.5rem;
+    height: max-content;
+    padding: 3rem;
+
+    border: 0.1rem solid var(--color-secondary-3);
+    border-radius: var(--border-radius-2);
+
+    @media (max-width: 768px) {
+      width: 100%;
+      padding: 1.6rem;
+    }
+  }
+
+  .order__contents__title {
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .order__products {
+    display: grid;
+    gap: 0.8rem;
+    grid-auto-rows: max-content;
+
+    padding-bottom: 0.8rem;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+
+    @media (max-width: 768px) {
+      padding-bottom: 1.2rem;
+    }
+  }
+
+  .order__product {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .order__product__title {
+    width: 34.6rem;
+
+    @media (max-width: 768px) {
+      width: 17.9rem;
+    }
+  }
+
+  .order__product__amount {
+    width: 3rem;
+    margin-right: 3rem;
+    margin-left: auto;
+
+    @media (max-width: 768px) {
+      width: 3rem;
+      margin-right: 1.6rem;
+    }
+  }
+
+  .order__product__price {
+    width: 9.9rem;
+    text-align: end;
+
+    @media (max-width: 768px) {
+      width: 7rem;
+    }
+  }
+
+  .order__devices {
+    padding: 1.6rem 0;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+  }
+
+  .order__devices__title {
+    margin-bottom: 1rem;
+  }
+
+  .order__devices__list {
+    display: grid;
+    gap: 1.2rem;
+    grid-auto-rows: max-content;
+  }
+
+  .order__device {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .order__device__name {
+  }
+
+  .order__device__button {
+    --padding: 0.4rem;
+    width: 8rem;
+    height: 2.4rem;
+  }
+
+  .order__price {
+    padding-top: 2.4rem;
+
+    @media (max-width: 768px) {
+      padding-top: 1.2rem;
+    }
+  }
+
+  .order__price__products {
+    display: flex;
+    justify-content: space-between;
+
+    color: var(--color-secondary-3);
+    margin-bottom: 0.8rem;
+  }
+
+  .order__price__products__title {
+  }
+
+  .order__price__products__value {
+  }
+
+  .order__price__delivery {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .order__price__delivery__title {
+  }
+
+  .order__price__delivery__value {
+  }
+
+  .order__price__full {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .order__price__full__title {
+  }
+
+  .order__price__full__value {
+  }
+</style>

@@ -21,6 +21,7 @@ const {
   description = 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
   pid = '1',
   image = '/images/food/1.jpg',
+  skipBasket,
   ...rest
 } = Astro.props
 ---
@@ -33,6 +34,7 @@ const {
   {description}
   {pid}
   {image}
+  skip-basket={skipBasket}
 >
   <slot />
 </e-product>

@@ -1,0 +1,48 @@
+---
+export interface Props {
+  class?: string
+  title?: string
+}
+
+const { class: className, title = 'Имя', ...rest } = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['order-field', className]}
+>
+  <div
+    class="f-d-18-s f-m-14-s order-field__name"
+    set:html={title}
+  />
+  <div class="order-field__content">
+    <slot />
+  </div>
+</div>
+
+<style is:global>
+  .order-field {
+    display: flex;
+    gap: 1.6rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+  }
+
+  .order-field__name {
+    width: 22.6rem;
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .order-field__content {
+    width: 52.6rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+</style>

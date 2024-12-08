@@ -187,9 +187,9 @@ const {
 
       if (this.#buttonElement) {
         if (validInputs === this.#inputElements?.length) {
-          this.#buttonElement.disabled = false
+          this.#buttonElement.removeAttribute('data-disabled')
         } else {
-          this.#buttonElement.disabled = true
+          this.#buttonElement.setAttribute('data-disabled', 'true')
         }
       }
     }

@@ -1,7 +1,6 @@
 ---
 import Button from '@elements/Button.astro'
 import Modal from '@elements/Modal.astro'
-import Image from '@elements/Image.astro'
 
 export const modal = '#form-answer'
 ---
@@ -13,16 +12,8 @@ export const modal = '#form-answer'
   class="form-answer"
 >
   <div class="form-answer__content">
-    <Image
-      class="form-answer__image"
-      src="/images/icons/successful-submission.svg"
-      lazy
-      lazyBackground
-      cover
-    />
-
-    <div class="font-h3 font-mob-h2 form-answer__title">Title</div>
-    <div class="font-p2 font-mob-p3 form-answer__message">Message</div>
+    <div class="f-d-48-s f-m-18-s form-answer__title">Title</div>
+    <div class="f-d-24-s f-m-14-s form-answer__message">Message</div>
     <Button
       class="form-answer__continue"
       modal="form-answer"
@@ -33,71 +24,50 @@ export const modal = '#form-answer'
 
 <style is:global>
   .form-answer {
-    --dominance: 1;
   }
 
   .form-answer__content {
-    padding: 5rem;
-    padding-top: 14.4rem;
-    width: 53.9rem;
+    width: 60rem;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5rem;
-
-    height: max-content;
-
-    overflow: hidden;
-
-    background-color: var(--color-background);
-    border-radius: 2rem;
 
     @media (max-width: 768px) {
       width: 100%;
-      min-height: 100%;
-      gap: 3rem;
-      padding: 9.4rem var(--screen-horisontal-padding) 3rem var(--screen-horisontal-padding);
-      border-radius: 0;
-    }
-  }
-
-  .form-answer__image {
-    width: 19.5rem;
-    height: 19.5rem;
-
-    @media (max-width: 768px) {
-      width: 14.3rem;
-      height: 14.3rem;
     }
   }
 
   .form-answer__title {
     width: 100%;
 
-    @media (max-width: 768px) {
-      text-align: center;
-    }
+    margin-bottom: 0.8rem;
+
+    text-align: center;
   }
 
   .form-answer__message {
     width: 100%;
+    margin-bottom: 4rem;
+
+    text-align: center;
 
     @media (max-width: 768px) {
-      text-align: center;
+      margin-bottom: 2.4rem;
     }
   }
 
   .form-answer__continue {
     --type: close;
+    --height: 4.3rem;
     width: 100%;
   }
 </style>
 
 <script>
-  import { PopoverElement } from 'aptechka/popover'
+  import { SwipePopoverElement } from '@lib/SwipePopoverElement'
 
-  export class FormAnswerElement extends PopoverElement {
+  export class FormAnswerElement extends SwipePopoverElement {
     #titleElement: HTMLElement | null = null
     #messageElement: HTMLElement | null = null
 
