@@ -54,7 +54,7 @@ items.forEach((item) => {
       <div class="menu__nav-wrapper">
         <e-popover-button
           class="menu__nav-button"
-          target="menu"
+          target="menu-nav"
         >
           <Icon
             name="sticks"
@@ -72,7 +72,7 @@ items.forEach((item) => {
 
         <e-popover
           class="menu__nav-popover"
-          id="menu"
+          id="menu-nav"
         >
           <e-input-group class="menu__nav">
             {
@@ -445,7 +445,11 @@ items.forEach((item) => {
     gap: 1rem;
 
     @media (max-width: 768px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: 100%;
     }
   }
 
@@ -455,7 +459,7 @@ items.forEach((item) => {
     }
 
     &[aria-hidden='false'] .menu-product__card {
-      display: grid !important;
+      display: flex !important;
     }
   }
 </style>

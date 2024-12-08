@@ -122,7 +122,7 @@ const modalId = `product-${pid}`
   image={images[0]!}
   {name}
   {description}
-  data-type={type}
+  data-type={'small'}
   data-categories={categories}
   data-subcategories={subcategories}
 >
@@ -215,6 +215,7 @@ const modalId = `product-${pid}`
         class="menu-product__button"
         placeholder="В корзину"
         counter={amount}
+        size={'always-big'}
       />
     </div>
   </div>
@@ -244,7 +245,8 @@ const modalId = `product-${pid}`
   .menu-product__card {
     position: relative;
 
-    display: block;
+    display: flex;
+    flex-direction: column;
 
     padding: 1.6rem;
 
@@ -262,7 +264,7 @@ const modalId = `product-${pid}`
     @media (max-width: 768px) {
       padding: 0.8rem;
 
-      .menu-product[data-type='large'] & {
+      /* .menu-product[data-type='large'] & {
         display: grid;
         grid-template-columns: max-content 1fr;
         grid-template-rows: max-content max-content max-content max-content;
@@ -271,7 +273,7 @@ const modalId = `product-${pid}`
           'name name'
           'description description'
           'bottom bottom';
-      }
+      } */
     }
   }
 
@@ -329,6 +331,8 @@ const modalId = `product-${pid}`
     align-items: center;
 
     @media (max-width: 768px) {
+      min-height: 2.2rem;
+
       .menu-product[data-type='large'] & {
         grid-area: name;
       }
@@ -362,6 +366,7 @@ const modalId = `product-${pid}`
     flex-wrap: wrap;
 
     margin-bottom: 1.6rem;
+    margin-top: auto;
 
     @media (max-width: 768px) {
       .menu-product[data-type='large'] & {
@@ -377,7 +382,7 @@ const modalId = `product-${pid}`
 
       .menu-product[data-type='small'] & {
         gap: 0.6rem 1.2rem;
-        margin-bottom: 3.3rem;
+        margin-bottom: 2.4rem;
       }
     }
   }
