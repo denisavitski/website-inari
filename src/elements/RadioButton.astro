@@ -5,12 +5,18 @@ export interface Props {
   name?: string
   required?: boolean
   checked?: boolean
+  theme?: 'fill' | 'outline'
+  font?: string
+  title?: string
 }
 
 const {
   class: className,
   value = 'Через ≈ 60 мин.',
   name = 'Время доставки',
+  theme = 'outline',
+  font = 'f-d-16-s f-m-12-s',
+  title,
   required,
   checked,
   ...rest
@@ -20,6 +26,7 @@ const {
 <label
   {...rest}
   class:list={['radio-button', className]}
+  data-theme={theme}
 >
   <input
     type="radio"
@@ -30,37 +37,54 @@ const {
     {required}
     {checked}
   />
-  <span class="f-d-16-s f-m-12-s radio-button__value">{value}</span>
+  <span class:list={[font, 'radio-button__value']}>{title || value}</span>
 </label>
 
 <style is:global>
   .radio-button {
     position: relative;
     cursor: pointer;
+    height: 3.5rem;
+    display: inline-block;
+
+    @media (max-width: 768px) {
+      height: 2.6rem;
+    }
   }
 
   .radio-button__value {
-    --color: var(--color-secondary-3);
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
     width: 100%;
-    padding: 0 2.4rem;
-    height: 3.5rem;
+    padding: 0 var(--padding, 2.4rem);
+    height: 100%;
+
     border-radius: var(--border-radius-1);
 
-    border: 0.1rem solid var(--color);
-    color: var(--color);
-
-    .radio-button__input:checked ~ & {
-      --color: var(--color-primary-2);
-    }
-
     @media (max-width: 768px) {
-      padding: 0 1.2rem;
-      height: 2.6rem;
+      padding: 0 var(--padding, 1.2rem);
     }
+  }
+
+  .radio-button[data-theme='outline'] .radio-button__value {
+    border: 0.1rem solid var(--color-secondary-3);
+    color: var(--color-secondary-3);
+  }
+
+  .radio-button[data-theme='outline'] .radio-button__input:checked ~ .radio-button__value {
+    border-color: var(--color-primary-2);
+    color: var(--color-primary-2);
+  }
+
+  .radio-button[data-theme='fill'] .radio-button__value {
+    border: 0.1rem solid var(--color-secondary-2);
+    color: var(--color-primary-2);
+  }
+
+  .radio-button[data-theme='fill'] .radio-button__input:checked ~ .radio-button__value {
+    border-color: transparent;
+    background-color: var(--color-primary-3);
   }
 </style>

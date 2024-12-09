@@ -1,0 +1,120 @@
+---
+import Icon from './Icon.astro'
+
+export interface Props {
+  class?: string
+  name?: string
+  checked?: boolean
+  value?: string
+  addressType?: string
+  distance?: string
+}
+
+const {
+  class: className,
+  name = 'Точка самовывоза',
+  value = 'улица Щербакова, 48, Зеленоград, Москва',
+  addressType = 'Фудмолл',
+  distance = '1,5км',
+  checked,
+  ...rest
+} = Astro.props
+---
+
+<label
+  {...rest}
+  class:list={['pickup-address', className]}
+>
+  <input
+    class="visually-hidden pickup-address__input"
+    type="radio"
+    {checked}
+    {name}
+    {value}
+  />
+
+  <span class="pickup-address__card">
+    <Icon
+      name="geo-1"
+      class="pickup-address__icon"
+    />
+
+    <span class="pickup-address__content">
+      <span
+        class="f-d-16-r f-m-14-r pickup-address__title"
+        set:html={value}
+      />
+      <span class="f-d-16-r f-m-12-r pickup-address__bottom">
+        <span
+          class="pickup-address__type"
+          set:html={addressType}
+        />
+        <span
+          class="pickup-address__distance"
+          set:html={distance}
+        />
+      </span>
+    </span>
+  </span>
+</label>
+
+<style is:global>
+  .pickup-address {
+    display: inline-block;
+    position: relative;
+  }
+
+  .pickup-address__input {
+  }
+
+  .pickup-address__card {
+    width: 100%;
+    padding: 1.2rem;
+    padding-right: 1.6rem;
+
+    display: flex;
+    gap: 1.2rem;
+
+    border: 0.1rem solid transparent;
+    background-color: var(--color-secondary-2);
+    border-radius: var(--border-radius-1);
+
+    .pickup-address__input & {
+      border-color: var(--color-primary-2);
+    }
+
+    @media (max-width: 768px) {
+      padding: 0.8rem 1.2rem;
+      padding-right: 1.6rem;
+    }
+  }
+
+  .pickup-address__icon {
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+
+    fill: var(--color-primary-2);
+  }
+
+  .pickup-address__content {
+  }
+
+  .pickup-address__title {
+    margin-bottom: 0.4rem;
+  }
+
+  .pickup-address__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    color: var(--color-secondary-3);
+  }
+
+  .pickup-address__type {
+  }
+
+  .pickup-address__distance {
+  }
+</style>

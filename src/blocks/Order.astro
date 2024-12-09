@@ -8,291 +8,298 @@ import Product from '@elements/Product.astro'
 import ProductButton from '@elements/ProductButton.astro'
 ---
 
-<div class="order">
-  <h1
-    class="f-d-48-s f-m-18-s order__heading"
-    set:html={'Заказ на доставку'}
-  />
+<e-order class="order">
+  <div
+    class="order__start"
+    aria-hidden="false"
+  >
+    <h1
+      class="f-d-48-s f-m-18-s order__heading"
+      set:html={'Заказ на доставку'}
+    />
 
-  <div class="order__flex">
-    <Form class="order__form">
-      <OrderField title="Имя">
-        <input
-          type="text"
-          class="order__input"
-          name="Имя"
-          title="Имя"
-        />
-      </OrderField>
-      <OrderField title="Номер телефона *">
-        <input
-          type="text"
-          class="order__input"
-          name="Номер телефона"
-          title="Номер телефона"
-          required
-        />
-      </OrderField>
-
-      <OrderField title="Адрес доставки *">
-        <div class="order__address">
-          <div class="order__address__house">
-            <input
-              type="text"
-              class="visually-hidden"
-              name="Адрес"
-              title="Адрес"
-              required
-            />
-            <div class="order__input order__address__input">
-              <div class="order__address__value">Адрес</div>
-              <span class="order__address__change-button">Изменить</span>
-            </div>
-          </div>
+    <div class="order__flex">
+      <Form class="order__form">
+        <OrderField title="Имя">
           <input
             type="text"
             class="order__input"
-            name="Подъезд"
-            title="Подъезд"
-            placeholder="Подъезд"
+            name="Имя"
+            title="Имя"
+          />
+        </OrderField>
+        <OrderField title="Номер телефона *">
+          <input
+            type="text"
+            class="order__input"
+            name="Номер телефона"
+            title="Номер телефона"
             required
           />
-          <div class="order__address__cols">
+        </OrderField>
+
+        <OrderField title="Адрес доставки *">
+          <div class="order__address">
+            <div class="order__address__house">
+              <input
+                type="text"
+                class="visually-hidden"
+                name="Адрес"
+                title="Адрес"
+                required
+              />
+              <div class="order__input order__address__input">
+                <div class="order__address__value">Адрес</div>
+                <span class="order__address__change-button">Изменить</span>
+              </div>
+            </div>
             <input
               type="text"
               class="order__input"
-              name="Этаж"
-              title="Этаж"
-              placeholder="Этаж"
+              name="Подъезд"
+              title="Подъезд"
+              placeholder="Подъезд"
               required
             />
-            <input
-              type="text"
-              class="order__input"
-              name="Квартира"
-              title="Квартира"
-              placeholder="Квартира"
+            <div class="order__address__cols">
+              <input
+                type="text"
+                class="order__input"
+                name="Этаж"
+                title="Этаж"
+                placeholder="Этаж"
+                required
+              />
+              <input
+                type="text"
+                class="order__input"
+                name="Квартира"
+                title="Квартира"
+                placeholder="Квартира"
+                required
+              />
+            </div>
+            <textarea
+              class="order__input order__input_textarea custom-scrollbar"
+              name="Комментарии к адресу"
+              title="Комментарии к адресу"
+              placeholder="Комментарии к адресу"
+            ></textarea>
+          </div>
+        </OrderField>
+
+        <OrderField title="Время доставки *">
+          <div class="order__time">
+            <RadioButton
+              class="order__time__input"
+              name="Время доставки"
+              value="Через ≈ 60 мин."
+              required
+              checked
+            />
+            <RadioButton
+              required
+              class="order__time__input"
+              name="Время доставки"
+              value="14:30 - 15:00"
+            />
+            <RadioButton
+              required
+              class="order__time__input"
+              name="Время доставки"
+              value="15:00 - 15:30"
+            />
+            <RadioButton
+              required
+              class="order__time__input"
+              name="Время доставки"
+              value="16:00 - 16:30"
+            />
+            <RadioButton
+              required
+              class="order__time__input"
+              name="Время доставки"
+              value="16:30 - 17:00"
+            />
+            <RadioButton
+              required
+              class="order__time__input"
+              name="Время доставки"
+              value="17:00 - 17:30"
+            />
+            <RadioButton
+              required
+              class="order__time__input"
+              name="Время доставки"
+              value="17:30 - 18:00"
+            />
+            <RadioButton
+              required
+              class="order__time__input"
+              name="Время доставки"
+              value="Другое время"
+            />
+          </div>
+        </OrderField>
+        <OrderField title="Способ оплаты">
+          <div class="order__payment">
+            <RadioButton
+              class="order__payment__input"
+              name="Способ оплаты"
+              value="Картой курьеру"
+              checked
+              required
+            />
+            <RadioButton
+              class="order__payment__input"
+              name="Способ оплаты"
+              value="Наличными курьеру"
               required
             />
           </div>
-          <textarea
-            class="order__input order__input_textarea custom-scrollbar"
-            name="Комментарии к адресу"
-            title="Комментарии к адресу"
-            placeholder="Комментарии к адресу"
-          ></textarea>
+        </OrderField>
+
+        <div class="order__form__bottom">
+          <Back
+            href="/#menu"
+            class="order__form__back"
+            >Назад к меню</Back
+          >
+          <Button
+            theme={'arrow'}
+            type="submit"
+            class="order__form__submit"
+            >Оформить заказ на <span data-total-price>3 420 ₽</span>
+          </Button>
         </div>
-      </OrderField>
+      </Form>
 
-      <OrderField title="Время доставки *">
-        <div class="order__time">
-          <RadioButton
-            class="order__time__input"
-            name="Время доставки"
-            value="Через ≈ 60 мин."
-            required
-            checked
-          />
-          <RadioButton
-            required
-            class="order__time__input"
-            name="Время доставки"
-            value="14:30 - 15:00"
-          />
-          <RadioButton
-            required
-            class="order__time__input"
-            name="Время доставки"
-            value="15:00 - 15:30"
-          />
-          <RadioButton
-            required
-            class="order__time__input"
-            name="Время доставки"
-            value="16:00 - 16:30"
-          />
-          <RadioButton
-            required
-            class="order__time__input"
-            name="Время доставки"
-            value="16:30 - 17:00"
-          />
-          <RadioButton
-            required
-            class="order__time__input"
-            name="Время доставки"
-            value="17:00 - 17:30"
-          />
-          <RadioButton
-            required
-            class="order__time__input"
-            name="Время доставки"
-            value="17:30 - 18:00"
-          />
-          <RadioButton
-            required
-            class="order__time__input"
-            name="Время доставки"
-            value="Другое время"
-          />
-        </div>
-      </OrderField>
-      <OrderField title="Способ оплаты">
-        <div class="order__payment">
-          <RadioButton
-            class="order__payment__input"
-            name="Способ оплаты"
-            value="Картой курьеру"
-            checked
-            required
-          />
-          <RadioButton
-            class="order__payment__input"
-            name="Способ оплаты"
-            value="Наличными курьеру"
-            required
-          />
-        </div>
-      </OrderField>
-
-      <div class="order__form__bottom">
-        <Back
-          href="/#menu"
-          class="order__form__back"
-          >Назад к меню</Back
-        >
-        <Button
-          theme={'arrow'}
-          type="submit"
-          class="order__form__submit"
-          >Оформить заказ на <span data-total-price>3 420 ₽</span>
-        </Button>
-      </div>
-    </Form>
-
-    <div class="order__contents">
-      <h2
-        class="f-d-24-s f-m-16-s order__contents__title"
-        set:html={'Состав заказа'}
-      />
-
-      <ul class="f-d-16-r f-m-12-r order__products">
-        <li class="order__product">
-          <div
-            class="order__product__title"
-            set:html={'Калифорния лайт, 8 шт.'}
-          />
-          <div
-            class="order__product__amount"
-            set:html={'1'}
-          />
-          <div
-            class="order__product__price"
-            set:html={'550 ₽'}
-          />
-        </li>
-      </ul>
-
-      <div class="order__devices">
-        <h3
-          class="f-d-16-s f-m-14-s order__devices__title"
-          set:html="Добавьте приборы"
+      <div class="order__contents">
+        <h2
+          class="f-d-24-s f-m-16-s order__contents__title"
+          set:html={'Состав заказа'}
         />
 
-        <div class="order__devices__list">
-          <Product
-            name="Палочки"
-            pid="111"
-            price="10"
-            class="order__device"
-            skipBasket
-          >
-            <div
-              class="f-d-16-r f-m-14-r order__device__name"
-              set:html="Палочки"
-            />
-            <ProductButton
-              class="order__device__button"
-              placeholder={false}
-              size={'small'}
-            />
-          </Product>
-          <Product
-            name="Палочки"
-            pid="Ложка"
-            price="10"
-            class="order__device"
-            skipBasket
-          >
-            <div
-              class="f-d-16-r f-m-14-r order__device__name"
-              set:html="Ложка"
-            />
-            <ProductButton
-              class="order__device__button"
-              placeholder={false}
-              size={'small'}
-            />
-          </Product>
-          <Product
-            name="Палочки"
-            pid="Вилка"
-            price="10"
-            class="order__device"
-            skipBasket
-          >
-            <div
-              class="f-d-16-r f-m-14-r order__device__name"
-              set:html="Вилка"
-            />
-            <ProductButton
-              class="order__device__button"
-              placeholder={false}
-              size={'small'}
-            />
-          </Product>
-        </div>
-      </div>
+        <ul class="f-d-16-r f-m-12-r order__products"> </ul>
 
-      <div class="order__price">
-        <div class="f-d-16-s f-m-14-s order__price__products">
-          <div
-            class="order__price__products__title"
-            set:html="4 товара"
+        <div class="order__devices">
+          <h3
+            class="f-d-16-s f-m-14-s order__devices__title"
+            set:html="Добавьте приборы"
           />
-          <div
-            class="order__price__products__value"
-            set:html="3 420 ₽"
-          />
+
+          <div class="order__devices__list">
+            <Product
+              name="Палочки"
+              pid="Палочки"
+              price={10}
+              class="order__device"
+            >
+              <div
+                class="f-d-16-r f-m-14-r order__device__name"
+                set:html="Палочки"
+              />
+              <ProductButton
+                class="order__device__button"
+                placeholder={false}
+                size={'small'}
+              />
+            </Product>
+            <Product
+              name="Ложка"
+              pid="Ложка"
+              price={10}
+              class="order__device"
+            >
+              <div
+                class="f-d-16-r f-m-14-r order__device__name"
+                set:html="Ложка"
+              />
+              <ProductButton
+                class="order__device__button"
+                placeholder={false}
+                size={'small'}
+              />
+            </Product>
+            <Product
+              name="Вилка"
+              pid="Вилка"
+              price={10}
+              class="order__device"
+            >
+              <div
+                class="f-d-16-r f-m-14-r order__device__name"
+                set:html="Вилка"
+              />
+              <ProductButton
+                class="order__device__button"
+                placeholder={false}
+                size={'small'}
+              />
+            </Product>
+          </div>
         </div>
-        <div class="f-d-16-s f-m-14-s order__price__delivery">
-          <div
-            class="order__price__delivery__title"
-            set:html="Доставка"
-          />
-          <div
-            class="order__price__delivery__value"
-            set:html="Бесплатно"
-          />
-        </div>
-        <div class="f-d-18-s f-m-16-s order__price__full">
-          <div
-            class="order__price__full__title"
-            set:html="Сумма заказа"
-          />
-          <div
-            class="order__price__full__value"
-            set:html="3 420 ₽"
-          />
+
+        <div class="order__price">
+          <div class="f-d-16-s f-m-14-s order__price__products">
+            <div
+              class="order__price__products__title"
+              set:html="4 товара"
+            />
+            <div
+              class="order__price__products__value"
+              set:html="3 420 ₽"
+              data-products-price
+            />
+          </div>
+          <div class="f-d-16-s f-m-14-s order__price__delivery">
+            <div
+              class="order__price__delivery__title"
+              set:html="Доставка"
+            />
+            <div
+              class="order__price__delivery__value"
+              set:html="Бесплатно"
+              data-delivery-price
+            />
+          </div>
+          <div class="f-d-18-s f-m-16-s order__price__full">
+            <div
+              class="order__price__full__title"
+              set:html="Сумма заказа"
+            />
+            <div
+              class="order__price__full__value"
+              set:html="3 420 ₽"
+              data-total-price
+            />
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+  <div
+    class="order__complete"
+    aria-hidden="true"
+  >
+    <h2
+      class="f-d-48-s f-m-18-s order__complete__heading"
+      set:html="Ваш заказ успешно принят!"
+    />
+    <p
+      class="f-d-24-s f-m-14-s order__complete__description"
+      set:html="Пожалуйста, ожидайте доставку"
+    />
+    <Button href="/">На главную Инари</Button>
+  </div>
+</e-order>
 
 <style is:global>
   .order {
     --gap: 1rem;
+
+    display: block;
+
     padding: 0 var(--screen-horisontal-padding);
     padding-top: 3.2rem;
     padding-bottom: 15rem;
@@ -301,6 +308,14 @@ import ProductButton from '@elements/ProductButton.astro'
       --gap: 0.8rem;
       padding-top: 2.4rem;
       padding-bottom: 12rem;
+    }
+  }
+
+  .order__start {
+    display: none;
+
+    &[aria-hidden='false'] {
+      display: block;
     }
   }
 
@@ -409,6 +424,10 @@ import ProductButton from '@elements/ProductButton.astro'
 
   .order__payment__input {
     width: 100%;
+
+    @media (max-width: 768px) {
+      height: 3.8rem;
+    }
   }
 
   .order__form__bottom {
@@ -596,4 +615,176 @@ import ProductButton from '@elements/ProductButton.astro'
 
   .order__price__full__value {
   }
+
+  /*
+  --------------
+  END
+  --------------
+  */
+
+  .order__complete {
+    display: none;
+
+    &[aria-hidden='false'] {
+      display: block;
+    }
+  }
+
+  .order__complete__heading {
+    display: block;
+    margin-bottom: 0.8rem;
+    text-align: center;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.4rem;
+    }
+  }
+
+  .order__complete__description {
+    display: block;
+    text-align: center;
+    margin-bottom: 4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 2.4rem;
+    }
+  }
 </style>
+
+<script>
+  import { basketStore, type BasketStoreItem } from '@stores/basketStore'
+  import { numberToPrice } from '@utils/number'
+
+  class OrderProduct {
+    #element: HTMLElement
+    #amountElement: HTMLElement
+    #priceElement: HTMLElement
+
+    #pid: string
+    #price: number
+    #amount: number
+
+    constructor(data: BasketStoreItem) {
+      this.#element = document.createElement('li')
+      this.#element.className = 'order__product'
+
+      this.#element.innerHTML = `
+        <div class="order__product__title">${data.name}</div>
+        <div class="order__product__amount"></div>
+        <div class="order__product__price"></div>
+      `
+
+      this.#amountElement = this.#element.querySelector('.order__product__amount')!
+      this.#priceElement = this.#element.querySelector('.order__product__price')!
+
+      this.#pid = data.pid
+      this.#price = data.price
+      this.#amount = data.amount
+
+      this.setAmount(this.#amount)
+    }
+
+    public get element() {
+      return this.#element
+    }
+
+    public get pid() {
+      return this.#pid
+    }
+
+    public get price() {
+      return this.#price
+    }
+
+    public get totalPrice() {
+      return this.#price * this.#amount
+    }
+
+    public get amount() {
+      return this.#amount
+    }
+
+    public setAmount(number: number) {
+      this.#amount = number
+      this.#amountElement.textContent = this.#amount.toString()
+      this.#priceElement.textContent = numberToPrice(this.#amount * this.#price)
+    }
+  }
+
+  export class OrderElement extends HTMLElement {
+    #startElement: HTMLElement | null = null
+    #endElement: HTMLElement | null = null
+    #totalPriceElements: Array<HTMLElement> = []
+    #productsPriceElements: Array<HTMLElement> = []
+    #deliveryPriceElements: Array<HTMLElement> = []
+    #productsContainerElement: HTMLElement | null = null
+
+    #products: Array<OrderProduct> = []
+
+    protected connectedCallback() {
+      // if (!basketStore.items.length) {
+      //   morph.navigate('/')
+      // }
+
+      this.#startElement = this.querySelector('.order__start')
+      this.#endElement = this.querySelector('.order__complete')
+      this.#totalPriceElements = [...this.querySelectorAll<HTMLElement>('[data-total-price]')]
+      this.#productsPriceElements = [...this.querySelectorAll<HTMLElement>('[data-products-price]')]
+      this.#deliveryPriceElements = [...this.querySelectorAll<HTMLElement>('[data-delivery-price]')]
+      this.#productsContainerElement = this.querySelector('.order__products')
+
+      basketStore.subscribe(this.#basketChangeListener)
+    }
+
+    protected disconnectedCallback() {
+      basketStore.unsubscribe(this.#basketChangeListener)
+    }
+
+    #basketChangeListener = () => {
+      basketStore.items.forEach((item) => {
+        let product = this.#products.find((product) => product.pid === item.pid)
+
+        if (!product) {
+          product = new OrderProduct(item)
+          this.#productsContainerElement?.appendChild(product.element)
+          this.#products.push(product)
+        } else {
+          product.setAmount(item.amount)
+        }
+      })
+
+      this.#products = this.#products.filter((product) => {
+        const item = basketStore.items.find((item) => item.pid === product.pid)
+
+        if (!item) {
+          product.element.remove()
+          return false
+        }
+
+        return true
+      })
+
+      this.#productsPriceElements.forEach((element) => {
+        element.textContent = numberToPrice(basketStore.fullPrice)
+      })
+
+      this.#deliveryPriceElements.forEach((element) => {
+        element.textContent = numberToPrice(0)
+      })
+
+      this.#totalPriceElements.forEach((element) => {
+        element.textContent = numberToPrice(0)
+      })
+    }
+  }
+
+  if (!customElements.get('e-order')) {
+    customElements.define('e-order', OrderElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-order': OrderElement
+    }
+  }
+</script>

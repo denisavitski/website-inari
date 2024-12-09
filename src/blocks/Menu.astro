@@ -2,6 +2,7 @@
 import { productsData } from '@dev-data/productsData'
 import Icon from '@elements/Icon.astro'
 import MenuProduct, { type MenuProductData } from '@elements/MenuProduct.astro'
+import RadioButton from '@elements/RadioButton.astro'
 
 export interface MenuItem extends MenuProductData {
   categories: Array<string>
@@ -121,24 +122,17 @@ items.forEach((item) => {
             subcategories.unshift('Все')
 
             return (
-              <e-input-group
-                class="menu__subcategory-input-group"
-                name={categoryName}
-              >
+              <e-input-group class="menu__subcategory-input-group">
                 {subcategories.map((subcategoryName, i) => {
                   return (
-                    <label class="menu__subcategory-input-group__item">
-                      <input
-                        type="radio"
-                        class="visually-hidden menu__subcategory-input-group__item__input"
-                        value={subcategoryName === 'Все' ? '' : subcategoryName}
-                        checked={i === 0}
-                      />
-                      <span
-                        class="f-d-16-s f-m-12-s menu__subcategory-input-group__item__name"
-                        set:html={subcategoryName}
-                      />
-                    </label>
+                    <RadioButton
+                      font="f-d-16-s f-m-12-s menu__subcategory-input-group__item"
+                      value={subcategoryName === 'Все' ? '' : subcategoryName}
+                      checked={i === 0}
+                      title={subcategoryName}
+                      name={categoryName}
+                      theme={'fill'}
+                    />
                   )
                 })}
               </e-input-group>
@@ -400,40 +394,6 @@ items.forEach((item) => {
 
     @media (max-width: 768px) {
       gap: 0.4rem;
-    }
-  }
-
-  .menu__subcategory-input-group__item {
-    position: relative;
-    cursor: pointer;
-  }
-
-  .menu__subcategory-input-group__item__input {
-  }
-
-  .menu__subcategory-input-group__item__name {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    height: 3.5rem;
-    padding: 0 2.4rem;
-
-    border-radius: var(--border-radius-1);
-    border: 0.1rem solid var(--color-secondary-2);
-
-    /* transition:
-      background-color var(--duration-button),
-      border-color var(--duration-button); */
-
-    .menu__subcategory-input-group__item__input:checked ~ & {
-      background-color: var(--color-primary-3);
-      border-color: var(--color-primary-3);
-    }
-
-    @media (max-width: 768px) {
-      height: 2.6rem;
-      padding: 0 1.2rem;
     }
   }
 

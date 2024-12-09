@@ -31,7 +31,7 @@ export interface MenuProductSetItem
 
 export interface MenuProductData extends Omit<BasketStoreItem, 'image'> {
   feature?: ProductFeatureIcon | undefined | false
-  oldPrice?: string | number | undefined | false
+  oldPrice?: number | undefined | false
   categories: Array<string>
   subcategories?: Array<string> | undefined | false
   labels?: LabelsProps['list'] | undefined | false
@@ -52,8 +52,8 @@ const {
   class: className,
   pid = '1',
   amount = 0,
-  price = '1000',
-  oldPrice = '2000',
+  price = 1000,
+  oldPrice = 2000,
   categories = ['Популярное', 'Роллы'],
   subcategories = ['Хосо маки'],
   labels = [

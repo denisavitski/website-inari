@@ -1,0 +1,132 @@
+---
+import Button from '@elements/Button.astro'
+import Modal from '@elements/Modal.astro'
+import PickupPoint from '@elements/PickupPoint.astro'
+import RadioButton from '@elements/RadioButton.astro'
+
+export const modal = '#order-type'
+---
+
+<!-- SINGLETON -->
+<Modal
+  tag="e-order-type"
+  id="order-type"
+  class="order-type"
+>
+  <div class="order-type__content">
+    <div class="order-type__left">
+      <div
+        class="f-d-24-s f-m-18-s order-type__title"
+        set:html="Выберите способ получения заказа"
+      />
+      <e-input-group class="order-type__input-group">
+        <RadioButton
+          class="order-type__button"
+          value="Доставка"
+          name="order-type"
+          theme={'fill'}
+          checked
+        />
+        <RadioButton
+          class="order-type__button"
+          value="Самовывоз"
+          name="order-type"
+          theme={'fill'}
+        />
+      </e-input-group>
+
+      <div class="order-type__variants">
+        <div
+          class="order-type__delivery"
+          aria-hidden="false"
+        >
+          <p class="f-d-16-r f-m-14-r order-type__delivery__description"
+            >Хотим убедиться, что&nbsp;вы&nbsp;находитесь в&nbsp;зоне доставки,
+            введите&nbsp;пожалуйста адрес</p
+          >
+        </div>
+
+        <div
+          class="order-type__pickup"
+          aria-hidden="true"
+        >
+          <e-input-group class="order-type__pickup__input-group">
+            <PickupPoint
+              class="order-type__pickup__point"
+              name="Точка самовывоза"
+              value="улица Щербакова, 48, Зеленоград, Москва"
+              addressType="Фудмолл"
+              distance="1,5км"
+              checked
+            />
+            <PickupPoint
+              class="order-type__pickup__point"
+              name="Точка самовывоза"
+              value="Новокрюковская улица, 1824, Зеленоград, Москва"
+              addressType="Пункт самовывоза"
+              distance="16 км"
+            />
+            <PickupPoint
+              class="order-type__pickup__point"
+              name="Точка самовывоза"
+              value="ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва"
+              addressType="Пункт самовывоза"
+              distance="17 км"
+            />
+            <PickupPoint
+              class="order-type__pickup__point"
+              name="Точка самовывоза"
+              value="5253-й проезд, 1с1, Зеленоград, Москва"
+              addressType="Фудмолл"
+              distance="22 км"
+            />
+          </e-input-group>
+          <Button class="order-type__pickup__continue">Продолжить</Button>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-type__map"></div>
+  </div>
+</Modal>
+
+<style is:global>
+  .order-type {
+  }
+
+  .order-type__content {
+    width: 120rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  import { SwipePopoverElement } from '@lib/SwipePopoverElement'
+
+  export class OrderTypeElement extends SwipePopoverElement {
+    protected override connectedCallback() {
+      super.connectedCallback()
+    }
+
+    protected override disconnectedCallback() {
+      super.disconnectedCallback()
+    }
+  }
+
+  if (!customElements.get('e-order-type')) {
+    customElements.define('e-order-type', OrderTypeElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-order-type': OrderTypeElement
+    }
+  }
+</script>

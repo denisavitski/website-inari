@@ -18,10 +18,9 @@ const {
   class: className,
   price = '250',
   name = 'Калифорния лайт, 8 шт.',
-  description = 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
+  description = '',
   pid = '1',
   image = '/images/food/1.jpg',
-  skipBasket,
   ...rest
 } = Astro.props
 ---
@@ -34,7 +33,6 @@ const {
   {description}
   {pid}
   {image}
-  skip-basket={skipBasket}
 >
   <slot />
 </e-product>
@@ -73,19 +71,11 @@ const {
 
       this.#priceElements = [...this.querySelectorAll('e-price')]
 
-      Promise.all([
-        customElements.whenDefined('e-product-button'),
-        customElements.whenDefined('e-input-group'),
-        customElements.whenDefined('e-price'),
-      ]).then(() => {
-        if (this.isConnected) {
-          basketStore.subscribe(this.#storeChangeListener)
-
-          if (this.#variantsGroupElements.length) {
-            this.#changeVariant(this.#variantsGroupElements[0]!)
-          }
-        }
-      })
+      if (document.readyState === 'complete') {
+        this.#loadListener()
+      } else {
+        addEventListener('load', this.#loadListener)
+      }
     }
 
     protected disconnectedCallback() {
@@ -98,6 +88,8 @@ const {
       })
 
       basketStore.unsubscribe(this.#storeChangeListener)
+
+      removeEventListener('load', this.#loadListener)
     }
 
     #counterChangeListener = (event: Event) => {
@@ -117,6 +109,16 @@ const {
         pid: this.pid,
         image: image,
       })
+    }
+
+    #loadListener = () => {
+      if (this.isConnected) {
+        basketStore.subscribe(this.#storeChangeListener)
+
+        if (this.#variantsGroupElements.length) {
+          this.#changeVariant(this.#variantsGroupElements[0]!)
+        }
+      }
     }
 
     #storeChangeListener = () => {

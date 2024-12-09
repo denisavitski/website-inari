@@ -5,6 +5,7 @@
     "paths": {
       "@blocks/*": ["src/blocks/*"],
       "@dev-data/*": ["src/dev-data/*"],
+      "@custom-elements/*": ["src/custom-elements/*"],
       "@elements/*": ["src/elements/*"],
       "@globals/*": ["src/globals/*"],
       "@layout/*": ["src/layout/*"],

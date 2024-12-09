@@ -1,0 +1,245 @@
+---
+export interface Props {
+  class?: string
+  value?: string
+  name?: string
+  placeholder?: string
+  font?: string
+}
+
+const {
+  class: className,
+  value,
+  name = 'suggestions-input',
+  placeholder = 'Placeholder',
+  font = 'f-d-16-r f-d-14-r',
+  ...rest
+} = Astro.props
+---
+
+<e-suggestions-input
+  {...rest}
+  class:list={['suggestions-input', className]}
+>
+  <input
+    type="text"
+    class:list={[font, 'suggestions-input__input']}
+    {value}
+    {placeholder}
+    {name}
+  />
+
+  <div
+    class="suggestions-input__suggestions"
+    aria-hidden="true"
+  >
+    <div class="suggestions-input__suggestion"> </div>
+  </div>
+</e-suggestions-input>
+
+<style is:global>
+  .suggestions-input {
+    position: relative;
+
+    display: inline-block;
+  }
+
+  .suggestions-input__input {
+    height: var(---height, 4.3rem);
+    padding: var(--padding, 1.2rem 1.6rem);
+
+    border-radius: var(--border-radius-1);
+    background-color: var(--color-secondary-2);
+
+    @media (max-width: 768px) {
+      height: var(---height, 4.1rem);
+    }
+  }
+
+  .suggestions-input__suggestions {
+    position: absolute;
+    top: calc(100% + 1.1rem);
+    left: 3rem;
+
+    width: 37.5rem;
+    padding: 1.6rem;
+
+    display: grid;
+    gap: 0.4rem;
+
+    border-radius: var(--border-radius-2);
+    background-color: var(--color-secondary-2);
+
+    @media (max-width: 768px) {
+      top: calc(100% + 0.8rem);
+      left: 2.4rem;
+
+      width: 29.5rem;
+
+      border: 0.1rem solid var(--color-secondary-3);
+    }
+
+    &[aria-hidden='true'] {
+      display: none;
+    }
+  }
+
+  .suggestions-input__suggestion {
+    padding: 0.8rem 1.2rem;
+
+    border-radius: var(--border-radius-1);
+    background-color: var(--color-secondary-1);
+
+    cursor: pointer;
+  }
+
+  .suggestions-input__suggestion__line-1 {
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  .suggestions-input__suggestion__line-2 {
+    display: block;
+    color: var(--color-secondary-3);
+  }
+</style>
+
+<script>
+  export interface SuggestParameters {
+    value: string
+    additional?: string
+  }
+
+  class Suggestion {
+    #element: HTMLElement
+    #inputElement: HTMLInputElement
+    #value: string
+
+    constructor(parameters: SuggestParameters) {
+      this.#element = document.createElement('label')
+      this.#element.className = 'f-d-16-r f-d-14-r suggestions-input__suggestion'
+      this.#element.innerHTML = `
+        <span class="suggestions-input__suggestion__line-1">${parameters.value}</span>
+        ${
+          parameters.additional
+            ? `<span class="suggestions-input__suggestion__line-2">${parameters.additional}</span>`
+            : ''
+        }
+      `
+
+      this.#inputElement = this.#element.querySelector('input')!
+
+      this.#value = parameters.value
+    }
+
+    public get element() {
+      return this.#element
+    }
+
+    public get inputElement() {
+      return this.#inputElement
+    }
+
+    public get value() {
+      return this.#value
+    }
+  }
+
+  export class SuggestionsInputElement extends HTMLElement {
+    #inputElement: HTMLInputElement | null = null
+    #suggestionsContainerElement: HTMLElement | null = null
+    #suggestions: Array<Suggestion> = []
+
+    public suggest(parameters: Array<SuggestParameters>) {
+      this.#suggestions.forEach((suggestion) => {
+        suggestion.element.addEventListener('pointerdown', this.#suggestionClickListener)
+      })
+
+      this.#suggestions = []
+
+      parameters.forEach((parameter) => {
+        const suggestion = new Suggestion(parameter)
+
+        this.#suggestions.push(suggestion)
+      })
+
+      if (this.#suggestionsContainerElement) {
+        this.#suggestions.forEach((suggestion) => {
+          suggestion.element.addEventListener('pointerdown', this.#suggestionClickListener)
+        })
+
+        if (this.#suggestions.length) {
+          this.#suggestionsContainerElement.ariaHidden = 'false'
+          this.#suggestionsContainerElement.innerHTML = ''
+          this.#suggestionsContainerElement.append(...this.#suggestions.map((s) => s.element))
+        } else {
+          this.#suggestionsContainerElement.ariaHidden = 'true'
+        }
+      }
+    }
+
+    protected connectedCallback() {
+      this.#inputElement = this.querySelector('.suggestions-input__input')
+      this.#suggestionsContainerElement = this.querySelector('.suggestions-input__suggestions')
+
+      this.#inputElement?.addEventListener('blur', this.#blurListener)
+
+      addEventListener('keydown', (e) => {
+        if (e.key === '1') {
+          this.suggest([
+            {
+              value: '1',
+            },
+            {
+              value: '2',
+            },
+            {
+              value: '3',
+            },
+          ])
+        }
+      })
+    }
+
+    protected disconnectedCallback() {
+      this.#suggestions.forEach((suggestion) => {
+        suggestion.element.addEventListener('pointerdown', this.#suggestionClickListener)
+      })
+
+      this.#suggestions = []
+
+      if (this.#suggestionsContainerElement) {
+        this.#suggestionsContainerElement.innerHTML = ''
+      }
+    }
+
+    #blurListener = () => {
+      this.suggest([])
+    }
+
+    #suggestionClickListener = (e: Event) => {
+      const element = e.currentTarget as HTMLElement
+      const suggestion = this.#suggestions.find((s) => s.element === element)
+
+      if (suggestion) {
+        if (this.#inputElement) {
+          this.#inputElement.value = suggestion.value
+        }
+
+        if (this.#suggestionsContainerElement) {
+          this.#suggestionsContainerElement.ariaHidden = 'true'
+        }
+      }
+    }
+  }
+
+  if (!customElements.get('e-suggestions-input')) {
+    customElements.define('e-suggestions-input', SuggestionsInputElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-suggestions-input': SuggestionsInputElement
+    }
+  }
+</script>

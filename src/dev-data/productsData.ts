@@ -4,7 +4,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '1',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Простые карточки'],
     subcategories: false,
@@ -28,7 +28,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '2',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Простые карточки'],
     subcategories: ['С описанием'],
@@ -52,7 +52,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '3',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Простые карточки'],
     subcategories: ['С иконкой eco'],
@@ -76,7 +76,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '4',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Простые карточки'],
     subcategories: ['С иконкой spicy'],
@@ -100,8 +100,8 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '5',
     amount: 0,
-    price: '1000',
-    oldPrice: '2000',
+    price: 1000,
+    oldPrice: 2000,
     categories: ['Простые карточки'],
     subcategories: ['Со скидкой'],
     labels: false,
@@ -124,7 +124,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '6',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Простые карточки'],
     subcategories: ['С лейблами'],
@@ -151,7 +151,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '7',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Простые карточки'],
     subcategories: ['Несколько изображений'],
@@ -175,8 +175,8 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '8',
     amount: 0,
-    price: '1000',
-    oldPrice: '2000',
+    price: 1000,
+    oldPrice: 2000,
     categories: ['Простые карточки'],
     subcategories: [
       'С описанием',
@@ -208,7 +208,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '9',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Карточки с вариантами'],
     subcategories: false,
@@ -249,7 +249,7 @@ export const productsData: Array<MenuProductData> = [
   {
     pid: '10',
     amount: 0,
-    price: '1000',
+    price: 1000,
     oldPrice: false,
     categories: ['Карточки с сетами'],
     subcategories: false,

@@ -79,8 +79,9 @@ const { class: className, ...rest } = Astro.props
           </div>
 
           <Button
-            class="basket__final__button"
+            class="basket__order-button"
             theme={'arrow'}
+            href="/order"
             >К оформлению заказа</Button
           >
         </div>
@@ -323,7 +324,7 @@ const { class: className, ...rest } = Astro.props
   .basket__final__value {
   }
 
-  .basket__final__button {
+  .basket__order-button {
     @media (max-width: 768px) {
       width: 100%;
     }
@@ -340,32 +341,34 @@ const { class: className, ...rest } = Astro.props
   export class BasketElement extends PopoverElement {
     #headElement: HTMLElement | null = null
     #itemsContainerElement: HTMLElement | null = null
+    #orderButtonElement: HTMLElement | null = null
 
     protected override connectedCallback() {
       super.connectedCallback()
 
       this.#headElement = this.querySelector('.basket__head')
       this.#itemsContainerElement = this.querySelector('.basket__items-container')
+      this.#orderButtonElement = this.querySelector('.basket__order-button')
 
       if (this.#itemsContainerElement) {
         basketStore.subscribe(this.#basketStoreChangeListener)
       }
+
+      this.#orderButtonElement?.addEventListener('click', this.#orderClickListener)
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
 
       basketStore.unsubscribe(this.#basketStoreChangeListener)
+
+      this.#orderButtonElement?.removeEventListener('click', this.#orderClickListener)
     }
 
     #basketStoreChangeListener = () => {
       const itemElements = [...this.#itemsContainerElement!.children] as Array<BasketItemElement>
 
       basketStore.items.forEach((storeItem) => {
-        if (storeItem.skipBasket) {
-          return
-        }
-
         const itemElement = itemElements.find((itemElement) => itemElement.pid === storeItem.pid)
 
         if (itemElement) {
@@ -405,6 +408,10 @@ const { class: className, ...rest } = Astro.props
           this.#headElement.textContent = ''
         }
       }
+    }
+
+    #orderClickListener = () => {
+      this.close()
     }
   }
 
