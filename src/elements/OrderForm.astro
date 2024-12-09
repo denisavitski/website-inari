@@ -1,0 +1,276 @@
+---
+import Back from '@blocks/Back.astro'
+import Form from './Form.astro'
+import OrderField from './OrderField.astro'
+import RadioButton from './RadioButton.astro'
+import Button from './Button.astro'
+import type { OrderStoreType } from '@stores/orderStore'
+import AddressInput from './AddressInput.astro'
+
+export interface Props {
+  class?: string
+  type?: OrderStoreType
+}
+
+const { class: className, type = 'delivery', ...rest } = Astro.props
+---
+
+<Form
+  {...rest}
+  class={`order-form ${className || ''}`}
+  resetAfterSubmit={false}
+>
+  <OrderField title="Имя">
+    <input
+      type="text"
+      class="order-form__input"
+      name="Имя"
+      title="Имя"
+    />
+  </OrderField>
+  <OrderField title="Номер телефона *">
+    <input
+      type="text"
+      class="order-form__input"
+      name="Номер телефона"
+      title="Номер телефона"
+      required
+    />
+  </OrderField>
+
+  <OrderField title={type === 'delivery' ? 'Адрес доставки *' : 'Точка самовывоза *'}>
+    <div class="order-form__address">
+      <AddressInput inputStyles="order-form__input" />
+      {
+        type === 'delivery' && (
+          <>
+            <input
+              type="text"
+              class="order-form__input"
+              name="Подъезд"
+              title="Подъезд"
+              placeholder="Подъезд"
+              required
+            />
+            <div class="order-form__address__cols">
+              <input
+                type="text"
+                class="order-form__input"
+                name="Этаж"
+                title="Этаж"
+                placeholder="Этаж"
+                required
+              />
+              <input
+                type="text"
+                class="order-form__input"
+                name="Квартира"
+                title="Квартира"
+                placeholder="Квартира"
+                required
+              />
+            </div>
+            <textarea
+              class="order-form__input order-form__input_textarea custom-scrollbar"
+              name="Комментарии к адресу"
+              title="Комментарии к адресу"
+              placeholder="Комментарии к адресу"
+            />
+          </>
+        )
+      }
+    </div>
+  </OrderField>
+
+  <OrderField title={type === 'delivery' ? 'Время доставки *' : 'Время самовывоза *'}>
+    <div class="order-form__time">
+      <RadioButton
+        class="order-form__time__input"
+        name="Время доставки"
+        value="Через ≈ 60 мин."
+        required
+        checked
+      />
+      <RadioButton
+        required
+        class="order-form__time__input"
+        name="Время доставки"
+        value="14:30 - 15:00"
+      />
+      <RadioButton
+        required
+        class="order-form__time__input"
+        name="Время доставки"
+        value="15:00 - 15:30"
+      />
+      <RadioButton
+        required
+        class="order-form__time__input"
+        name="Время доставки"
+        value="16:00 - 16:30"
+      />
+      <RadioButton
+        required
+        class="order-form__time__input"
+        name="Время доставки"
+        value="16:30 - 17:00"
+      />
+      <RadioButton
+        required
+        class="order-form__time__input"
+        name="Время доставки"
+        value="17:00 - 17:30"
+      />
+      <RadioButton
+        required
+        class="order-form__time__input"
+        name="Время доставки"
+        value="17:30 - 18:00"
+      />
+      <RadioButton
+        required
+        class="order-form__time__input"
+        name="Время доставки"
+        value="Другое время"
+      />
+    </div>
+  </OrderField>
+
+  {
+    type === 'delivery' && (
+      <OrderField title="Способ оплаты">
+        <div class="order-form__payment">
+          <RadioButton
+            class="order-form__payment__input"
+            name="Способ оплаты"
+            value="Картой курьеру"
+            checked
+            required
+          />
+          <RadioButton
+            class="order-form__payment__input"
+            name="Способ оплаты"
+            value="Наличными курьеру"
+            required
+          />
+        </div>
+      </OrderField>
+    )
+  }
+
+  <div class="order-form__form__bottom">
+    <Back
+      href="/#menu"
+      class="order-form__form__back"
+      >Назад к меню</Back
+    >
+    <Button
+      theme={'arrow'}
+      type="submit"
+      class="order-form__form__submit"
+      >Оформить заказ на <span data-total-price>3 420 ₽</span>
+    </Button>
+  </div>
+</Form>
+
+<style is:global>
+  .order-form {
+    --gap: 1rem;
+
+    width: 76.8rem;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-auto-rows: max-content;
+    gap: 2.4rem;
+
+    @media (max-width: 768px) {
+      --gap: 0.8rem;
+
+      width: 100%;
+      gap: 1.6rem;
+    }
+  }
+
+  .order-form__input {
+    font-size: 1.6rem;
+    font-weight: 400;
+
+    width: 100%;
+    height: 4.3rem;
+    padding: 1.2rem 1.6rem;
+
+    border-radius: var(--border-radius-1);
+    background-color: var(--color-secondary-2);
+
+    @media (max-width: 768px) {
+      font-size: 1.4rem;
+    }
+  }
+
+  .order-form__input_textarea {
+    resize: none;
+    height: 13.1rem;
+  }
+
+  .order-form__address {
+    display: grid;
+    grid-template-columns: 100%;
+    gap: var(--gap);
+  }
+
+  .order-form__address__cols {
+    display: flex;
+    gap: var(--gap);
+  }
+
+  .order-form__time {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+  }
+
+  .order-form__payment {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+
+  .order-form__payment__input {
+    width: 100%;
+
+    @media (max-width: 768px) {
+      height: 3.8rem;
+    }
+  }
+
+  .order-form__form__bottom {
+    --height: 4.8rem;
+
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 2.4rem;
+
+    @media (max-width: 768px) {
+      --height: 4rem;
+
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+  }
+
+  .order-form__form__back {
+    margin: 0;
+    height: var(--height);
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  .order-form__form__submit {
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+</style>

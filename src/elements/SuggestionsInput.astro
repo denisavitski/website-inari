@@ -212,8 +212,10 @@ const {
 
     protected disconnectedCallback() {
       this.#suggestions.forEach((suggestion) => {
-        suggestion.element.addEventListener('pointerdown', this.#suggestionClickListener)
+        suggestion.element.removeEventListener('pointerdown', this.#suggestionClickListener)
       })
+
+      this.#inputElement?.removeEventListener('blur', this.#blurListener)
 
       this.#suggestions = []
 
@@ -233,6 +235,7 @@ const {
       if (suggestion) {
         if (this.#inputElement) {
           this.#inputElement.value = suggestion.value
+          this.#inputElement.dispatchEvent(new Event('change'))
         }
 
         if (this.#suggestionsContainerElement) {

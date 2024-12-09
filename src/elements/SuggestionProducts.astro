@@ -15,43 +15,38 @@ const {
   products = [
     {
       price: 250,
-      name: 'Сет «Американская классика», 32 шт.',
+      name: 'Сет «111», 32 шт.',
       description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
-      pid: '1',
+      pid: '111',
       image: '/images/food/1.jpg',
-      amount: 1,
     },
     {
       price: 250,
-      name: 'Сет «Американская классика», 32 шт.',
+      name: 'Сет «222», 32 шт.',
       description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
-      pid: '2',
+      pid: '222',
       image: '/images/food/1.jpg',
-      amount: 1,
     },
     {
       price: 250,
-      name: 'Сет «Американская классика», 32 шт.',
+      name: 'Сет «333», 32 шт.',
       description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
-      pid: '3',
+      pid: '333',
       image: '/images/food/1.jpg',
-      amount: 1,
     },
     {
       price: 250,
-      name: 'Сет «Американская классика», 32 шт.',
+      name: 'Сет «444», 32 шт.',
       description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
-      pid: '4',
+      pid: '444',
       image: '/images/food/1.jpg',
-      amount: 1,
     },
     {
       price: 250,
-      name: 'Сет «Американская классика», 32 шт.',
+      name: 'Сет «555», 32 шт.',
       description: 'Сливочный сыр, сурими, салат Айсберг, икра тобико оранжевая, кунжут',
-      pid: '5',
+      pid: '555',
       image: '/images/food/1.jpg',
-      amount: 1,
     },
   ],
   ...rest
@@ -155,10 +150,13 @@ const {
         const sliced = randomized.slice(0, 4)
 
         if (sliced.length) {
+          this.style.display = ''
           this.#sliderElement = new ScrollElement()
           this.#sliderElement.append(...sliced)
 
           this.#contentElement.appendChild(this.#sliderElement)
+        } else {
+          this.style.display = 'none'
         }
       }
     }

@@ -1,0 +1,276 @@
+---
+import Product from './Product.astro'
+import ProductButton from './ProductButton.astro'
+
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<div
+  {...rest}
+  class:list={['order-contents', className]}
+>
+  <h2
+    class="f-d-24-s f-m-16-s order-contents__title"
+    set:html={'Состав заказа'}
+  />
+
+  <ul class="f-d-16-r f-m-12-r order-contents__products"> </ul>
+
+  <div class="order-contents__devices">
+    <h3
+      class="f-d-16-s f-m-14-s order-contents__devices__title"
+      set:html="Добавьте приборы"
+    />
+
+    <div class="order-contents__devices__list">
+      <Product
+        name="Палочки"
+        pid="Палочки"
+        price={10}
+        class="order-contents__device"
+      >
+        <div
+          class="f-d-16-r f-m-14-r order-contents__device__name"
+          set:html="Палочки"
+        />
+        <ProductButton
+          class="order-contents__device__button"
+          placeholder={false}
+          size={'small'}
+        />
+      </Product>
+      <Product
+        name="Ложка"
+        pid="Ложка"
+        price={10}
+        class="order-contents__device"
+      >
+        <div
+          class="f-d-16-r f-m-14-r order-contents__device__name"
+          set:html="Ложка"
+        />
+        <ProductButton
+          class="order-contents__device__button"
+          placeholder={false}
+          size={'small'}
+        />
+      </Product>
+      <Product
+        name="Вилка"
+        pid="Вилка"
+        price={10}
+        class="order-contents__device"
+      >
+        <div
+          class="f-d-16-r f-m-14-r order-contents__device__name"
+          set:html="Вилка"
+        />
+        <ProductButton
+          class="order-contents__device__button"
+          placeholder={false}
+          size={'small'}
+        />
+      </Product>
+    </div>
+  </div>
+
+  <div class="order-contents__price">
+    <div class="order-contents__price__parts">
+      <div class="f-d-16-s f-m-14-s order-contents__price__part">
+        <div
+          class="order-contents__price__part__title"
+          set:html="4 товара"
+        />
+        <div
+          class="order-contents__price__part__value"
+          set:html="0 ₽"
+          data-products-price
+        />
+      </div>
+      <div
+        class="f-d-16-s f-m-14-s order-contents__price__part"
+        data-discount-price-container
+        style="color: var(--color-secondary-6)"
+      >
+        <div
+          class="order-contents__price__part__title"
+          set:html="Скидка"
+        />
+        <div
+          class="order-contents__price__part__value"
+          set:html="0 ₽"
+          data-discount-price
+        />
+      </div>
+      <div
+        class="f-d-16-s f-m-14-s order-contents__price__part"
+        data-delivery-price-container
+        style="color: var(--color-primary-2)"
+      >
+        <div
+          class="order-contents__price__part__title"
+          set:html="Доставка"
+        />
+        <div
+          class="order-contents__price__part__value"
+          set:html="Бесплатно"
+          data-delivery-price
+        />
+      </div>
+    </div>
+
+    <div class="f-d-18-s f-m-16-s order-contents__price__full">
+      <div
+        class="order-contents__price__full__title"
+        set:html="Сумма заказа"
+      />
+      <div
+        class="order-contents__price__full__value"
+        set:html="3 420 ₽"
+        data-total-price
+      />
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .order-contents {
+    width: 59.5rem;
+    height: max-content;
+    padding: 3rem;
+
+    border: 0.1rem solid var(--color-secondary-3);
+    border-radius: var(--border-radius-2);
+
+    @media (max-width: 768px) {
+      width: 100%;
+      padding: 1.6rem;
+    }
+  }
+
+  .order-contentss__title {
+    margin-bottom: 2.4rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.2rem;
+    }
+  }
+
+  .order-contents__products {
+    display: grid;
+    gap: 0.8rem;
+    grid-auto-rows: max-content;
+
+    padding-bottom: 0.8rem;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+
+    @media (max-width: 768px) {
+      padding-bottom: 1.2rem;
+    }
+  }
+
+  .order-contents__product {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .order-contents__product__title {
+    width: 34.6rem;
+
+    @media (max-width: 768px) {
+      width: 17.9rem;
+    }
+  }
+
+  .order-contents__product__amount {
+    width: 3rem;
+    margin-right: 3rem;
+    margin-left: auto;
+
+    @media (max-width: 768px) {
+      width: 3rem;
+      margin-right: 1.6rem;
+    }
+  }
+
+  .order-contents__product__price {
+    width: 9.9rem;
+    text-align: end;
+
+    @media (max-width: 768px) {
+      width: 7rem;
+    }
+  }
+
+  .order-contents__devices {
+    padding: 1.6rem 0;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+  }
+
+  .order-contents__devices__title {
+    margin-bottom: 1rem;
+  }
+
+  .order-contents__devices__list {
+    display: grid;
+    gap: 1.2rem;
+    grid-auto-rows: max-content;
+  }
+
+  .order-contents__device {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .order-contents__device__name {
+  }
+
+  .order-contents__device__button {
+    --padding: 0.4rem;
+    width: 8rem;
+    height: 2.4rem;
+  }
+
+  .order-contents__price {
+    padding-top: 2.4rem;
+
+    @media (max-width: 768px) {
+      padding-top: 1.2rem;
+    }
+  }
+
+  .order-contents__price__parts {
+    display: grid;
+    gap: 0.8rem;
+
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .order-contents__price__part {
+    display: flex;
+    justify-content: space-between;
+
+    color: var(--color-secondary-3);
+  }
+
+  .order-contents__price__part__title {
+  }
+
+  .order-contents__price__part__value {
+  }
+
+  .order-contents__price__full {
+    display: flex;
+    justify-content: space-between;
+  }
+</style>

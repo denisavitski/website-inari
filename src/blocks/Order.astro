@@ -1,287 +1,29 @@
 ---
-import Form from '@elements/Form.astro'
-import OrderField from '@elements/OrderField.astro'
-import RadioButton from '@elements/RadioButton.astro'
-import Back from './Back.astro'
 import Button from '@elements/Button.astro'
-import Product from '@elements/Product.astro'
-import ProductButton from '@elements/ProductButton.astro'
+import OrderForm from '@elements/OrderForm.astro'
+import OrderContents from '@elements/OrderContents.astro'
+import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
 ---
 
 <e-order class="order">
-  <div
-    class="order__start"
-    aria-hidden="false"
-  >
+  <div class="order__start">
     <h1
       class="f-d-48-s f-m-18-s order__heading"
-      set:html={'Заказ на доставку'}
+      set:html={'Оформление заказа'}
     />
 
+    <OrderTypeToggle class="order__type" />
+
     <div class="order__flex">
-      <Form class="order__form">
-        <OrderField title="Имя">
-          <input
-            type="text"
-            class="order__input"
-            name="Имя"
-            title="Имя"
-          />
-        </OrderField>
-        <OrderField title="Номер телефона *">
-          <input
-            type="text"
-            class="order__input"
-            name="Номер телефона"
-            title="Номер телефона"
-            required
-          />
-        </OrderField>
-
-        <OrderField title="Адрес доставки *">
-          <div class="order__address">
-            <div class="order__address__house">
-              <input
-                type="text"
-                class="visually-hidden"
-                name="Адрес"
-                title="Адрес"
-                required
-              />
-              <div class="order__input order__address__input">
-                <div class="order__address__value">Адрес</div>
-                <span class="order__address__change-button">Изменить</span>
-              </div>
-            </div>
-            <input
-              type="text"
-              class="order__input"
-              name="Подъезд"
-              title="Подъезд"
-              placeholder="Подъезд"
-              required
-            />
-            <div class="order__address__cols">
-              <input
-                type="text"
-                class="order__input"
-                name="Этаж"
-                title="Этаж"
-                placeholder="Этаж"
-                required
-              />
-              <input
-                type="text"
-                class="order__input"
-                name="Квартира"
-                title="Квартира"
-                placeholder="Квартира"
-                required
-              />
-            </div>
-            <textarea
-              class="order__input order__input_textarea custom-scrollbar"
-              name="Комментарии к адресу"
-              title="Комментарии к адресу"
-              placeholder="Комментарии к адресу"
-            ></textarea>
-          </div>
-        </OrderField>
-
-        <OrderField title="Время доставки *">
-          <div class="order__time">
-            <RadioButton
-              class="order__time__input"
-              name="Время доставки"
-              value="Через ≈ 60 мин."
-              required
-              checked
-            />
-            <RadioButton
-              required
-              class="order__time__input"
-              name="Время доставки"
-              value="14:30 - 15:00"
-            />
-            <RadioButton
-              required
-              class="order__time__input"
-              name="Время доставки"
-              value="15:00 - 15:30"
-            />
-            <RadioButton
-              required
-              class="order__time__input"
-              name="Время доставки"
-              value="16:00 - 16:30"
-            />
-            <RadioButton
-              required
-              class="order__time__input"
-              name="Время доставки"
-              value="16:30 - 17:00"
-            />
-            <RadioButton
-              required
-              class="order__time__input"
-              name="Время доставки"
-              value="17:00 - 17:30"
-            />
-            <RadioButton
-              required
-              class="order__time__input"
-              name="Время доставки"
-              value="17:30 - 18:00"
-            />
-            <RadioButton
-              required
-              class="order__time__input"
-              name="Время доставки"
-              value="Другое время"
-            />
-          </div>
-        </OrderField>
-        <OrderField title="Способ оплаты">
-          <div class="order__payment">
-            <RadioButton
-              class="order__payment__input"
-              name="Способ оплаты"
-              value="Картой курьеру"
-              checked
-              required
-            />
-            <RadioButton
-              class="order__payment__input"
-              name="Способ оплаты"
-              value="Наличными курьеру"
-              required
-            />
-          </div>
-        </OrderField>
-
-        <div class="order__form__bottom">
-          <Back
-            href="/#menu"
-            class="order__form__back"
-            >Назад к меню</Back
-          >
-          <Button
-            theme={'arrow'}
-            type="submit"
-            class="order__form__submit"
-            >Оформить заказ на <span data-total-price>3 420 ₽</span>
-          </Button>
-        </div>
-      </Form>
-
-      <div class="order__contents">
-        <h2
-          class="f-d-24-s f-m-16-s order__contents__title"
-          set:html={'Состав заказа'}
-        />
-
-        <ul class="f-d-16-r f-m-12-r order__products"> </ul>
-
-        <div class="order__devices">
-          <h3
-            class="f-d-16-s f-m-14-s order__devices__title"
-            set:html="Добавьте приборы"
-          />
-
-          <div class="order__devices__list">
-            <Product
-              name="Палочки"
-              pid="Палочки"
-              price={10}
-              class="order__device"
-            >
-              <div
-                class="f-d-16-r f-m-14-r order__device__name"
-                set:html="Палочки"
-              />
-              <ProductButton
-                class="order__device__button"
-                placeholder={false}
-                size={'small'}
-              />
-            </Product>
-            <Product
-              name="Ложка"
-              pid="Ложка"
-              price={10}
-              class="order__device"
-            >
-              <div
-                class="f-d-16-r f-m-14-r order__device__name"
-                set:html="Ложка"
-              />
-              <ProductButton
-                class="order__device__button"
-                placeholder={false}
-                size={'small'}
-              />
-            </Product>
-            <Product
-              name="Вилка"
-              pid="Вилка"
-              price={10}
-              class="order__device"
-            >
-              <div
-                class="f-d-16-r f-m-14-r order__device__name"
-                set:html="Вилка"
-              />
-              <ProductButton
-                class="order__device__button"
-                placeholder={false}
-                size={'small'}
-              />
-            </Product>
-          </div>
-        </div>
-
-        <div class="order__price">
-          <div class="f-d-16-s f-m-14-s order__price__products">
-            <div
-              class="order__price__products__title"
-              set:html="4 товара"
-            />
-            <div
-              class="order__price__products__value"
-              set:html="3 420 ₽"
-              data-products-price
-            />
-          </div>
-          <div class="f-d-16-s f-m-14-s order__price__delivery">
-            <div
-              class="order__price__delivery__title"
-              set:html="Доставка"
-            />
-            <div
-              class="order__price__delivery__value"
-              set:html="Бесплатно"
-              data-delivery-price
-            />
-          </div>
-          <div class="f-d-18-s f-m-16-s order__price__full">
-            <div
-              class="order__price__full__title"
-              set:html="Сумма заказа"
-            />
-            <div
-              class="order__price__full__value"
-              set:html="3 420 ₽"
-              data-total-price
-            />
-          </div>
-        </div>
-      </div>
+      <OrderForm class="order__delivery-form" />
+      <OrderForm
+        class="order__pickup-form"
+        type={'pickup'}
+      />
+      <OrderContents class="order__contents" />
     </div>
   </div>
-  <div
-    class="order__complete"
-    aria-hidden="true"
-  >
+  <div class="order__complete">
     <h2
       class="f-d-48-s f-m-18-s order__complete__heading"
       set:html="Ваш заказ успешно принят!"
@@ -312,10 +54,8 @@ import ProductButton from '@elements/ProductButton.astro'
   }
 
   .order__start {
-    display: none;
-
-    &[aria-hidden='false'] {
-      display: block;
+    .order.complete & {
+      display: none;
     }
   }
 
@@ -327,16 +67,14 @@ import ProductButton from '@elements/ProductButton.astro'
     }
   }
 
-  .order__form {
-    width: 76.8rem;
-    display: grid;
-    grid-template-columns: 100%;
-    grid-auto-rows: max-content;
-    gap: 2.4rem;
+  .order__type {
+    display: flex;
+    gap: 1rem;
+
+    margin-bottom: 2.4rem;
 
     @media (max-width: 768px) {
-      width: 100%;
-      gap: 1.6rem;
+      margin-bottom: 1.2rem;
     }
   }
 
@@ -350,270 +88,16 @@ import ProductButton from '@elements/ProductButton.astro'
     }
   }
 
-  .order__input {
-    font-size: 1.6rem;
-    font-weight: 400;
-
-    width: 100%;
-    height: 4.3rem;
-    padding: 1.2rem 1.6rem;
-
-    border-radius: var(--border-radius-1);
-    background-color: var(--color-secondary-2);
-
-    @media (max-width: 768px) {
-      font-size: 1.4rem;
+  .order__delivery-form {
+    [data-order-type='pickup'] & {
+      display: none;
     }
   }
 
-  .order__input_textarea {
-    resize: none;
-    height: 13.1rem;
-  }
-
-  .order__address {
-    display: grid;
-    grid-template-columns: 100%;
-    gap: var(--gap);
-  }
-
-  .order__address__house {
-    position: relative;
-
-    display: flex;
-    align-items: center;
-
-    cursor: pointer;
-  }
-
-  .order__address__input {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .order__address__value {
-    width: 39.5rem;
-  }
-
-  .order__address__change-button {
-    font-size: 1.6rem;
-    color: var(--color-secondary-6);
-
-    @media (max-width: 768px) {
-      font-size: 1.2rem;
+  .order__pickup-form {
+    [data-order-type='delivery'] & {
+      display: none;
     }
-  }
-
-  .order__address__cols {
-    display: flex;
-    gap: var(--gap);
-  }
-
-  .order__time {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--gap);
-  }
-
-  .order__payment {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.8rem;
-  }
-
-  .order__payment__input {
-    width: 100%;
-
-    @media (max-width: 768px) {
-      height: 3.8rem;
-    }
-  }
-
-  .order__form__bottom {
-    --height: 4.8rem;
-
-    display: flex;
-    justify-content: space-between;
-
-    margin-top: 2.4rem;
-
-    @media (max-width: 768px) {
-      --height: 4rem;
-
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-  }
-
-  .order__form__back {
-    margin: 0;
-    height: var(--height);
-
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-  }
-
-  .order__form__submit {
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-  }
-
-  /*
-  --------------
-  CONTENTS
-  --------------
-  */
-
-  .order__contents {
-    width: 59.5rem;
-    height: max-content;
-    padding: 3rem;
-
-    border: 0.1rem solid var(--color-secondary-3);
-    border-radius: var(--border-radius-2);
-
-    @media (max-width: 768px) {
-      width: 100%;
-      padding: 1.6rem;
-    }
-  }
-
-  .order__contents__title {
-    margin-bottom: 2.4rem;
-
-    @media (max-width: 768px) {
-      margin-bottom: 1.2rem;
-    }
-  }
-
-  .order__products {
-    display: grid;
-    gap: 0.8rem;
-    grid-auto-rows: max-content;
-
-    padding-bottom: 0.8rem;
-    border-bottom: 0.1rem solid var(--color-secondary-1);
-
-    @media (max-width: 768px) {
-      padding-bottom: 1.2rem;
-    }
-  }
-
-  .order__product {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .order__product__title {
-    width: 34.6rem;
-
-    @media (max-width: 768px) {
-      width: 17.9rem;
-    }
-  }
-
-  .order__product__amount {
-    width: 3rem;
-    margin-right: 3rem;
-    margin-left: auto;
-
-    @media (max-width: 768px) {
-      width: 3rem;
-      margin-right: 1.6rem;
-    }
-  }
-
-  .order__product__price {
-    width: 9.9rem;
-    text-align: end;
-
-    @media (max-width: 768px) {
-      width: 7rem;
-    }
-  }
-
-  .order__devices {
-    padding: 1.6rem 0;
-    border-bottom: 0.1rem solid var(--color-secondary-1);
-  }
-
-  .order__devices__title {
-    margin-bottom: 1rem;
-  }
-
-  .order__devices__list {
-    display: grid;
-    gap: 1.2rem;
-    grid-auto-rows: max-content;
-  }
-
-  .order__device {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .order__device__name {
-  }
-
-  .order__device__button {
-    --padding: 0.4rem;
-    width: 8rem;
-    height: 2.4rem;
-  }
-
-  .order__price {
-    padding-top: 2.4rem;
-
-    @media (max-width: 768px) {
-      padding-top: 1.2rem;
-    }
-  }
-
-  .order__price__products {
-    display: flex;
-    justify-content: space-between;
-
-    color: var(--color-secondary-3);
-    margin-bottom: 0.8rem;
-  }
-
-  .order__price__products__title {
-  }
-
-  .order__price__products__value {
-  }
-
-  .order__price__delivery {
-    display: flex;
-    justify-content: space-between;
-
-    margin-bottom: 3.2rem;
-
-    @media (max-width: 768px) {
-      margin-bottom: 1.6rem;
-    }
-  }
-
-  .order__price__delivery__title {
-  }
-
-  .order__price__delivery__value {
-  }
-
-  .order__price__full {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .order__price__full__title {
-  }
-
-  .order__price__full__value {
   }
 
   /*
@@ -625,7 +109,7 @@ import ProductButton from '@elements/ProductButton.astro'
   .order__complete {
     display: none;
 
-    &[aria-hidden='false'] {
+    .order.complete & {
       display: block;
     }
   }
@@ -653,6 +137,7 @@ import ProductButton from '@elements/ProductButton.astro'
 
 <script>
   import { basketStore, type BasketStoreItem } from '@stores/basketStore'
+  import { orderStore } from '@stores/orderStore'
   import { numberToPrice } from '@utils/number'
 
   class OrderProduct {
@@ -712,11 +197,16 @@ import ProductButton from '@elements/ProductButton.astro'
   }
 
   export class OrderElement extends HTMLElement {
-    #startElement: HTMLElement | null = null
-    #endElement: HTMLElement | null = null
     #totalPriceElements: Array<HTMLElement> = []
+
     #productsPriceElements: Array<HTMLElement> = []
+
+    #deliverPriceContainerElements: Array<HTMLElement> = []
     #deliveryPriceElements: Array<HTMLElement> = []
+
+    #discountPriceContainerElements: Array<HTMLElement> = []
+    #discountPriceElements: Array<HTMLElement> = []
+
     #productsContainerElement: HTMLElement | null = null
 
     #products: Array<OrderProduct> = []
@@ -726,21 +216,62 @@ import ProductButton from '@elements/ProductButton.astro'
       //   morph.navigate('/')
       // }
 
-      this.#startElement = this.querySelector('.order__start')
-      this.#endElement = this.querySelector('.order__complete')
       this.#totalPriceElements = [...this.querySelectorAll<HTMLElement>('[data-total-price]')]
+
       this.#productsPriceElements = [...this.querySelectorAll<HTMLElement>('[data-products-price]')]
+
+      this.#deliverPriceContainerElements = [
+        ...this.querySelectorAll<HTMLElement>('[data-delivery-price-container]'),
+      ]
       this.#deliveryPriceElements = [...this.querySelectorAll<HTMLElement>('[data-delivery-price]')]
+
+      this.#discountPriceContainerElements = [
+        ...this.querySelectorAll<HTMLElement>('[data-discount-price-container]'),
+      ]
+      this.#discountPriceElements = [...this.querySelectorAll<HTMLElement>('[data-discount-price]')]
+
       this.#productsContainerElement = this.querySelector('.order__products')
 
-      basketStore.subscribe(this.#basketChangeListener)
+      basketStore.subscribe(this.#basketStoreChangeListener)
+      orderStore.subscribe(this.#orderStoreChangeListener)
     }
 
     protected disconnectedCallback() {
-      basketStore.unsubscribe(this.#basketChangeListener)
+      basketStore.unsubscribe(this.#basketStoreChangeListener)
+      orderStore.unsubscribe(this.#orderStoreChangeListener)
     }
 
-    #basketChangeListener = () => {
+    #orderStoreChangeListener = () => {
+      if (orderStore.type === 'pickup') {
+        this.#deliverPriceContainerElements.forEach((element) => {
+          element.style.display = 'none'
+        })
+      } else {
+        this.#deliverPriceContainerElements.forEach((element) => {
+          element.style.display = ''
+        })
+      }
+
+      if (!orderStore.discount) {
+        this.#discountPriceContainerElements.forEach((element) => {
+          element.style.display = 'none'
+        })
+
+        this.#discountPriceElements.forEach((element) => {
+          element.textContent = numberToPrice(0)
+        })
+      } else {
+        this.#discountPriceContainerElements.forEach((element) => {
+          element.style.display = ''
+        })
+
+        this.#discountPriceElements.forEach((element) => {
+          element.textContent = numberToPrice(orderStore.discount)
+        })
+      }
+    }
+
+    #basketStoreChangeListener = () => {
       basketStore.items.forEach((item) => {
         let product = this.#products.find((product) => product.pid === item.pid)
 

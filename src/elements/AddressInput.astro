@@ -1,0 +1,116 @@
+---
+export interface Props {
+  class?: string
+  inputStyles?: string
+}
+
+const { class: className, inputStyles, ...rest } = Astro.props
+---
+
+<e-address-input
+  {...rest}
+  class:list={['focus address-input', className]}
+  target="order-type"
+>
+  <input
+    class="visually-hidden"
+    name="Адрес"
+    required
+    title="Адрес"
+    tabindex="-1"
+  />
+  <div class:list={['address-input__input', inputStyles]}>
+    <div class="address-input__value">Адрес</div>
+    <span class="address-input__change-button">Изменить</span>
+  </div>
+</e-address-input>
+
+<style>
+  .address-input {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+    border-radius: var(--border-radius-1);
+
+    &:focus {
+      outline: auto;
+    }
+  }
+
+  .address-input__input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: unset;
+    min-height: 4.3rem;
+  }
+
+  .address-input__value {
+    width: 39.5rem;
+
+    color: var(--color-secondary-3);
+
+    .address-input.filled & {
+      color: var(--color-primary-2);
+    }
+  }
+
+  .address-input__change-button {
+    font-size: 1.6rem;
+    color: var(--color-secondary-6);
+
+    @media (max-width: 768px) {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+
+<script>
+  import { orderStore } from '@stores/orderStore'
+  import { PopoverButtonElement } from 'aptechka/popover'
+
+  export class AddressInputElement extends PopoverButtonElement {
+    #inputElement: HTMLInputElement | null = null
+    #valueElement: HTMLElement | null = null
+
+    protected override connectedCallback() {
+      super.connectedCallback()
+
+      this.#inputElement = this.querySelector('input')
+      this.#valueElement = this.querySelector('.address-input__value')
+
+      orderStore.subscribe(this.#orderChangeListener)
+    }
+
+    protected override disconnectedCallback() {
+      super.disconnectedCallback()
+
+      orderStore.unsubscribe(this.#orderChangeListener)
+    }
+
+    #orderChangeListener = () => {
+      this.classList.toggle('filled', !!orderStore.address)
+
+      if (this.#inputElement) {
+        this.#inputElement.value = orderStore.address
+      }
+
+      if (this.#valueElement) {
+        this.#valueElement.textContent = orderStore.address || 'Адрес'
+      }
+    }
+  }
+
+  if (!customElements.get('e-address-input')) {
+    customElements.define('e-address-input', AddressInputElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-address-input': AddressInputElement
+    }
+  }
+</script>

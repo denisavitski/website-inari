@@ -4,7 +4,6 @@ import type { BasketStoreItem } from '@stores/basketStore'
 export interface ProductVariant {
   shortName: string
   name: string
-  pid: string
   size: string
   price: string | number
   oldPrice?: string | number | undefined
@@ -40,12 +39,12 @@ const {
 <script>
   import { basketStore } from '@stores/basketStore'
   import type { ProductButtonElement } from './ProductButton.astro.0.mts'
-  import type { InputGroupElement } from '@lib/InputGroupElement'
   import type { PriceElement } from './Price.astro.0.mts'
+  import type { ToggleElement } from '@lib/ToggleElement'
 
   export class ProductElement extends HTMLElement {
     #buttonElements: Array<ProductButtonElement> = []
-    #variantsGroupElements: Array<InputGroupElement> = []
+    #variantToggleElement: ToggleElement | null = null
     #priceElements: Array<PriceElement> = []
 
     public get pid() {
@@ -59,23 +58,13 @@ const {
     protected connectedCallback() {
       this.#buttonElements = [...this.querySelectorAll('e-product-button')]
 
-      this.#buttonElements.forEach((element) => {
-        element.addEventListener('productButtonCounterChange', this.#counterChangeListener)
-      })
-
-      this.#variantsGroupElements = [...this.querySelectorAll('e-input-group')]
-
-      this.#variantsGroupElements.forEach((element) => {
-        element.addEventListener('inputGroupValueChange', this.#variantChangeListener)
-      })
+      this.#variantToggleElement = this.querySelector('e-toggle')
 
       this.#priceElements = [...this.querySelectorAll('e-price')]
 
-      if (document.readyState === 'complete') {
+      Promise.all(['e-product-button']).then(() => {
         this.#loadListener()
-      } else {
-        addEventListener('load', this.#loadListener)
-      }
+      })
     }
 
     protected disconnectedCallback() {
@@ -83,13 +72,30 @@ const {
         element.removeEventListener('productButtonCounterChange', this.#counterChangeListener)
       })
 
-      this.#variantsGroupElements.forEach((element) => {
-        element.removeEventListener('inputGroupValueChange', this.#variantChangeListener)
-      })
+      this.#variantToggleElement?.removeEventListener('toggleChange', this.#variantChangeListener)
 
       basketStore.unsubscribe(this.#storeChangeListener)
+    }
 
-      removeEventListener('load', this.#loadListener)
+    #loadListener = () => {
+      if (this.isConnected) {
+        const storeItem = basketStore.items.find((item) => item.pid === this.pid)
+
+        if (storeItem) {
+          this.#variantToggleElement?.setValue(storeItem.name)
+        }
+
+        this.#buttonElements.forEach((element) => {
+          element.addEventListener('productButtonCounterChange', this.#counterChangeListener)
+        })
+
+        if (this.#variantToggleElement) {
+          this.#variantToggleElement.addEventListener('toggleChange', this.#variantChangeListener)
+          this.#changeVariant()
+        }
+
+        basketStore.subscribe(this.#storeChangeListener)
+      }
     }
 
     #counterChangeListener = (event: Event) => {
@@ -111,16 +117,6 @@ const {
       })
     }
 
-    #loadListener = () => {
-      if (this.isConnected) {
-        basketStore.subscribe(this.#storeChangeListener)
-
-        if (this.#variantsGroupElements.length) {
-          this.#changeVariant(this.#variantsGroupElements[0]!)
-        }
-      }
-    }
-
     #storeChangeListener = () => {
       const storeItem = basketStore.items.find((item) => item.pid === this.pid)
 
@@ -135,40 +131,26 @@ const {
       }
     }
 
-    #variantChangeListener = (e: Event) => {
-      const element = e.currentTarget as InputGroupElement
-      this.#changeVariant(element)
+    #variantChangeListener = () => {
+      this.#changeVariant(true)
     }
 
-    #changeVariant(actigeGroupElement: InputGroupElement) {
-      if (basketStore.prevItems) {
+    #changeVariant(reset = false) {
+      if (basketStore.prevItems && reset) {
         this.#buttonElements.forEach((element) => {
           element?.set(0)
         })
       }
 
-      const currentInput = actigeGroupElement.input
+      const currentButtonElement = this.#variantToggleElement?.buttonElement
 
-      if (currentInput) {
-        this.#variantsGroupElements.forEach((element) => {
-          const currentValue = currentInput!.value
-
-          if (actigeGroupElement !== element && element.value !== actigeGroupElement.value) {
-            element.changeValue(currentValue)
-          }
-        })
-
-        const name = currentInput.getAttribute('data-name')
-        const pid = currentInput.getAttribute('data-pid')
-        const price = currentInput.getAttribute('data-price')
-        const oldPrice = currentInput.getAttribute('data-old-price')
+      if (currentButtonElement) {
+        const name = currentButtonElement.getAttribute('data-name')
+        const price = currentButtonElement.getAttribute('data-price')
+        const oldPrice = currentButtonElement.getAttribute('data-old-price')
 
         if (name) {
           this.setAttribute('name', name)
-        }
-
-        if (pid) {
-          this.setAttribute('pid', pid)
         }
 
         if (price) {
@@ -177,8 +159,8 @@ const {
 
         this.#priceElements.forEach((element) => element?.updateValue(price, oldPrice))
 
-        for (const key in currentInput.dataset) {
-          const value = currentInput.dataset[key]
+        for (const key in currentButtonElement.dataset) {
+          const value = currentButtonElement.dataset[key]
 
           if (value && key.toLowerCase().includes('variant')) {
             const keyWithoutVariant = key

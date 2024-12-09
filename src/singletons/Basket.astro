@@ -325,6 +325,10 @@ const { class: className, ...rest } = Astro.props
   }
 
   .basket__order-button {
+    &[data-disabled] {
+      pointer-events: none;
+    }
+
     @media (max-width: 768px) {
       width: 100%;
     }
@@ -401,8 +405,12 @@ const { class: className, ...rest } = Astro.props
         if (this.#headElement) {
           this.#headElement.textContent = `${basketStore.fullAmount} ${productsToString(basketStore.fullAmount)} товара на ${numberToPrice(basketStore.fullPrice)}`
         }
+
+        this.#orderButtonElement?.removeAttribute('data-disabled')
       } else {
         this.classList.remove('has-items')
+
+        this.#orderButtonElement?.setAttribute('data-disabled', '')
 
         if (this.#headElement) {
           this.#headElement.textContent = ''

@@ -47,6 +47,8 @@ const {
     height: 3.5rem;
     display: inline-block;
 
+    border-radius: var(--border-radius-1);
+
     @media (max-width: 768px) {
       height: 2.6rem;
     }
@@ -73,7 +75,8 @@ const {
     color: var(--color-secondary-3);
   }
 
-  .radio-button[data-theme='outline'] .radio-button__input:checked ~ .radio-button__value {
+  .radio-button[data-theme='outline'] .radio-button__input:checked ~ .radio-button__value,
+  .radio-button[data-theme='outline'][data-checked] .radio-button__value {
     border-color: var(--color-primary-2);
     color: var(--color-primary-2);
   }
@@ -83,7 +86,8 @@ const {
     color: var(--color-primary-2);
   }
 
-  .radio-button[data-theme='fill'] .radio-button__input:checked ~ .radio-button__value {
+  .radio-button[data-theme='fill'] .radio-button__input:checked ~ .radio-button__value,
+  .radio-button[data-theme='fill'][data-checked] .radio-button__value {
     border-color: transparent;
     background-color: var(--color-primary-3);
   }

@@ -1,14 +1,6 @@
 ---
 import type { HTMLAttributes } from 'astro/types'
 
-export interface CommmonFormProps {
-  submitButton?: string
-  terms?: string
-  successTitle?: string
-  successMessage?: string
-  errorMessage?: string
-}
-
 export interface Props extends HTMLAttributes<'div'> {
   name?: string
   handler?: string
@@ -16,6 +8,7 @@ export interface Props extends HTMLAttributes<'div'> {
   successMessage?: string | undefined | false
   errorMessage?: string | undefined | false
   reusable?: boolean
+  resetAfterSubmit?: boolean
 }
 
 const {
@@ -25,6 +18,7 @@ const {
   successMessage,
   errorMessage,
   reusable = true,
+  resetAfterSubmit = true,
   ...rest
 } = Astro.props
 ---
@@ -57,6 +51,7 @@ const {
   {name}
   {handler}
   {reusable}
+  reset-after-submit={resetAfterSubmit}
 >
   <form>
     <div class="form-tmp-inputs"></div>
@@ -86,7 +81,8 @@ const {
     #tmpInputsContainerElement: HTMLElement | null = null
     #sended = false
     #handler = '/test'
-    #isReusable = false
+    #reusable = false
+    #resetAfterSubmit = false
 
     protected connectedCallback() {
       this.#popoverElement = findParentElement(this, PopoverElement)
@@ -94,7 +90,8 @@ const {
       this.#formElement = this.querySelector('form')
 
       this.#handler = this.getAttribute('handler') || '/test'
-      this.#isReusable = this.hasAttribute('reusable')
+      this.#reusable = this.hasAttribute('reusable')
+      this.#resetAfterSubmit = this.hasAttribute('reset-after-submit')
 
       if (this.#formElement) {
         this.#tmpInputsContainerElement = this.querySelector<HTMLElement>('.form-tmp-inputs')
@@ -141,7 +138,7 @@ const {
     #submitListener = async (e: SubmitEvent) => {
       e.preventDefault()
 
-      if (this.#handler === 'fetchit' || (this.#sended && !this.#isReusable)) {
+      if (this.#handler === 'fetchit' || (this.#sended && !this.#reusable)) {
         return
       }
 
@@ -227,7 +224,7 @@ const {
         }
       }
 
-      if (this.#isReusable) {
+      if (this.#resetAfterSubmit) {
         this.#inputElements?.forEach((element) => {
           element.value = ''
         })

@@ -1,3 +1,5 @@
+import { basketStore } from '@stores/basketStore'
+import { orderStore } from '@stores/orderStore'
 import { Morph } from 'aptechka/morph'
 
 export const morph = new Morph({
@@ -35,3 +37,14 @@ addEventListener('load', () => {
 })
 
 addEventListener('resize', updateSize)
+
+orderStore.subscribe((e) => {
+  document.documentElement.setAttribute('data-order-type', e.current.type)
+})
+
+basketStore.subscribe(() => {
+  document.documentElement.setAttribute(
+    'data-basket-has-items',
+    (!!basketStore.items.length).toString(),
+  )
+})

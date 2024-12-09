@@ -2,8 +2,8 @@
 import Button from '@elements/Button.astro'
 import Icon from '@elements/Icon.astro'
 import Modal from '@elements/Modal.astro'
+import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
 import PickupPoint from '@elements/PickupPoint.astro'
-import RadioButton from '@elements/RadioButton.astro'
 import SuggestionsInput from '@elements/SuggestionsInput.astro'
 
 export const modal = '#order-type'
@@ -21,23 +21,8 @@ export const modal = '#order-type'
         class="f-d-24-s f-m-18-s order-type__title"
         set:html="Выберите способ получения заказа"
       />
-      <e-input-group class="order-type__input-group">
-        <RadioButton
-          class="order-type__button"
-          value="delivery"
-          name="order-type"
-          theme={'fill'}
-          title="Доставка"
-          checked
-        />
-        <RadioButton
-          class="order-type__button"
-          value="pickup"
-          name="order-type"
-          theme={'fill'}
-          title="Самовывоз"
-        />
-      </e-input-group>
+
+      <OrderTypeToggle class="order-type__toggle" />
 
       <div class="order-type__variants">
         <div
@@ -184,7 +169,7 @@ export const modal = '#order-type'
     }
   }
 
-  .order-type__input-group {
+  .order-type__toggle {
     display: flex;
     justify-content: center;
     gap: 0.8rem;
@@ -337,50 +322,65 @@ export const modal = '#order-type'
 
 <script>
   import type { SuggestionsInputElement } from '@elements/SuggestionsInput.astro.0.mjs'
-  import type { InputGroupElement } from '@lib/InputGroupElement'
+  import type { ToggleElement } from '@lib/ToggleElement'
   import { SwipePopoverElement } from '@lib/SwipePopoverElement'
   import { orderStore } from '@stores/orderStore'
+  import type { InputGroupElement } from '@lib/InputGroupElement'
 
   export class OrderTypeElement extends SwipePopoverElement {
     #orderVariantElements: Array<HTMLElement> = []
-    #orderTypeInputGroupElement: InputGroupElement<'delivery' | 'pickup'> | null = null
+    #orderTypeToggleElement: ToggleElement<'delivery' | 'pickup'> | null = null
     #priceZoneElements: Array<HTMLElement> = []
-    #deliveryInput: SuggestionsInputElement | null = null
+    #deliveryInputElement: SuggestionsInputElement | null = null
+    #pickupInputElement: InputGroupElement | null = null
+
+    constructor() {
+      super()
+
+      this.addEventListener('popoverOpened', () => {
+        if (orderStore.type === 'delivery') {
+          this.#deliveryInputElement?.inputElement?.focus()
+        }
+      })
+    }
 
     protected override connectedCallback() {
       super.connectedCallback()
 
       this.#orderVariantElements = [...this.querySelectorAll<HTMLElement>('[data-order-type]')]
 
-      this.#orderTypeInputGroupElement = this.querySelector('.order-type__input-group')
-
-      this.#orderTypeInputGroupElement?.addEventListener(
-        'inputGroupValueChange',
-        this.#orderTypeInputGroupChangeListener,
-      )
+      this.#orderTypeToggleElement = this.querySelector('.order-type__toggle')
+      this.#orderTypeToggleElement?.addEventListener('toggleChange', this.#orderTypeToggleListener)
 
       this.#priceZoneElements = [...this.querySelectorAll<HTMLElement>('[data-price-zone]')]
 
-      this.#deliveryInput = this.querySelector('.order-type__delivery__input')
+      this.#deliveryInputElement = this.querySelector('.order-type__delivery__input')
+      this.#deliveryInputElement?.addEventListener('change', this.#deliveryInputListener)
 
-      this.#deliveryInput?.addEventListener('input', this.#deliveryInputListener)
+      this.#pickupInputElement = this.querySelector('.order-type__pickup__input-group')
+      this.#pickupInputElement?.addEventListener('inputGroupValueChange', this.#pickupInputListener)
 
-      this.#orderTypeInputGroupChangeListener()
+      this.#orderTypeToggleListener()
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
 
-      this.#orderTypeInputGroupElement?.removeEventListener(
+      this.#orderTypeToggleElement?.removeEventListener(
         'inputGroupValueChange',
-        this.#orderTypeInputGroupChangeListener,
+        this.#orderTypeToggleListener,
       )
 
-      this.#deliveryInput?.removeEventListener('input', this.#deliveryInputListener)
+      this.#deliveryInputElement?.removeEventListener('change', this.#deliveryInputListener)
+
+      this.#pickupInputElement?.removeEventListener(
+        'inputGroupValueChange',
+        this.#pickupInputListener,
+      )
     }
 
-    #orderTypeInputGroupChangeListener = () => {
-      const value = this.#orderTypeInputGroupElement!.value
+    #orderTypeToggleListener = () => {
+      const value = this.#orderTypeToggleElement?.value
 
       orderStore.setType(value || 'delivery')
 
@@ -396,18 +396,27 @@ export const modal = '#order-type'
     }
 
     #checkValidAddress() {
-      if (!this.#deliveryInput) {
+      if (!this.#deliveryInputElement) {
         return
       }
 
-      if (orderStore.type === 'delivery' && !this.#deliveryInput.value) {
+      if (orderStore.type === 'delivery' && !this.#deliveryInputElement.value) {
         this.classList.add('invalid-address')
       } else {
         this.classList.remove('invalid-address')
       }
     }
 
-    #deliveryInputListener = () => {
+    #deliveryInputListener = (e: Event) => {
+      const ct = e.currentTarget as HTMLInputElement
+
+      orderStore.setAddress(ct.value)
+
+      this.#checkValidAddress()
+    }
+
+    #pickupInputListener = () => {
+      orderStore.setAddress(this.#pickupInputElement?.value || '')
       this.#checkValidAddress()
     }
   }

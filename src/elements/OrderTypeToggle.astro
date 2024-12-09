@@ -1,0 +1,64 @@
+---
+import './RadioButton.astro'
+
+export interface Props {
+  class?: string
+  name?: string
+}
+
+const { class: className, name = 'order-type', ...rest } = Astro.props
+---
+
+<e-order-type-toggle
+  {...rest}
+  class:list={['order-type-toggle', className]}
+  {name}
+>
+  <button
+    class="radio-button"
+    data-value="delivery"
+    data-theme="fill"
+    data-checked
+    ><span class="radio-button__value">Доставка</span></button
+  >
+  <button
+    class="radio-button"
+    data-value="pickup"
+    data-theme="fill"
+    ><span class="radio-button__value">Самовывоз</span></button
+  >
+</e-order-type-toggle>
+
+<style is:global>
+  .order-type-toggle {
+    display: flex;
+    gap: 0.8rem;
+  }
+</style>
+
+<script>
+  import { ToggleElement } from '@lib/ToggleElement'
+  import { orderStore } from '@stores/orderStore'
+
+  export class OrderTypeToggleElement extends ToggleElement {
+    constructor() {
+      super()
+
+      this.addEventListener('toggleChange', (e) => {
+        if (e.detail) {
+          orderStore.setType(e.detail as any)
+        }
+      })
+    }
+  }
+
+  if (!customElements.get('e-order-type-toggle')) {
+    customElements.define('e-order-type-toggle', OrderTypeToggleElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-order-type-toggle': OrderTypeToggleElement
+    }
+  }
+</script>

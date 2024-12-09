@@ -141,6 +141,19 @@ textarea {
   color: inherit;
 }
 
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-secondary-3);
+}
+
+/* button:focus,
+input:focus,
+textarea:focus,
+a:focus,
+.focus:focus {
+  outline: 0.1rem solid var(--color-secondary-6);
+} */
+
 a {
   font-family: inherit;
   color: inherit;

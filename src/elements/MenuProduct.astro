@@ -199,7 +199,7 @@ const modalId = `product-${pid}`
           <ProductVariants
             class="menu-product__variants"
             variants={variants}
-            name={`${name}-variants`}
+            name={name}
           />
         )
       }
@@ -258,6 +258,10 @@ const modalId = `product-${pid}`
 
       &:hover {
         background-color: var(--color-secondary-2);
+
+        .product-variants__variant:not([data-checked]) {
+          border-color: var(--color-secondary-1);
+        }
       }
     }
 

@@ -4,7 +4,7 @@ import Image from './Image.astro'
 import ProductButton from './ProductButton.astro'
 import Product from './Product.astro'
 
-export interface Props extends BasketStoreItem {
+export interface Props extends Omit<BasketStoreItem, 'amount'> {
   class?: string
 }
 

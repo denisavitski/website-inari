@@ -1,0 +1,460 @@
+<e-calendar
+  hours-start="10:00"
+  hours-end="22:00"
+></e-calendar>
+
+<script>
+  import { capitalize, clamp, createStylesheet, dispatchEvent } from 'aptechka/utils'
+
+  const style = createStylesheet({
+    ':host': {
+      position: 'relative',
+      display: 'inline-flex',
+      gap: '1rem',
+    },
+
+    '.side': {
+      boxSizing: 'border-box',
+      width: '45rem',
+      minHeight: '42rem',
+      padding: '3rem',
+      borderRadius: 'var(--border-radius-2)',
+      backgroundColor: 'var(--color-secondary-2)',
+    },
+
+    '.month': {},
+
+    '.head': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+
+      marginBottom: '3rem',
+    },
+
+    '.arrow': {
+      flexShrink: '0',
+
+      fontFamily: 'inherit',
+      border: 'none',
+      background: 'none',
+      color: 'inherit',
+      padding: '0',
+      cursor: 'pointer',
+
+      width: '2.4rem',
+      height: '2.4rem',
+    },
+
+    '.arrow svg': {
+      width: '100%',
+      height: '100%',
+      fill: 'var(--color-primary-2)',
+    },
+
+    '.arrow-left': {
+      transform: 'scaleX(-1)',
+    },
+
+    ':host(.current-month) .arrow-left': {
+      opacity: 0.4,
+      pointerEvents: 'none',
+    },
+
+    '.month-name': {
+      fontSize: '2.4rem',
+      fontWeight: '600',
+    },
+
+    '.arrow-right': {},
+
+    '.days': {
+      '--gap': '0.375rem 1.833rem',
+    },
+
+    '.days-names': {
+      display: ' grid',
+      gridTemplateColumns: 'repeat(7, 1fr)',
+      gap: 'var(--gap)',
+      color: 'var(--color-secondary-3)',
+    },
+
+    '.days-list': {
+      display: ' grid',
+      gridTemplateColumns: 'repeat(7, 1fr)',
+      gap: 'var(--gap)',
+    },
+
+    '.day': {
+      fontSize: '1.8rem',
+      fontWeight: '600',
+
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+
+      width: '4rem',
+      height: '4rem',
+
+      cursor: 'pointer',
+    },
+
+    '.day.picked': {
+      color: 'var(--color-secondary-6)',
+    },
+
+    '.day.inactive': {
+      color: 'var(--color-secondary-3)',
+      pointerEvents: 'none',
+    },
+
+    '.hours': {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3,1fr)',
+    },
+
+    '.hour': {
+      fontSize: '1.8rem',
+      fontWeight: '600',
+      cursor: 'pointer',
+    },
+
+    '.hour.picked': {
+      color: 'var(--color-primary-3)',
+    },
+
+    '.hour.inactive': {
+      color: 'var(--color-secondary-3)',
+      pointerEvents: 'none',
+    },
+
+    '@media (max-width: 768px)': {
+      ':host': {
+        width: '100%',
+        flexDirection: 'column',
+        gap: '0.8rem',
+      },
+
+      '.side': {
+        width: '100%',
+        minHeight: '28rem',
+        padding: '1.6rem',
+      },
+
+      '.month-name': {
+        fontSize: '1.8rem',
+      },
+
+      '.head': {
+        marginBottom: '1.6rem',
+      },
+
+      '.days': {
+        '--gap': '0.375rem 1.833rem',
+      },
+
+      '.day': {
+        fontSize: '1.4rem',
+        width: '3rem',
+        height: '3rem',
+      },
+
+      '.hour': {
+        fontSize: '1.4rem',
+      },
+    },
+  })
+
+  export interface CalendarPickedDate {
+    day: number
+    month: number
+    year: number
+    hours: string
+  }
+
+  export interface CalendarEvents {
+    calendarPick: CustomEvent<CalendarPickedDate>
+  }
+
+  export class CalendarElement extends HTMLElement {
+    #counter = 0
+    #todayDate = new Date()
+    #todayYear = this.#todayDate.getFullYear()
+    #todayMonth = this.#todayDate.getMonth()
+
+    #monthNameElement: HTMLElement
+    #arrowLeftElement: HTMLElement
+    #arrowRightElement: HTMLElement
+    #daysListElement: HTMLElement
+    #hoursListElement: HTMLElement
+
+    #dayElements: Array<HTMLElement> = []
+    #hourElements: Array<HTMLElement> = []
+
+    #pickedDate: CalendarPickedDate = {
+      day: 1,
+      month: 1,
+      year: 1,
+      hours: '',
+    }
+
+    constructor() {
+      super()
+
+      const shadow = this.attachShadow({ mode: 'open' })
+
+      shadow.adoptedStyleSheets = [...shadow.adoptedStyleSheets, style]
+
+      shadow.innerHTML = `
+        <div class="side month">
+          <div class="head">
+            <button class="arrow arrow-left">
+              <svg><use xlink:href="/sprite.svg#sprite:tailless-arrow"></svg>
+            </button>
+            <div class="month-name"></div>
+            <button class="arrow arrow-right">
+              <svg><use xlink:href="/sprite.svg#sprite:tailless-arrow"></svg>
+            </button>
+            </button>
+          </div>
+          <div class="days">
+            <div class="days-names">
+              <div class="day">Пн.</div>
+              <div class="day">Вт.</div>
+              <div class="day">Ср.</div>
+              <div class="day">Чт.</div>
+              <div class="day">Вт.</div>
+              <div class="day">Сб.</div>
+              <div class="day">Вс.</div>
+            </div>
+            <div class="days-list"></div>
+          </div>
+        </div>
+        <div class="side hours"></div>
+      `
+
+      this.#monthNameElement = shadow.querySelector('.month-name')!
+      this.#arrowLeftElement = shadow.querySelector('.arrow-left')!
+      this.#arrowRightElement = shadow.querySelector('.arrow-right')!
+      this.#daysListElement = shadow.querySelector('.days-list')!
+      this.#hoursListElement = shadow.querySelector('.hours')!
+
+      this.#counter = this.#todayMonth
+
+      this.#arrowLeftElement.addEventListener('click', () => {
+        this.shiftMonth(-1)
+      })
+
+      this.#arrowRightElement.addEventListener('click', () => {
+        this.shiftMonth(1)
+      })
+
+      this.#createHours()
+      this.#createMonth()
+    }
+
+    public setMonth(value: number) {
+      this.#counter = clamp(value, this.#todayMonth, Infinity)
+
+      this.#createMonth()
+    }
+
+    public shiftMonth(value: number) {
+      this.setMonth(this.#counter + value)
+    }
+
+    #createMonth() {
+      let monthIndex = this.#counter
+      const year = this.#todayYear + Math.floor(monthIndex / 12)
+      monthIndex = monthIndex % 12
+      monthIndex = monthIndex < 0 ? 12 + monthIndex : monthIndex
+
+      const date = new Date(year, monthIndex, 1)
+      const monthName = date.toLocaleString('default', { month: 'long' })
+      const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
+      const offsetIndex = (date.getDay() + 6) % 7
+
+      this.#monthNameElement.textContent = `${capitalize(monthName)} ${year}`
+
+      const dayElements: Array<HTMLElement> = []
+
+      let firstActiveDayNumber: number = 0
+
+      for (let dayIndex = 0; dayIndex < daysInMonth + offsetIndex; dayIndex++) {
+        const element = document.createElement('div')
+        element.className = 'day'
+
+        if (dayIndex >= offsetIndex) {
+          const dayNumber = dayIndex - offsetIndex + 1
+          const dayString = dayNumber.toString()
+
+          const date = new Date(year, monthIndex, dayNumber + 1)
+
+          if (date.getTime() < this.#todayDate.getTime()) {
+            element.classList.add('inactive')
+          } else if (!firstActiveDayNumber) {
+            firstActiveDayNumber = dayNumber
+          }
+
+          element.textContent = dayString
+
+          element.setAttribute('data-value', dayString)
+        }
+
+        dayElements.push(element)
+      }
+
+      this.#daysListElement.innerHTML = ''
+      this.#daysListElement.append(...dayElements)
+
+      this.#dayElements.forEach((element) => {
+        element.removeEventListener('click', this.#dayClickListener)
+      })
+
+      this.#dayElements = dayElements
+
+      this.#dayElements.forEach((element) => {
+        element.addEventListener('click', this.#dayClickListener)
+      })
+
+      this.classList.toggle('current-month', this.#counter === this.#todayMonth)
+
+      this.#pickedDate.month = date.getMonth() + 1
+      this.#pickedDate.year = date.getFullYear()
+      this.#pickDay(firstActiveDayNumber)
+    }
+
+    #createHours() {
+      const hoursStart = this.getAttribute('hours-start') || '10:00'
+      const hoursEnd = this.getAttribute('hours-end') || '22:00'
+
+      const timeSlots = this.#generateTimeSlots(hoursStart, hoursEnd)
+
+      this.#hourElements.forEach((element) => {
+        element.removeEventListener('click', this.#hourClickListener)
+      })
+
+      this.#hourElements = []
+
+      const now = this.#getCurrentTimeInMinutes()
+
+      timeSlots.forEach((timeSlot) => {
+        const element = document.createElement('div')
+        element.className = 'hour'
+        element.textContent = timeSlot
+        element.setAttribute('data-value', timeSlot)
+
+        const [startTime] = timeSlot.split(' - ')
+        const slotTimeInMinutes = this.#parseTime(startTime!)
+
+        if (slotTimeInMinutes <= now) {
+          element.classList.add('inactive')
+        }
+
+        this.#hourElements.push(element)
+      })
+
+      this.#hoursListElement.append(...this.#hourElements)
+
+      const firstActiveElement = this.#hourElements.find(
+        (element) => !element.classList.contains('inactive'),
+      )
+
+      this.#pickHour(firstActiveElement!.getAttribute('data-value')!)
+
+      this.#hourElements.forEach((element) => {
+        element.addEventListener('click', this.#hourClickListener)
+      })
+    }
+
+    #dayClickListener = (e: Event) => {
+      const ct = e.currentTarget as HTMLElement
+      this.#pickDay(parseInt(ct.getAttribute('data-value')!))
+    }
+
+    #pickDay(number: number) {
+      this.#pickedDate.day = number
+
+      this.#dayElements.forEach((element) => {
+        if (element.getAttribute('data-value') === number.toString()) {
+          element.classList.add('picked')
+        } else {
+          element.classList.remove('picked')
+        }
+      })
+
+      dispatchEvent(this, 'calendarPick', {
+        detail: this.#pickedDate,
+      })
+    }
+
+    #hourClickListener = (e: Event) => {
+      const ct = e.currentTarget as HTMLElement
+      this.#pickHour(ct.getAttribute('data-value')!)
+    }
+
+    #pickHour(value: string) {
+      this.#pickedDate.hours = value
+
+      this.#hourElements.forEach((element) => {
+        if (element.getAttribute('data-value') === value.toString()) {
+          element.classList.add('picked')
+        } else {
+          element.classList.remove('picked')
+        }
+      })
+
+      dispatchEvent(this, 'calendarPick', {
+        detail: this.#pickedDate,
+      })
+    }
+
+    #getCurrentTimeInMinutes() {
+      const now = new Date()
+      return now.getHours() * 60 + now.getMinutes()
+    }
+
+    #parseTime(timeStr: string): number {
+      const [hours, minutes] = timeStr.split(':').map(Number)
+      return (hours || 0) * 60 + (minutes || 0)
+    }
+
+    #generateTimeSlots(hoursStart: string, hoursEnd: string): string[] {
+      const start = this.#parseTime(hoursStart)
+      let end = this.#parseTime(hoursEnd)
+
+      if (end <= start) {
+        end += 1440
+      }
+
+      const slots: string[] = []
+
+      for (let time = start; time < end; time += 30) {
+        const startTime = formatTime(time)
+        const endTime = formatTime(time + 30)
+        slots.push(`${startTime} - ${endTime}`)
+      }
+
+      return slots
+
+      function formatTime(totalMinutes: number): string {
+        const adjustedMinutes = totalMinutes % 1440
+        const hours = Math.floor(adjustedMinutes / 60)
+        const minutes = adjustedMinutes % 60
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+      }
+    }
+  }
+
+  if (!customElements.get('e-calendar')) {
+    customElements.define('e-calendar', CalendarElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-calendar': CalendarElement
+    }
+
+    interface HTMLElementEventMap extends CalendarEvents {}
+  }
+</script>
