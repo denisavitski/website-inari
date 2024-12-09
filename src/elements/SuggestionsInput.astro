@@ -11,7 +11,7 @@ const {
   class: className,
   value,
   name = 'suggestions-input',
-  placeholder = 'Placeholder',
+  placeholder = '',
   font = 'f-d-16-r f-d-14-r',
   ...rest
 } = Astro.props
@@ -45,6 +45,7 @@ const {
   }
 
   .suggestions-input__input {
+    width: 100%;
     height: var(---height, 4.3rem);
     padding: var(--padding, 1.2rem 1.6rem);
 
@@ -149,6 +150,14 @@ const {
     #inputElement: HTMLInputElement | null = null
     #suggestionsContainerElement: HTMLElement | null = null
     #suggestions: Array<Suggestion> = []
+
+    public get inputElement() {
+      return this.#inputElement
+    }
+
+    public get value() {
+      return this.#inputElement?.value
+    }
 
     public suggest(parameters: Array<SuggestParameters>) {
       this.#suggestions.forEach((suggestion) => {

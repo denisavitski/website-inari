@@ -1,8 +1,10 @@
 ---
 import Button from '@elements/Button.astro'
+import Icon from '@elements/Icon.astro'
 import Modal from '@elements/Modal.astro'
 import PickupPoint from '@elements/PickupPoint.astro'
 import RadioButton from '@elements/RadioButton.astro'
+import SuggestionsInput from '@elements/SuggestionsInput.astro'
 
 export const modal = '#order-type'
 ---
@@ -22,16 +24,18 @@ export const modal = '#order-type'
       <e-input-group class="order-type__input-group">
         <RadioButton
           class="order-type__button"
-          value="Доставка"
+          value="delivery"
           name="order-type"
           theme={'fill'}
+          title="Доставка"
           checked
         />
         <RadioButton
           class="order-type__button"
-          value="Самовывоз"
+          value="pickup"
           name="order-type"
           theme={'fill'}
+          title="Самовывоз"
         />
       </e-input-group>
 
@@ -39,16 +43,49 @@ export const modal = '#order-type'
         <div
           class="order-type__delivery"
           aria-hidden="false"
+          data-order-type="delivery"
         >
           <p class="f-d-16-r f-m-14-r order-type__delivery__description"
             >Хотим убедиться, что&nbsp;вы&nbsp;находитесь в&nbsp;зоне доставки,
             введите&nbsp;пожалуйста адрес</p
           >
+
+          <SuggestionsInput
+            class="order-type__delivery__input"
+            placeholder="Адрес"
+          />
+
+          <div
+            class="f-d-16-r f-m-14-r rder-type__delivery__price"
+            aria-hidden="true"
+          >
+            <div
+              class="order-type__delivery__price__zone-1"
+              data-price-zone="1"
+              aria-hidden="true"
+              >Бесплатная доставка по данному адресу при заказе на сумму <b>от 1 500 рублей</b></div
+            >
+
+            <div
+              class="order-type__delivery__price__zone-2"
+              data-price-zone="2"
+              aria-hidden="true"
+              >Бесплатная доставка по данному адресу при заказе на сумму <b>от 2 500 рублей</b></div
+            >
+
+            <div
+              class="order-type__delivery__price__zone-3"
+              data-price-zone="3"
+              aria-hidden="true"
+              >Стоимость доставки по данному адресу — <b>400 рублей</b>, независимо от суммы заказа</div
+            >
+          </div>
         </div>
 
         <div
           class="order-type__pickup"
           aria-hidden="true"
+          data-order-type="pickup"
         >
           <e-input-group class="order-type__pickup__input-group">
             <PickupPoint
@@ -81,8 +118,24 @@ export const modal = '#order-type'
               distance="22 км"
             />
           </e-input-group>
-          <Button class="order-type__pickup__continue">Продолжить</Button>
         </div>
+      </div>
+
+      <div class="order-type__bottom">
+        <button class="order-type__location">
+          <Icon
+            name="geo-1"
+            class="order-type__location__icon"
+          />
+          <span class="f-d-16-r f-d-14-r order-type__location__title"
+            >Определить местоположение</span
+          >
+        </button>
+        <Button
+          class="order-type__continue"
+          modal="order-type"
+          >Продолжить</Button
+        >
       </div>
     </div>
 
@@ -96,6 +149,20 @@ export const modal = '#order-type'
 
   .order-type__content {
     width: 120rem;
+    min-height: 52rem;
+
+    display: flex;
+    gap: 5rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      gap: 0;
+      flex-direction: column;
+    }
+  }
+
+  .order-type__left {
+    width: 52.5rem;
 
     display: flex;
     flex-direction: column;
@@ -103,20 +170,245 @@ export const modal = '#order-type'
 
     @media (max-width: 768px) {
       width: 100%;
+      display: contents;
+    }
+  }
+
+  .order-type__title {
+    text-align: center;
+
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .order-type__input-group {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+
+    margin-bottom: 2.4rem;
+  }
+
+  .order-type__button {
+  }
+
+  .order-type__variants {
+  }
+
+  .order-type__delivery {
+    display: none;
+
+    &[aria-hidden='false'] {
+      display: block;
+    }
+  }
+
+  .order-type__delivery__description {
+    text-align: center;
+    margin-bottom: 1.6rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .order-type__delivery__input {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+
+    margin-bottom: 1.6rem;
+  }
+
+  .order-type__delivery__price {
+    &[aria-hidden='true'] {
+      display: none;
+    }
+
+    b {
+      color: var(--color-primary-3);
+    }
+  }
+
+  [data-price-zone] {
+    &[aria-hidden='true'] {
+      display: none;
+    }
+  }
+
+  .order-type__delivery__price__zone-1 {
+  }
+
+  .order-type__delivery__price__zone-2 {
+  }
+
+  .order-type__delivery__price__zone-3 {
+  }
+
+  .order-type__pickup {
+    display: none;
+    flex-direction: column;
+
+    &[aria-hidden='false'] {
+      display: flex;
+    }
+  }
+
+  .order-type__pickup__input-group {
+    display: grid;
+    gap: 1rem;
+
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      gap: 0.8rem;
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .order-type__pickup__point {
+    width: 100%;
+  }
+
+  .order-type__bottom {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 1.6rem;
+
+    @media (max-width: 768px) {
+      display: contents;
+    }
+  }
+
+  .order-type__location {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0.4rem;
+    }
+  }
+
+  .order-type__location__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+
+    fill: var(--color-primary-2);
+  }
+
+  .order-type__continue {
+    --type: close;
+    --height: 4.3rem;
+
+    .order-type.invalid-address & {
+      opacity: 0.4;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-top: 2.4rem;
+      order: 1;
+    }
+  }
+
+  .order-type__map {
+    width: 52.5rem;
+    height: 50rem;
+
+    border-radius: var(--border-radius-2);
+    background-color: var(--color-secondary-2);
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 25rem;
     }
   }
 </style>
 
 <script>
+  import type { SuggestionsInputElement } from '@elements/SuggestionsInput.astro.0.mjs'
+  import type { InputGroupElement } from '@lib/InputGroupElement'
   import { SwipePopoverElement } from '@lib/SwipePopoverElement'
+  import { orderStore } from '@stores/orderStore'
 
   export class OrderTypeElement extends SwipePopoverElement {
+    #orderVariantElements: Array<HTMLElement> = []
+    #orderTypeInputGroupElement: InputGroupElement<'delivery' | 'pickup'> | null = null
+    #priceZoneElements: Array<HTMLElement> = []
+    #deliveryInput: SuggestionsInputElement | null = null
+
     protected override connectedCallback() {
       super.connectedCallback()
+
+      this.#orderVariantElements = [...this.querySelectorAll<HTMLElement>('[data-order-type]')]
+
+      this.#orderTypeInputGroupElement = this.querySelector('.order-type__input-group')
+
+      this.#orderTypeInputGroupElement?.addEventListener(
+        'inputGroupValueChange',
+        this.#orderTypeInputGroupChangeListener,
+      )
+
+      this.#priceZoneElements = [...this.querySelectorAll<HTMLElement>('[data-price-zone]')]
+
+      this.#deliveryInput = this.querySelector('.order-type__delivery__input')
+
+      this.#deliveryInput?.addEventListener('input', this.#deliveryInputListener)
+
+      this.#orderTypeInputGroupChangeListener()
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
+
+      this.#orderTypeInputGroupElement?.removeEventListener(
+        'inputGroupValueChange',
+        this.#orderTypeInputGroupChangeListener,
+      )
+
+      this.#deliveryInput?.removeEventListener('input', this.#deliveryInputListener)
+    }
+
+    #orderTypeInputGroupChangeListener = () => {
+      const value = this.#orderTypeInputGroupElement!.value
+
+      orderStore.setType(value || 'delivery')
+
+      this.#orderVariantElements.forEach((element) => {
+        if (element.getAttribute('data-order-type') === value) {
+          element.ariaHidden = 'false'
+        } else {
+          element.ariaHidden = 'true'
+        }
+      })
+
+      this.#checkValidAddress()
+    }
+
+    #checkValidAddress() {
+      if (!this.#deliveryInput) {
+        return
+      }
+
+      if (orderStore.type === 'delivery' && !this.#deliveryInput.value) {
+        this.classList.add('invalid-address')
+      } else {
+        this.classList.remove('invalid-address')
+      }
+    }
+
+    #deliveryInputListener = () => {
+      this.#checkValidAddress()
     }
   }
 

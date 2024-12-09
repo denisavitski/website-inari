@@ -1,13 +1,13 @@
 import { dispatchEvent } from 'aptechka/utils'
 
 export interface InputGroupEvents {
-  inputGroupValueChange: CustomEvent<string>
+  inputGroupValueChange: CustomEvent<string | undefined>
 }
 
-export class InputGroupElement extends HTMLElement {
+export class InputGroupElement<T extends string = string> extends HTMLElement {
   #inputElements: Array<HTMLInputElement> = []
 
-  #value: string = ''
+  #value: T | undefined
   #input: HTMLInputElement | null = null
   #name: string = ''
 
@@ -72,9 +72,9 @@ export class InputGroupElement extends HTMLElement {
 
     if (input) {
       this.#input = input
-      this.#value = input.value.trim()
+      this.#value = input.value.trim() as T
     } else {
-      this.#value = ''
+      this.#value = undefined
     }
   }
 }
