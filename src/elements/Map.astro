@@ -1,0 +1,173 @@
+---
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<e-map
+  {...rest}
+  class:list={['class', className]}
+>
+</e-map>
+
+<style is:global>
+  e-map {
+    position: relative;
+    display: block;
+  }
+</style>
+
+<script>
+  import { ticker } from 'aptechka/ticker'
+
+  export class MapElement extends HTMLElement {
+    #map: any = null
+    #searchControl: any = null
+    #searchResults: any = null
+
+    public get isReady() {
+      return window.ymaps && this.#map
+    }
+
+    public async search(value: string): Promise<Array<string>> {
+      if (this.isReady) {
+        this.#searchResults.removeAll()
+
+        await this.#searchControl.search(value)
+
+        const resultArray = this.#searchControl.getResultsArray()
+
+        if (resultArray.length === 1) {
+          resultArray.forEach((result: any) => {
+            this.#searchResults.add(result)
+            this.#map.panTo(result.geometry.getCoordinates())
+          })
+        }
+
+        return resultArray.map((result: any) => result.properties.get('text'))
+      }
+
+      return []
+    }
+
+    public async findLocation() {
+      if (this.isReady) {
+        try {
+          const location = await window.ymaps.geolocation.get({
+            provider: 'browser',
+          })
+
+          this.#map.panTo(location.geoObjects.position)
+
+          // Получаем координаты местоположения
+          const coordinates = location.geoObjects.get(0).geometry.getCoordinates()
+
+          // Геокодируем координаты, чтобы получить адрес
+          const geocoder = await window.ymaps.geocode(coordinates)
+          const firstGeoObject = geocoder.geoObjects.get(0)
+
+          if (firstGeoObject) {
+            return firstGeoObject.getAddressLine()
+          } else {
+            return ''
+          }
+        } catch (e) {
+          console.error(e)
+          return ''
+        }
+      }
+    }
+
+    protected async connectedCallback() {
+      ticker.subscribe(this.#scriptReadyListener)
+    }
+
+    protected disconnectedCallback() {
+      this.#map?.destroy()
+      ticker.unsubscribe(this.#scriptReadyListener)
+    }
+
+    async #createMap() {
+      const geo = await fetch('/map.geojson')
+      const geojson = await geo.json()
+
+      if (!this.isConnected) {
+        return
+      }
+
+      this.#map = new window.ymaps.Map(this, {
+        center: [31.014281, 52.42416],
+        zoom: 9,
+        behaviors: ['default'],
+        controls: [],
+      })
+
+      this.#searchControl = new window.ymaps.control.SearchControl({
+        options: {
+          noPlacemark: true,
+        },
+      })
+
+      this.#searchResults = new window.ymaps.GeoObjectCollection(null, {
+        hintContentLayout: window.ymaps.templateLayoutFactory.createClass('$[properties.name]'),
+      })
+
+      this.#map.geoObjects.add(this.#searchResults)
+
+      // for (let i = 0; i < searchControl.getResultsCount(); i++) {
+      //   searchControl.getResult(i).then((result) => {
+      //     results.push(result.properties.get('name'))
+
+      //     console.log(searchControl.getResultsCount())
+
+      //     if (i === searchControl.getResultsCount() - 1) {
+      //       // Отображаем результаты
+      //       console.log('Результаты поиска:', results)
+      //     }
+      //   })
+      // }
+
+      const deliveryZones = window.ymaps.geoQuery(geojson).addToMap(this.#map)
+
+      deliveryZones.each((obj: any) => {
+        obj.options.set({
+          fillColor: obj.properties.get('fill'),
+          fillOpacity: obj.properties.get('fill-opacity'),
+          strokeColor: obj.properties.get('stroke'),
+          strokeWidth: obj.properties.get('stroke-width'),
+          strokeOpacity: obj.properties.get('stroke-opacity'),
+        })
+
+        obj.properties.set('balloonContent', obj.properties.get('description'))
+      })
+
+      // this.#map.behaviors.disable('scrollZoom')
+    }
+
+    #scriptReadyListener = () => {
+      if (window.ymaps) {
+        window.ymaps.ready(() => {
+          this.#createMap()
+        })
+
+        ticker.unsubscribe(this.#scriptReadyListener)
+      }
+    }
+  }
+
+  if (!customElements.get('e-map')) {
+    customElements.define('e-map', MapElement)
+  }
+
+  declare global {
+    interface Window {
+      ymaps: any
+    }
+
+    interface HTMLElementTagNameMap {
+      'e-map': MapElement
+    }
+  }
+</script>

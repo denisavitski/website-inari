@@ -1,10 +1,11 @@
 ---
 import Button from '@elements/Button.astro'
 import Icon from '@elements/Icon.astro'
+import LocationButton from '@elements/LocationButton.astro'
+import Map from '@elements/Map.astro'
 import Modal from '@elements/Modal.astro'
 import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
 import PickupPoint from '@elements/PickupPoint.astro'
-import SuggestionsInput from '@elements/SuggestionsInput.astro'
 
 export const modal = '#order-type'
 ---
@@ -35,9 +36,10 @@ export const modal = '#order-type'
             введите&nbsp;пожалуйста адрес</p
           >
 
-          <SuggestionsInput
-            class="order-type__delivery__input"
-            placeholder="Адрес"
+          <input
+            type="text"
+            class="f-d-16-r f-m-14-r order-type__delivery__input"
+            placeholder="Улица"
           />
 
           <div
@@ -106,15 +108,7 @@ export const modal = '#order-type'
       </div>
 
       <div class="order-type__bottom">
-        <button class="order-type__location">
-          <Icon
-            name="geo-1"
-            class="order-type__location__icon"
-          />
-          <span class="f-d-16-r f-d-14-r order-type__location__title"
-            >Определить местоположение</span
-          >
-        </button>
+        <LocationButton class="order-type__location" />
         <Button
           class="order-type__continue"
           modal="order-type"
@@ -123,7 +117,7 @@ export const modal = '#order-type'
       </div>
     </div>
 
-    <div class="order-type__map"></div>
+    <Map class="order-type__map" />
   </div>
 </Modal>
 
@@ -204,7 +198,15 @@ export const modal = '#order-type'
     z-index: 1;
     width: 100%;
 
+    height: 4.3rem;
     margin-bottom: 1.6rem;
+    padding: 1.2rem 1.6rem;
+    border-radius: var(--border-radius-1);
+    background-color: var(--color-secondary-2);
+
+    @media (max-width: 768px) {
+      height: 4.1rem;
+    }
   }
 
   .order-type__delivery__price {
@@ -272,20 +274,9 @@ export const modal = '#order-type'
   }
 
   .order-type__location {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8rem;
-
     @media (max-width: 768px) {
       margin-bottom: 0.4rem;
     }
-  }
-
-  .order-type__location__icon {
-    width: 2.4rem;
-    height: 2.4rem;
-
-    fill: var(--color-primary-2);
   }
 
   .order-type__continue {
@@ -311,6 +302,7 @@ export const modal = '#order-type'
 
     border-radius: var(--border-radius-2);
     background-color: var(--color-secondary-2);
+    overflow: hidden;
 
     @media (max-width: 768px) {
       width: 100%;
@@ -320,18 +312,23 @@ export const modal = '#order-type'
 </style>
 
 <script>
-  import type { SuggestionsInputElement } from '@elements/SuggestionsInput.astro.0.mjs'
   import type { ToggleElement } from '@lib/ToggleElement'
   import { SwipePopoverElement } from '@lib/SwipePopoverElement'
   import { orderStore } from '@stores/orderStore'
   import type { InputGroupElement } from '@lib/InputGroupElement'
+  import type { MapElement } from '@elements/Map.astro.0.mjs'
+  import { debounce } from 'aptechka/utils'
 
   export class OrderTypeElement extends SwipePopoverElement {
     #orderVariantElements: Array<HTMLElement> = []
     #orderTypeToggleElement: ToggleElement<'delivery' | 'pickup'> | null = null
     #priceZoneElements: Array<HTMLElement> = []
-    #deliveryInputElement: SuggestionsInputElement | null = null
+    #deliveryInputElement: HTMLInputElement | null = null
     #pickupInputElement: InputGroupElement | null = null
+    #mapElement: MapElement | null = null
+    #locationButtonElement: HTMLElement | null = null
+
+    #findLocationAttempts = 0
 
     constructor() {
       super()
@@ -339,7 +336,7 @@ export const modal = '#order-type'
       this.addEventListener('popoverOpened', () => {
         if (orderStore.type === 'delivery') {
           this.#deliveryInputElement?.dispatchEvent(new Event('change'))
-          this.#deliveryInputElement?.inputElement?.focus()
+          this.#deliveryInputElement?.focus()
         } else {
           this.#pickupInputElement?.dispatchEvent(new CustomEvent('inputGroupValueChange'))
         }
@@ -363,6 +360,11 @@ export const modal = '#order-type'
       this.#pickupInputElement = this.querySelector('.order-type__pickup__input-group')
       this.#pickupInputElement?.addEventListener('inputGroupValueChange', this.#pickupInputListener)
 
+      this.#mapElement = this.querySelector('e-map')
+
+      this.#locationButtonElement = this.querySelector('.order-type__location')
+      this.#locationButtonElement?.addEventListener('click', this.#locationButtonListener)
+
       this.#orderTypeToggleListener()
     }
 
@@ -381,6 +383,8 @@ export const modal = '#order-type'
         'inputGroupValueChange',
         this.#pickupInputListener,
       )
+
+      this.#locationButtonElement?.removeEventListener('click', this.#locationButtonListener)
     }
 
     #orderTypeToggleListener = () => {
@@ -411,10 +415,15 @@ export const modal = '#order-type'
       }
     }
 
-    #deliveryInputListener = (e: Event) => {
-      const ct = e.currentTarget as HTMLInputElement
+    #deliveryInputListener = debounce((e: Event) => {
+      const ct = e.target as HTMLInputElement
+      this.#searchForAddress(ct.value)
+    }, 500)
 
-      orderStore.setAddress(ct.value)
+    async #searchForAddress(value: string) {
+      await this.#mapElement?.search(value)
+
+      orderStore.setAddress(value)
 
       this.#checkValidAddress()
     }
@@ -422,6 +431,24 @@ export const modal = '#order-type'
     #pickupInputListener = () => {
       orderStore.setAddress(this.#pickupInputElement?.value || '')
       this.#checkValidAddress()
+    }
+
+    #locationButtonListener = async () => {
+      if (this.#mapElement) {
+        const attempt = ++this.#findLocationAttempts
+
+        const location = await this.#mapElement.findLocation()
+
+        if (attempt === this.#findLocationAttempts) {
+          if (this.#deliveryInputElement) {
+            this.#deliveryInputElement.value = location
+            this.#deliveryInputElement.dispatchEvent(new Event('change'))
+          }
+          if (!location) {
+            alert('Не удалось установить ваше местоположение')
+          }
+        }
+      }
     }
   }
 

@@ -1,0 +1,35 @@
+---
+import Icon from './Icon.astro'
+
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<button
+  {...rest}
+  class:list={['location-button', className]}
+>
+  <Icon
+    name="geo-1"
+    class="location-button__icon"
+  />
+  <span class="f-d-16-r f-d-14-r location-button__title">Определить местоположение</span>
+</button>
+
+<style is:global>
+  .location-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .location-button__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+
+    fill: var(--color-primary-2);
+  }
+</style>

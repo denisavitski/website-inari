@@ -1,6 +1,7 @@
 ---
 import type { ImageDataProps } from '@elements/Image.astro'
 import Image from '@elements/Image.astro'
+import Map from '@elements/Map.astro'
 
 export interface Props {
   class?: string
@@ -158,7 +159,7 @@ const {
       </ul>
     </div>
 
-    <div class="delivery__area__map"></div>
+    <Map class="delivery__area__map" />
   </div>
 
   <div class="delivery__payment">
@@ -283,6 +284,7 @@ const {
 
     border-radius: var(--border-radius-2);
     background-color: var(--color-secondary-3);
+    overflow: hidden;
 
     @media (max-width: 768px) {
       width: 100%;

@@ -2,9 +2,10 @@
 export interface Props {
   class?: string
   inputStyles?: string
+  name?: string
 }
 
-const { class: className, inputStyles, ...rest } = Astro.props
+const { class: className, inputStyles, name = 'Адрес', ...rest } = Astro.props
 ---
 
 <e-address-input
@@ -14,13 +15,13 @@ const { class: className, inputStyles, ...rest } = Astro.props
 >
   <input
     class="visually-hidden"
-    name="Адрес"
+    name={name}
     required
-    title="Адрес"
+    title={name}
     tabindex="-1"
   />
   <div class:list={['address-input__input', inputStyles]}>
-    <div class="address-input__value">Адрес</div>
+    <div class="address-input__value">{name}</div>
     <span class="address-input__change-button">Изменить</span>
   </div>
 </e-address-input>
@@ -99,7 +100,7 @@ const { class: className, inputStyles, ...rest } = Astro.props
       }
 
       if (this.#valueElement) {
-        this.#valueElement.textContent = orderStore.address || 'Адрес'
+        this.#valueElement.textContent = orderStore.address || this.#inputElement?.name || ''
       }
 
       this.#inputElement?.dispatchEvent(new Event('change'))

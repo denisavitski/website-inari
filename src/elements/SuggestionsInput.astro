@@ -159,6 +159,13 @@ const {
       return this.#inputElement?.value
     }
 
+    public set value(value: string | undefined) {
+      if (this.#inputElement) {
+        this.#inputElement.value = value || ''
+        this.#inputElement.dispatchEvent(new Event('change', { bubbles: true }))
+      }
+    }
+
     public suggest(parameters: Array<SuggestParameters>) {
       this.#suggestions.forEach((suggestion) => {
         suggestion.element.addEventListener('pointerdown', this.#suggestionClickListener)
@@ -167,9 +174,10 @@ const {
       this.#suggestions = []
 
       parameters.forEach((parameter) => {
-        const suggestion = new Suggestion(parameter)
-
-        this.#suggestions.push(suggestion)
+        if (parameter.value !== this.value) {
+          const suggestion = new Suggestion(parameter)
+          this.#suggestions.push(suggestion)
+        }
       })
 
       if (this.#suggestionsContainerElement) {
@@ -219,7 +227,7 @@ const {
       if (suggestion) {
         if (this.#inputElement) {
           this.#inputElement.value = suggestion.value
-          this.#inputElement.dispatchEvent(new Event('change'))
+          this.#inputElement.dispatchEvent(new Event('change', { bubbles: true }))
         }
 
         if (this.#suggestionsContainerElement) {

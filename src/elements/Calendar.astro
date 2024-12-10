@@ -251,8 +251,8 @@
         this.shiftMonth(1)
       })
 
-      this.#createMonth()
       this.#createHours()
+      this.#createMonth()
     }
 
     public get pickedDate() {
@@ -328,6 +328,8 @@
       this.#pickedDate.month = date.getMonth() + 1
       this.#pickedDate.year = date.getFullYear()
       this.#pickDay(firstActiveDayNumber)
+
+      this.#setActiveHours()
     }
 
     #createHours() {
@@ -342,35 +344,66 @@
 
       this.#hourElements = []
 
-      const now = this.#getCurrentTimeInMinutes()
-
       timeSlots.forEach((timeSlot) => {
         const element = document.createElement('div')
         element.className = 'hour'
         element.textContent = timeSlot
         element.setAttribute('data-value', timeSlot)
 
-        const [startTime] = timeSlot.split(' - ')
-        const slotTimeInMinutes = this.#parseTime(startTime!)
-
-        if (slotTimeInMinutes <= now) {
-          element.classList.add('inactive')
-        }
-
         this.#hourElements.push(element)
       })
 
       this.#hoursListElement.append(...this.#hourElements)
 
-      const firstActiveElement = this.#hourElements.find(
-        (element) => !element.classList.contains('inactive'),
-      )
-
-      this.#pickHour(firstActiveElement!.getAttribute('data-value')!)
-
       this.#hourElements.forEach((element) => {
         element.addEventListener('click', this.#hourClickListener)
       })
+    }
+
+    #setActiveHours() {
+      const lastElement = this.#hourElements[this.#hourElements.length - 1]
+
+      const nowDate = new Date()
+
+      if (lastElement) {
+        this.#hourElements.forEach((element) => {
+          const time = this.#getHourElementTime(element)
+
+          const elementDate = new Date(
+            this.#pickedDate.year,
+            this.#pickedDate.month - 1,
+            this.#pickedDate.day,
+            time?.hours,
+            time?.minutes,
+          )
+
+          if (elementDate.getTime() <= nowDate.getTime()) {
+            element.classList.add('inactive')
+          } else {
+            element.classList.remove('inactive')
+          }
+        })
+      }
+
+      const el = this.#hourElements.find((el) => !el.classList.contains('inactive'))
+
+      if (el) {
+        this.#pickHour(el.getAttribute('data-value')!)
+      }
+    }
+
+    #getHourElementTime(element: HTMLElement) {
+      const timeSlot = element.getAttribute('data-value')
+
+      if (timeSlot) {
+        const [startTime] = timeSlot.split(' - ')
+
+        if (startTime) {
+          return this.#parseTime(startTime)
+        }
+      }
+
+      return null
     }
 
     #dayClickListener = (e: Event) => {
@@ -415,19 +448,19 @@
       })
     }
 
-    #getCurrentTimeInMinutes() {
-      const now = new Date()
-      return now.getHours() * 60 + now.getMinutes()
-    }
-
-    #parseTime(timeStr: string): number {
+    #parseTime(timeStr: string) {
       const [hours, minutes] = timeStr.split(':').map(Number)
-      return (hours || 0) * 60 + (minutes || 0)
+
+      const obj = { hours: hours || 0, minutes: minutes || 0, combined: 0 }
+
+      obj.combined = obj.hours * 60 + obj.minutes
+
+      return obj
     }
 
     #generateTimeSlots(hoursStart: string, hoursEnd: string): string[] {
-      const start = this.#parseTime(hoursStart)
-      let end = this.#parseTime(hoursEnd)
+      const start = this.#parseTime(hoursStart).combined
+      let end = this.#parseTime(hoursEnd).combined
 
       if (end <= start) {
         end += 1440
