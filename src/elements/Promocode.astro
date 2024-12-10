@@ -1,0 +1,191 @@
+---
+import Form from './Form.astro'
+
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<e-promocode
+  {...rest}
+  class:list={['f-d-16-r f-m-14-r promocode', className]}
+>
+  <Form class="promocode__form">
+    <input
+      name="promo-code"
+      required
+      type="text"
+      class="promocode__input"
+      placeholder="Промокод"
+    />
+    <button
+      class="promocode__button"
+      type="submit"
+      >Применить</button
+    >
+  </Form>
+  <span class="promocode__info">Промокод применен</span>
+</e-promocode>
+
+<style is:global>
+  .promocode {
+    display: block;
+  }
+
+  .promocode__form {
+    position: relative;
+
+    width: 100%;
+    height: 5.1rem;
+
+    background-color: var(--color-secondary-1);
+    border-radius: var(--border-radius-1);
+
+    @media (max-width: 768px) {
+      height: 4.1rem;
+    }
+
+    margin-bottom: 1rem;
+  }
+
+  .promocode__input {
+    width: 78%;
+    height: 100%;
+
+    padding-left: 2.4rem;
+
+    border-radius: var(--border-radius-1);
+
+    @media (max-width: 768px) {
+      padding-left: 1.6rem;
+      width: 68%;
+    }
+  }
+
+  .promocode__info {
+    display: none;
+
+    .promocode.pending &,
+    .promocode.success &,
+    .promocode.error & {
+      display: block;
+    }
+
+    .promocode.success & {
+      color: var(--color-secondary-7);
+    }
+
+    .promocode.error & {
+      color: var(--color-primary-3);
+    }
+  }
+
+  .promocode__button {
+    color: var(--color-secondary-6);
+
+    position: absolute;
+    top: 50%;
+    right: 2.4rem;
+
+    transform: translateY(-50%);
+
+    @media (max-width: 768px) {
+      right: 1.6rem;
+    }
+
+    .promocode.pending & {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+</style>
+
+<script>
+  import { wait } from 'aptechka/utils'
+  import type { FormElement } from './Form.astro.0.mts'
+  import { orderStore } from '@stores/orderStore'
+  import { ClassLinkedStatus } from 'aptechka/class-linked-status'
+
+  export class PromocodeElement extends HTMLElement {
+    #formElement: FormElement | null = null
+    #infoElement: HTMLElement | null = null
+    #status = new ClassLinkedStatus(this, { success: false, error: false, pending: false })
+
+    protected connectedCallback() {
+      this.#formElement = this.querySelector('e-form')
+      this.#formElement?.addEventListener('formSubmit', this.#formSubmitListener)
+      this.#formElement?.addEventListener('formSuccess', this.#formSuccessListener)
+      this.#formElement?.addEventListener('formError', this.#formErrorListener)
+
+      this.#infoElement = this.querySelector('.promocode__info')
+    }
+
+    protected disconnectedCallback() {
+      this.#formElement?.removeEventListener('formSubmit', this.#formSubmitListener)
+      this.#formElement?.removeEventListener('formSuccess', this.#formSuccessListener)
+      this.#formElement?.removeEventListener('formError', this.#formErrorListener)
+      this.#status.close()
+    }
+
+    #formSubmitListener = () => {
+      this.#status.reset()
+      this.#status.set('pending', true)
+      this.#setInfo('Проверяем промокод')
+    }
+
+    #formSuccessListener = async () => {
+      const testDiscount = await this.#getTestDiscount()
+      this.#fork(testDiscount)
+    }
+
+    #formErrorListener = () => {
+      this.#fork(0)
+    }
+
+    #fork(value: number) {
+      if (value) {
+        this.#success(value)
+      } else {
+        this.#error()
+      }
+    }
+
+    #success(value: number) {
+      this.#setInfo('Промокод применен')
+      this.#status.set('pending', false)
+      this.#status.set('success', true)
+      orderStore.setDiscount(value)
+    }
+
+    #error() {
+      this.#setInfo('Промокод не найден')
+      this.#status.set('pending', false)
+      this.#status.set('error', true)
+      orderStore.setDiscount(0)
+    }
+
+    // DEV
+    async #getTestDiscount() {
+      await wait(1000)
+      return Math.random() > 0.5 ? Math.random() * 1000 : 0
+    }
+
+    #setInfo(value: string) {
+      if (this.#infoElement) {
+        this.#infoElement.textContent = value
+      }
+    }
+  }
+
+  if (!customElements.get('e-promocode')) {
+    customElements.define('e-promocode', PromocodeElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-promocode': PromocodeElement
+    }
+  }
+</script>

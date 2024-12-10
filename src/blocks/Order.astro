@@ -3,6 +3,7 @@ import Button from '@elements/Button.astro'
 import OrderForm from '@elements/OrderForm.astro'
 import OrderContents from '@elements/OrderContents.astro'
 import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
+import OrderCalendar from '@elements/OrderCalendar.astro'
 ---
 
 <e-order class="order">
@@ -23,17 +24,39 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
       <OrderContents class="order__contents" />
     </div>
   </div>
-  <div class="order__complete">
+  <div class="order__result order__result_pending">
     <h2
-      class="f-d-48-s f-m-18-s order__complete__heading"
+      class="f-d-48-s f-m-18-s order__result__heading"
+      set:html="Ваш заказ проходит обработку"
+    />
+    <p
+      class="f-d-24-s f-m-14-s order__result__description"
+      set:html="Пожалуйста, ожидайте"
+    />
+  </div>
+  <div class="order__result order__result_success">
+    <h2
+      class="f-d-48-s f-m-18-s order__result__heading"
       set:html="Ваш заказ успешно принят!"
     />
     <p
-      class="f-d-24-s f-m-14-s order__complete__description"
+      class="f-d-24-s f-m-14-s order__result__description"
       set:html="Пожалуйста, ожидайте доставку"
     />
     <Button href="/">На главную Инари</Button>
   </div>
+  <div class="order__result order__result_error">
+    <h2
+      class="f-d-48-s f-m-18-s order__result__heading"
+      set:html={`К сожалению, Ваш заказ обработать не&nbsp;удалось`}
+    />
+    <p
+      class="f-d-24-s f-m-14-s order__result__description"
+      set:html={`Попробуйте повторить попытку позже, либо совершите заказ по&nbsp;нашему телефону <a href="tel:+ 7 (921) 999-84-22">+&nbsp;7&nbsp;(921)&nbsp;999-84-22</a>`}
+    />
+    <Button href="/">На главную Инари</Button>
+  </div>
+  <OrderCalendar />
 </e-order>
 
 <style is:global>
@@ -54,7 +77,9 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
   }
 
   .order__start {
-    .order.complete & {
+    .order.success &,
+    .order.error &,
+    .order.pending & {
       display: none;
     }
   }
@@ -106,15 +131,43 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
   --------------
   */
 
-  .order__complete {
-    display: none;
+  .order__result {
+    --height: 4.3rem;
 
-    .order.complete & {
-      display: block;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 90rem;
+    height: 72.8rem;
+    margin: 0 auto;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 30rem;
     }
   }
 
-  .order__complete__heading {
+  .order__result_pending {
+    .order.pending & {
+      display: flex;
+    }
+  }
+
+  .order__result_success {
+    .order.success & {
+      display: flex;
+    }
+  }
+
+  .order__result_error {
+    .order.error & {
+      display: flex;
+    }
+  }
+
+  .order__result__heading {
     display: block;
     margin-bottom: 0.8rem;
     text-align: center;
@@ -124,10 +177,14 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
     }
   }
 
-  .order__complete__description {
+  .order__result__description {
     display: block;
     text-align: center;
     margin-bottom: 4rem;
+
+    a {
+      color: var(--color-primary-3);
+    }
 
     @media (max-width: 768px) {
       margin-bottom: 2.4rem;
@@ -136,9 +193,15 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
 </style>
 
 <script>
+  import type { CalendarElement } from '@elements/Calendar.astro.0.mjs'
+  import type { FormElement } from '@elements/Form.astro.0.mjs'
+  import { morph } from '@globals/page'
+  import type { InputGroupElement, InputGroupEvents } from '@lib/InputGroupElement'
   import { basketStore, type BasketStoreItem } from '@stores/basketStore'
   import { orderStore } from '@stores/orderStore'
   import { numberToPrice } from '@utils/number'
+  import { ClassLinkedStatus } from 'aptechka/class-linked-status'
+  import type { PopoverElement } from 'aptechka/popover'
 
   class OrderProduct {
     #element: HTMLElement
@@ -151,16 +214,16 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
 
     constructor(data: BasketStoreItem) {
       this.#element = document.createElement('li')
-      this.#element.className = 'order__product'
+      this.#element.className = 'order-contents__product'
 
       this.#element.innerHTML = `
-        <div class="order__product__title">${data.name}</div>
-        <div class="order__product__amount"></div>
-        <div class="order__product__price"></div>
+        <div class="order-contents__product__title">${data.name}</div>
+        <div class="order-contents__product__amount"></div>
+        <div class="order-contents__product__price"></div>
       `
 
-      this.#amountElement = this.#element.querySelector('.order__product__amount')!
-      this.#priceElement = this.#element.querySelector('.order__product__price')!
+      this.#amountElement = this.#element.querySelector('.order-contents__product__amount')!
+      this.#priceElement = this.#element.querySelector('.order-contents__product__price')!
 
       this.#pid = data.pid
       this.#price = data.price
@@ -197,78 +260,74 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
   }
 
   export class OrderElement extends HTMLElement {
-    #totalPriceElements: Array<HTMLElement> = []
+    #formElements: Array<FormElement> = []
 
-    #productsPriceElements: Array<HTMLElement> = []
+    #timeGroupElements: Array<InputGroupElement> = []
 
-    #deliverPriceContainerElements: Array<HTMLElement> = []
-    #deliveryPriceElements: Array<HTMLElement> = []
+    #customDateInputElements: Array<HTMLInputElement> = []
 
-    #discountPriceContainerElements: Array<HTMLElement> = []
-    #discountPriceElements: Array<HTMLElement> = []
+    #calendarModalElement: PopoverElement | null = null
+    #calendarElement: CalendarElement | null = null
 
     #productsContainerElement: HTMLElement | null = null
 
     #products: Array<OrderProduct> = []
+
+    #status = new ClassLinkedStatus(this, { success: false, error: false, pending: false })
 
     protected connectedCallback() {
       // if (!basketStore.items.length) {
       //   morph.navigate('/')
       // }
 
-      this.#totalPriceElements = [...this.querySelectorAll<HTMLElement>('[data-total-price]')]
+      document.documentElement.classList.add('order-page')
 
-      this.#productsPriceElements = [...this.querySelectorAll<HTMLElement>('[data-products-price]')]
+      this.#formElements = [...this.querySelectorAll('e-form')]
+      this.#formElements.forEach((element) => {
+        element.addEventListener('formSubmit', this.#formSubmitListener)
+        element.addEventListener('formSuccess', this.#formSuccessListener)
+        element.addEventListener('formError', this.#formErrorListener)
+      })
 
-      this.#deliverPriceContainerElements = [
-        ...this.querySelectorAll<HTMLElement>('[data-delivery-price-container]'),
+      this.#timeGroupElements = [...this.querySelectorAll<InputGroupElement>('.order-form__time')]
+      this.#timeGroupElements.forEach((element) => {
+        element.addEventListener('inputGroupValueChange', this.#timeChangeListener)
+      })
+
+      this.#customDateInputElements = [
+        ...this.querySelectorAll<HTMLInputElement>('[data-custom-date]'),
       ]
-      this.#deliveryPriceElements = [...this.querySelectorAll<HTMLElement>('[data-delivery-price]')]
 
-      this.#discountPriceContainerElements = [
-        ...this.querySelectorAll<HTMLElement>('[data-discount-price-container]'),
-      ]
-      this.#discountPriceElements = [...this.querySelectorAll<HTMLElement>('[data-discount-price]')]
+      this.#calendarModalElement = this.querySelector('#order-calendar')
 
-      this.#productsContainerElement = this.querySelector('.order__products')
+      this.#calendarElement = this.querySelector('e-calendar')
+      this.#calendarElement?.addEventListener('calendarPick', this.#calendarPickListener)
+
+      this.#productsContainerElement = this.querySelector('.order-contents__products')
 
       basketStore.subscribe(this.#basketStoreChangeListener)
-      orderStore.subscribe(this.#orderStoreChangeListener)
     }
 
     protected disconnectedCallback() {
+      document.documentElement.classList.remove('order-page')
+
       basketStore.unsubscribe(this.#basketStoreChangeListener)
-      orderStore.unsubscribe(this.#orderStoreChangeListener)
-    }
 
-    #orderStoreChangeListener = () => {
-      if (orderStore.type === 'pickup') {
-        this.#deliverPriceContainerElements.forEach((element) => {
-          element.style.display = 'none'
-        })
-      } else {
-        this.#deliverPriceContainerElements.forEach((element) => {
-          element.style.display = ''
-        })
-      }
+      this.#formElements.forEach((element) => {
+        element.removeEventListener('formSubmit', this.#formSubmitListener)
+        element.removeEventListener('formSuccess', this.#formSuccessListener)
+        element.removeEventListener('formError', this.#formErrorListener)
+      })
 
-      if (!orderStore.discount) {
-        this.#discountPriceContainerElements.forEach((element) => {
-          element.style.display = 'none'
-        })
+      this.#timeGroupElements.forEach((element) => {
+        element.removeEventListener('inputGroupValueChange', this.#timeChangeListener)
+      })
 
-        this.#discountPriceElements.forEach((element) => {
-          element.textContent = numberToPrice(0)
-        })
-      } else {
-        this.#discountPriceContainerElements.forEach((element) => {
-          element.style.display = ''
-        })
+      this.#calendarElement?.removeEventListener('calendarPick', this.#calendarPickListener)
 
-        this.#discountPriceElements.forEach((element) => {
-          element.textContent = numberToPrice(orderStore.discount)
-        })
-      }
+      this.#status.close()
+
+      orderStore.setStep('basket')
     }
 
     #basketStoreChangeListener = () => {
@@ -294,17 +353,57 @@ import OrderTypeToggle from '@elements/OrderTypeToggle.astro'
 
         return true
       })
+    }
 
-      this.#productsPriceElements.forEach((element) => {
-        element.textContent = numberToPrice(basketStore.fullPrice)
+    #timeChangeListener = (e: InputGroupEvents['inputGroupValueChange']) => {
+      const ct = e.currentTarget as InputGroupElement
+
+      if (ct.input?.hasAttribute('data-custom-date')) {
+        this.#calendarModalElement?.open()
+      }
+    }
+
+    #calendarPickListener = () => {
+      const d = this.#calendarElement!.pickedDate
+
+      const dateString = `${d.day}-${d.month}-${d.year} ${d.hours}`
+
+      this.#customDateInputElements.forEach((el) => {
+        el.setAttribute('value', dateString)
       })
+    }
 
-      this.#deliveryPriceElements.forEach((element) => {
-        element.textContent = numberToPrice(0)
+    #formSubmitListener = () => {
+      orderStore.setStep('order')
+      this.#status.set('success', false)
+      this.#status.set('error', false)
+      this.#status.set('pending', true)
+
+      morph.scrollElement.scroll({
+        top: 0,
+        behavior: 'instant',
       })
+    }
 
-      this.#totalPriceElements.forEach((element) => {
-        element.textContent = numberToPrice(0)
+    #formSuccessListener = () => {
+      orderStore.setStep('complete')
+
+      this.#status.set('pending', false)
+      this.#status.set('success', true)
+
+      morph.scrollElement.scroll({
+        top: 0,
+        behavior: 'instant',
+      })
+    }
+
+    #formErrorListener = () => {
+      this.#status.set('pending', false)
+      this.#status.set('error', true)
+
+      morph.scrollElement.scroll({
+        top: 0,
+        behavior: 'instant',
       })
     }
   }

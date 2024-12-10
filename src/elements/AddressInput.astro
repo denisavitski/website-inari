@@ -101,6 +101,8 @@ const { class: className, inputStyles, ...rest } = Astro.props
       if (this.#valueElement) {
         this.#valueElement.textContent = orderStore.address || 'Адрес'
       }
+
+      this.#inputElement?.dispatchEvent(new Event('change'))
     }
   }
 

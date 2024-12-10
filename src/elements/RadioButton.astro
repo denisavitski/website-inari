@@ -8,17 +8,19 @@ export interface Props {
   theme?: 'fill' | 'outline'
   font?: string
   title?: string
+  inputAttrs?: { [key: string]: string }
 }
 
 const {
   class: className,
-  value = 'Через ≈ 60 мин.',
-  name = 'Время доставки',
+  value = '',
+  name = '',
   theme = 'outline',
   font = 'f-d-16-s f-m-12-s',
   title,
   required,
   checked,
+  inputAttrs,
   ...rest
 } = Astro.props
 ---
@@ -36,6 +38,7 @@ const {
     value={value}
     {required}
     {checked}
+    {...inputAttrs}
   />
   <span class:list={[font, 'radio-button__value']}>{title || value}</span>
 </label>

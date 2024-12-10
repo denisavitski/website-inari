@@ -11,7 +11,7 @@ const { class: className, name = 'order-type', ...rest } = Astro.props
 
 <e-order-type-toggle
   {...rest}
-  class:list={['order-type-toggle', className]}
+  class:list={[' order-type-toggle', className]}
   {name}
 >
   <button
@@ -19,13 +19,13 @@ const { class: className, name = 'order-type', ...rest } = Astro.props
     data-value="delivery"
     data-theme="fill"
     data-checked
-    ><span class="radio-button__value">Доставка</span></button
+    ><span class="f-d-18-s f-m-12-s radio-button__value">Доставка</span></button
   >
   <button
     class="radio-button"
     data-value="pickup"
     data-theme="fill"
-    ><span class="radio-button__value">Самовывоз</span></button
+    ><span class="f-d-18-s f-m-12-s radio-button__value">Самовывоз</span></button
   >
 </e-order-type-toggle>
 

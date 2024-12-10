@@ -95,6 +95,8 @@ body {
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-in-out-back: cubic-bezier(0.68, -0.6, 0.32, 1.6);
 
+  --morph-duration: 0.3s;
+
   @media (max-width: 768px) {
     --screen-horisontal-padding: 1.6rem;
     --section-vertical-padding: 4.5rem;
@@ -136,6 +138,7 @@ button,
 input,
 textarea {
   font-family: inherit;
+  font-size: inherit;
   border: none;
   background: none;
   color: inherit;
@@ -143,6 +146,8 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
+  font-family: inherit;
+  font-size: inherit;
   color: var(--color-secondary-3);
 }
 
@@ -397,6 +402,20 @@ b {
   .f-m-12-r {
     font-family: 'Montserrat';
     font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 120%;
+  }
+
+  .f-m-10-s {
+    font-family: 'Montserrat';
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 120%;
+  }
+
+  .f-m-10-r {
+    font-family: 'Montserrat';
+    font-size: 1rem;
     font-weight: 400;
     line-height: 120%;
   }

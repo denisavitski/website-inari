@@ -4,6 +4,9 @@ import '@elements/BasketItem.astro'
 import Button from '@elements/Button.astro'
 import Form from '@elements/Form.astro'
 import Icon from '@elements/Icon.astro'
+import PricePart from '@elements/PricePart.astro'
+import PricePartValue from '@elements/PricePartValue.astro'
+import Promocode from '@elements/Promocode.astro'
 import SuggestionProducts from '@elements/SuggestionProducts.astro'
 
 export const modal = '#basket'
@@ -43,39 +46,30 @@ const { class: className, ...rest } = Astro.props
       </div>
 
       <div class="basket__bottom">
-        <Form class="basket__promo">
-          <input
-            name="promo-code"
-            required
-            type="text"
-            class="f-d-16-r f-m-14-r basket__promo__input"
-          />
-          <button
-            class="f-d-16-r f-m-12-r basket__promo__button"
-            type="submit"
-            >Применить</button
-          >
-        </Form>
+        <Promocode class="basket__promo" />
 
-        <div class="f-d-16-s f-m-14-s basket__info">
-          <div class="basket__info__line">
-            <div class="basket__info__line__title">1 товар</div>
-            <div class="basket__info__line__value">2 500 ₽</div>
-          </div>
-          <div class="basket__info__line">
-            <div class="basket__info__line__title">Скидка</div>
-            <div class="basket__info__line__value">– 350 ₽</div>
-          </div>
-          <div class="basket__info__line">
-            <div class="basket__info__line__title">Доставка</div>
-            <div class="basket__info__line__value">Бесплатно</div>
-          </div>
+        <div class="basket__info">
+          <PricePart
+            type={'products'}
+            title=""
+          />
+          <PricePart
+            type={'discount'}
+            title="Скидка"
+          />
+          <PricePart
+            type={'delivery'}
+            title="Доставка"
+          />
         </div>
 
         <div class="basket__final">
           <div class="basket__final__text">
             <div class="f-d-24-s f-m-18-s basket__final__title">Сумма заказа</div>
-            <div class="f-d-24-s f-m-18-s basket__final__value">2 150 ₽</div>
+            <PricePartValue
+              class="f-d-24-s f-m-18-s basket__final__value"
+              type={'total'}
+            />
           </div>
 
           <Button
@@ -192,7 +186,7 @@ const { class: className, ...rest } = Astro.props
 
     display: none;
 
-    .basket.has-items & {
+    [data-basket-has-items='true'] & {
       display: block;
     }
   }
@@ -233,47 +227,6 @@ const { class: className, ...rest } = Astro.props
     }
   }
 
-  .basket__promo {
-    position: relative;
-    width: 100%;
-    height: 5.1rem;
-
-    background-color: var(--color-secondary-1);
-    border-radius: var(--border-radius-1);
-
-    @media (max-width: 768px) {
-      height: 4.1rem;
-    }
-  }
-
-  .basket__promo__input {
-    width: 78%;
-    height: 100%;
-
-    padding-left: 2.4rem;
-
-    border-radius: var(--border-radius-1);
-
-    @media (max-width: 768px) {
-      padding-left: 1.6rem;
-      width: 68%;
-    }
-  }
-
-  .basket__promo__button {
-    color: var(--color-secondary-6);
-
-    position: absolute;
-    top: 50%;
-    right: 2.4rem;
-
-    transform: translateY(-50%);
-
-    @media (max-width: 768px) {
-      right: 1.6rem;
-    }
-  }
-
   .basket__info {
     padding-bottom: 3.2rem;
     border-bottom: 0.1rem solid var(--color-secondary-1);
@@ -281,17 +234,6 @@ const { class: className, ...rest } = Astro.props
     display: grid;
     grid-auto-rows: max-content;
     gap: 0.8rem;
-  }
-
-  .basket__info__line {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .basket__info__line__title {
-  }
-
-  .basket__info__line__value {
   }
 
   .basket__final {
@@ -400,16 +342,12 @@ const { class: className, ...rest } = Astro.props
       })
 
       if (basketStore.fullAmount) {
-        this.classList.add('has-items')
-
         if (this.#headElement) {
-          this.#headElement.textContent = `${basketStore.fullAmount} ${productsToString(basketStore.fullAmount)} товара на ${numberToPrice(basketStore.fullPrice)}`
+          this.#headElement.textContent = `${basketStore.fullAmount} ${productsToString(basketStore.fullAmount)} на ${numberToPrice(basketStore.fullPrice)}`
         }
 
         this.#orderButtonElement?.removeAttribute('data-disabled')
       } else {
-        this.classList.remove('has-items')
-
         this.#orderButtonElement?.setAttribute('data-disabled', '')
 
         if (this.#headElement) {

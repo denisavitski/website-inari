@@ -1,0 +1,194 @@
+---
+import Icon from './Icon.astro'
+
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+
+const steps = ['Корзина', 'Оформление заказа', 'Заказ принят']
+---
+
+<e-order-steps
+  {...rest}
+  class:list={['order-steps', className]}
+>
+  {
+    steps.map((step, i) => {
+      return (
+        <dir
+          class="order-steps__step"
+          data-step={i + 1}
+        >
+          <div class="f-d-16-s f-m-14-s order-steps__step__number">
+            {i + 1}
+            <div class="order-steps__step__check">
+              <Icon
+                name="check"
+                class="order-steps__step__check__icon"
+              />
+            </div>
+          </div>
+          <div
+            class="f-d-14-s f-m-10-s order-steps__step__name"
+            set:html={step}
+          />
+        </dir>
+      )
+    })
+  }
+</e-order-steps>
+
+<style is:global>
+  .order-steps {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+
+    @media (max-width: 768px) {
+      gap: 2.85rem;
+    }
+  }
+
+  .order-steps__step {
+    --active: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+
+    width: 16.9rem;
+
+    @media (max-width: 768px) {
+      width: 9rem;
+    }
+
+    [step='basket'] &[data-step='1'] {
+      --active: 1;
+    }
+
+    [step='order'] &[data-step='1'],
+    [step='order'] &[data-step='2'] {
+      --active: 1;
+    }
+
+    [step='complete'] &[data-step='1'],
+    [step='complete'] &[data-step='2'],
+    [step='complete'] &[data-step='3'] {
+      --active: 1;
+    }
+  }
+
+  .order-steps__step__number {
+    position: relative;
+
+    width: 3.2rem;
+    height: 3.2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    border: 0.1rem solid var(--color-primary-3);
+
+    color: var(--color-primary-3);
+
+    @media (max-width: 768px) {
+      width: 2.4rem;
+      height: 2.4rem;
+    }
+
+    .order-steps__step:not(:last-child) &::before,
+    .order-steps__step:not(:last-child) &::after {
+      content: '';
+
+      position: absolute;
+      left: calc(100% + 2.45rem);
+
+      display: block;
+
+      width: 11.4rem;
+      border-bottom: 0.1rem dashed var(--color-primary-3);
+
+      @media (max-width: 768px) {
+        left: calc(100% + 0.8rem);
+        width: 7.9rem;
+      }
+    }
+
+    .order-steps__step:not(:last-child) &::after {
+      border-bottom-style: solid;
+      opacity: var(--active, 0);
+      transition: opacity var(--morph-duration);
+    }
+  }
+
+  .order-steps__step__check {
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background-color: var(--color-primary-3);
+
+    transition: opacity var(--morph-duration);
+
+    opacity: var(--active, 0);
+  }
+
+  .order-steps__step__check__icon {
+    width: 50%;
+    height: 50%;
+
+    fill: var(--color-primary-2);
+  }
+
+  .order-steps__step__name {
+    color: var(--color-primary-1);
+
+    @media (max-width: 768px) {
+      text-align: center;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: max-content;
+    }
+  }
+</style>
+
+<script>
+  import { orderStore } from '@stores/orderStore'
+
+  export class OrderStepsElement extends HTMLElement {
+    protected connectedCallback() {
+      orderStore.subscribe(this.#storeChangeListener)
+    }
+
+    protected disconnectedCallback() {
+      orderStore.unsubscribe(this.#storeChangeListener)
+    }
+
+    #storeChangeListener = () => {
+      this.setAttribute('step', orderStore.step)
+    }
+  }
+
+  if (!customElements.get('e-order-steps')) {
+    customElements.define('e-order-steps', OrderStepsElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-order-steps': OrderStepsElement
+    }
+  }
+</script>

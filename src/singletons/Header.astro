@@ -1,6 +1,7 @@
 ---
 import BasketButton from '@elements/BasketButton.astro'
 import Logo from '@elements/Logo.astro'
+import OrderSteps from '@elements/OrderSteps.astro'
 
 export interface Props {
   logo?: string
@@ -81,6 +82,8 @@ const {
     <div class="header__basket-wrapper">
       <BasketButton class="header__basket" />
     </div>
+
+    <OrderSteps class="header__order-steps" />
   </div>
 </header>
 
@@ -102,6 +105,8 @@ const {
   }
 
   .header__inner {
+    position: relative;
+
     width: 100%;
     padding: 0 2.4rem;
     height: 7.2rem;
@@ -144,6 +149,13 @@ const {
       height: 3.2rem;
 
       background-color: var(--color-primary-3);
+
+      transition: opacity var(--morph-duration);
+
+      .order-page & {
+        opacity: 0;
+        pointer-events: none;
+      }
     }
   }
   .header__menu-button__line {
@@ -271,6 +283,15 @@ const {
     gap: 2.4rem;
     margin-left: auto;
 
+    @media (min-width: 769px) {
+      transition: opacity var(--morph-duration);
+
+      .order-page & {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
     @media (max-width: 768px) {
       width: 100%;
       flex-direction: column;
@@ -309,10 +330,39 @@ const {
   }
 
   .header__basket-wrapper {
+    transition: opacity var(--morph-duration);
+
+    .order-page & {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     @media (min-width: 769px) {
       width: 23rem;
       display: flex;
       justify-content: flex-end;
+    }
+  }
+
+  .header__order-steps {
+    position: absolute;
+
+    transition: opacity var(--morph-duration);
+    opacity: 0;
+    pointer-events: none;
+
+    .order-page & {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (min-width: 769px) {
+      right: 2.4rem;
+    }
+
+    @media (max-width: 768px) {
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 </style>

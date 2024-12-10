@@ -6,6 +6,7 @@ import RadioButton from './RadioButton.astro'
 import Button from './Button.astro'
 import type { OrderStoreType } from '@stores/orderStore'
 import AddressInput from './AddressInput.astro'
+import PricePartValue from './PricePartValue.astro'
 
 export interface Props {
   class?: string
@@ -83,10 +84,10 @@ const { class: className, type = 'delivery', ...rest } = Astro.props
   </OrderField>
 
   <OrderField title={type === 'delivery' ? 'Время доставки *' : 'Время самовывоза *'}>
-    <div class="order-form__time">
+    <e-input-group class="order-form__time">
       <RadioButton
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
         value="Через ≈ 60 мин."
         required
         checked
@@ -94,46 +95,48 @@ const { class: className, type = 'delivery', ...rest } = Astro.props
       <RadioButton
         required
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
         value="14:30 - 15:00"
       />
       <RadioButton
         required
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
         value="15:00 - 15:30"
       />
       <RadioButton
         required
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
         value="16:00 - 16:30"
       />
       <RadioButton
         required
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
         value="16:30 - 17:00"
       />
       <RadioButton
         required
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
         value="17:00 - 17:30"
       />
       <RadioButton
         required
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
         value="17:30 - 18:00"
       />
       <RadioButton
         required
         class="order-form__time__input"
-        name="Время доставки"
+        name={type === 'delivery' ? 'Время доставки' : 'Время самовывоза'}
+        title="Другое время"
         value="Другое время"
+        inputAttrs={{ 'data-custom-date': '' }}
       />
-    </div>
+    </e-input-group>
   </OrderField>
 
   {
@@ -168,7 +171,7 @@ const { class: className, type = 'delivery', ...rest } = Astro.props
       theme={'arrow'}
       type="submit"
       class="order-form__form__submit"
-      >Оформить заказ на <span data-total-price>3 420 ₽</span>
+      >Оформить заказ на <PricePartValue type={'total'} />
     </Button>
   </div>
 </Form>

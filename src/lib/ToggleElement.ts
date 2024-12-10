@@ -6,7 +6,6 @@ export interface ToggleEvents {
 
 export class ToggleElement<T extends string = string> extends HTMLElement {
   #buttonElements: Array<HTMLElement> = []
-  #allToggleElements: Array<ToggleElement> = []
   #value: T | undefined
   #currentButtonElement: HTMLElement | null = null
 
@@ -37,15 +36,8 @@ export class ToggleElement<T extends string = string> extends HTMLElement {
 
       dispatchEvent(this, 'toggleChange', {
         detail: this.#value,
+        bubbles: true,
       })
-
-      if (_notifyRest) {
-        this.#allToggleElements.forEach((element) => {
-          if (element !== this) {
-            element.setValue(value)
-          }
-        })
-      }
     }
   }
 
@@ -65,10 +57,14 @@ export class ToggleElement<T extends string = string> extends HTMLElement {
     })
 
     removeEventListener('load', this.#loadListener)
+
+    document.documentElement.removeEventListener('toggleChange', this.#documentToggleChangeListener)
   }
 
   #loadListener = () => {
     if (this.isConnected) {
+      document.documentElement.addEventListener('toggleChange', this.#documentToggleChangeListener)
+
       this.#buttonElements.forEach((element) => {
         element.addEventListener('click', this.#buttonClickListener)
 
@@ -76,10 +72,6 @@ export class ToggleElement<T extends string = string> extends HTMLElement {
           this.setValue(element.getAttribute('data-value') as T, true)
         }
       })
-
-      this.#allToggleElements = [
-        ...document.querySelectorAll<ToggleElement>(`[name="${this.name}"]`),
-      ].filter((el) => el instanceof ToggleElement)
     }
   }
 
@@ -90,6 +82,14 @@ export class ToggleElement<T extends string = string> extends HTMLElement {
 
     if (value) {
       this.setValue(value as T, true)
+    }
+  }
+
+  #documentToggleChangeListener = (event: ToggleEvents['toggleChange']) => {
+    const ct = event.target as ToggleElement
+
+    if (ct !== this && ct.name === this.name) {
+      this.setValue(event.detail as T)
     }
   }
 }

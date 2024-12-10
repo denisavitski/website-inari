@@ -1,0 +1,50 @@
+---
+import Button from './Button.astro'
+import Calendar from './Calendar.astro'
+import Modal from './Modal.astro'
+---
+
+<Modal
+  id="order-calendar"
+  class="order-calendar"
+>
+  <div class="order-calenda__content">
+    <div class="f-d-24-s f-m-18-s order-calendar__title">Выберите время доставки</div>
+    <Calendar />
+    <Button
+      class="order-calendar__continue"
+      modal="order-calendar"
+      >Продолжить</Button
+    >
+  </div>
+</Modal>
+
+<style is:global>
+  .order-calendar {
+  }
+
+  .order-calenda__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3.2rem;
+
+    @media (max-width: 768px) {
+      gap: 2.4rem;
+    }
+  }
+
+  .order-calendar__title {
+    text-align: center;
+  }
+
+  .order-calendar__continue {
+    --type: close;
+    --height: 4.3rem;
+    width: 25rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+</style>

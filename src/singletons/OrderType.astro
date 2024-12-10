@@ -79,7 +79,6 @@ export const modal = '#order-type'
               value="улица Щербакова, 48, Зеленоград, Москва"
               addressType="Фудмолл"
               distance="1,5км"
-              checked
             />
             <PickupPoint
               class="order-type__pickup__point"
@@ -339,7 +338,10 @@ export const modal = '#order-type'
 
       this.addEventListener('popoverOpened', () => {
         if (orderStore.type === 'delivery') {
+          this.#deliveryInputElement?.dispatchEvent(new Event('change'))
           this.#deliveryInputElement?.inputElement?.focus()
+        } else {
+          this.#pickupInputElement?.dispatchEvent(new CustomEvent('inputGroupValueChange'))
         }
       })
     }
@@ -355,6 +357,7 @@ export const modal = '#order-type'
       this.#priceZoneElements = [...this.querySelectorAll<HTMLElement>('[data-price-zone]')]
 
       this.#deliveryInputElement = this.querySelector('.order-type__delivery__input')
+      this.#deliveryInputElement?.addEventListener('input', this.#deliveryInputListener)
       this.#deliveryInputElement?.addEventListener('change', this.#deliveryInputListener)
 
       this.#pickupInputElement = this.querySelector('.order-type__pickup__input-group')
@@ -371,6 +374,7 @@ export const modal = '#order-type'
         this.#orderTypeToggleListener,
       )
 
+      this.#deliveryInputElement?.removeEventListener('input', this.#deliveryInputListener)
       this.#deliveryInputElement?.removeEventListener('change', this.#deliveryInputListener)
 
       this.#pickupInputElement?.removeEventListener(

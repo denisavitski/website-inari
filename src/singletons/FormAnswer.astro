@@ -71,13 +71,13 @@ export const modal = '#form-answer'
     #titleElement: HTMLElement | null = null
     #messageElement: HTMLElement | null = null
 
-    public setText(title: string, message: string) {
+    public setText(title: string, message?: string | undefined) {
       if (this.#titleElement) {
         this.#titleElement.innerHTML = title
       }
 
       if (this.#messageElement) {
-        this.#messageElement.innerHTML = message
+        this.#messageElement.innerHTML = message || ''
       }
     }
 

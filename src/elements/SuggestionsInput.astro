@@ -192,22 +192,6 @@ const {
       this.#suggestionsContainerElement = this.querySelector('.suggestions-input__suggestions')
 
       this.#inputElement?.addEventListener('blur', this.#blurListener)
-
-      addEventListener('keydown', (e) => {
-        if (e.key === '1') {
-          this.suggest([
-            {
-              value: '1',
-            },
-            {
-              value: '2',
-            },
-            {
-              value: '3',
-            },
-          ])
-        }
-      })
     }
 
     protected disconnectedCallback() {

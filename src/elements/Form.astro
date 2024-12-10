@@ -23,26 +23,6 @@ const {
 } = Astro.props
 ---
 
-<!-- 
-  Если указан handler отличный от /test, данные из формы отправятся по нему, 
-  и по успешному завершению откроется модалка.
-
-
-  В handler также можно указать значение fetchit, 
-  в таком случае отправка формы не будет обрабатываться, 
-  но буду слушаться события fetchit:success и fetchit:error 
-  которые будут открывать ответ.
-
-
-  Если форма находится внутри модалки и туда нужно 
-  передать значения в зависимости от нажатой кнопки,
-  то это можно сделать через специальные аитрибуты,
-  которые начинаются c data-input.
-
-  Например: <e-popover-button data-input-page="https://site.com/about" data-input-page-name="о нас">
-  при нажатии на такую кнопку в форме создадутся инпуты 
-  с названием page и pageName и соответствующими значениями
--->
 <e-form
   {...rest}
   success-title={successTitle}
@@ -71,7 +51,13 @@ const {
 
 <script>
   import { PopoverElement, type PopoverEvents } from 'aptechka/popover'
-  import { findParentElement } from 'aptechka/utils'
+  import { dispatchEvent, findParentElement } from 'aptechka/utils'
+
+  export interface FromEvents {
+    formSubmit: CustomEvent
+    formSuccess: CustomEvent
+    formError: CustomEvent
+  }
 
   export class FormElement extends HTMLElement {
     #popoverElement: PopoverElement | null = null
@@ -83,6 +69,25 @@ const {
     #handler = '/test'
     #reusable = false
     #resetAfterSubmit = false
+    #result: any
+
+    public get result() {
+      return this.#result
+    }
+
+    public checkValidity() {
+      const validInputs = this.#inputElements?.filter((inputElement) => {
+        return inputElement.validity.valid
+      }).length
+
+      if (this.#buttonElement) {
+        if (validInputs === this.#inputElements?.length) {
+          this.#buttonElement.removeAttribute('data-disabled')
+        } else {
+          this.#buttonElement.setAttribute('data-disabled', 'true')
+        }
+      }
+    }
 
     protected connectedCallback() {
       this.#popoverElement = findParentElement(this, PopoverElement)
@@ -105,11 +110,12 @@ const {
 
         this.#inputElements.forEach((inputElement) => {
           inputElement.addEventListener('input', this.#inputListener)
+          inputElement.addEventListener('change', this.#inputListener)
         })
 
         this.#buttonElement = this.#formElement.querySelector('button[type="submit"]')
 
-        this.#inputListener()
+        this.checkValidity()
 
         if (this.#handler === 'fetchit') {
           document.addEventListener('fetchit:success', this.#fetchitSuccesListener as EventListener)
@@ -122,9 +128,10 @@ const {
     }
 
     protected disconnectedCallback() {
-      this.#inputElements?.forEach((inputElement) =>
-        inputElement.removeEventListener('input', this.#inputListener),
-      )
+      this.#inputElements?.forEach((inputElement) => {
+        inputElement.removeEventListener('input', this.#inputListener)
+        inputElement.removeEventListener('change', this.#inputListener)
+      })
 
       this.#formElement?.removeEventListener('submit', this.#submitListener)
 
@@ -137,6 +144,8 @@ const {
 
     #submitListener = async (e: SubmitEvent) => {
       e.preventDefault()
+
+      dispatchEvent(this, 'formSubmit', { custom: true })
 
       if (this.#handler === 'fetchit' || (this.#sended && !this.#reusable)) {
         return
@@ -162,7 +171,7 @@ const {
             }, 50)
           })
         } else {
-          await fetch(this.#handler, {
+          this.#result = await fetch(this.#handler, {
             method: 'POST',
             body: formData,
           })
@@ -171,6 +180,7 @@ const {
         this.#success()
       } catch (e) {
         console.error(e)
+        this.#result = e
         this.#error()
       }
 
@@ -178,23 +188,15 @@ const {
     }
 
     #inputListener = () => {
-      const validInputs = this.#inputElements?.filter((inputElement) => {
-        return inputElement.validity.valid
-      }).length
-
-      if (this.#buttonElement) {
-        if (validInputs === this.#inputElements?.length) {
-          this.#buttonElement.removeAttribute('data-disabled')
-        } else {
-          this.#buttonElement.setAttribute('data-disabled', 'true')
-        }
-      }
+      this.checkValidity()
     }
 
     #fetchitSuccesListener = (e: CustomEvent) => {
       console.log('[fetchit success event]', e)
 
       const { form } = (e as CustomEvent)?.detail as { form: HTMLFormElement }
+
+      this.#result = e.detail
 
       if (this.#formElement === form) {
         this.#success()
@@ -205,6 +207,8 @@ const {
       console.log('[fetchit error event]', e)
 
       const { form } = (e as CustomEvent)?.detail as { form: HTMLFormElement }
+
+      this.#result = e.detail
 
       if (this.#formElement === form) {
         this.#error()
@@ -218,19 +222,25 @@ const {
         const successTitle = this.getAttribute('success-title')
         const successMessage = this.getAttribute('success-message')
 
-        if (successTitle && successMessage) {
-          answerElement.setText(successTitle, successMessage)
+        if (successTitle) {
+          answerElement.setText(successTitle, successMessage || '')
           answerElement.open()
         }
       }
 
       if (this.#resetAfterSubmit) {
         this.#inputElements?.forEach((element) => {
-          element.value = ''
+          if (element.type !== 'radio' && element.type !== 'checkbox') {
+            element.value = ''
+          }
         })
 
         this.#inputListener()
       }
+
+      dispatchEvent(this, 'formSuccess', {
+        custom: true,
+      })
     }
 
     #error() {
@@ -239,6 +249,10 @@ const {
       alert(errorMessage)
 
       this.#sended = false
+
+      dispatchEvent(this, 'formError', {
+        custom: true,
+      })
     }
 
     #popoverOpenedListener = (e: PopoverEvents['popoverOpened']) => {
@@ -278,5 +292,7 @@ const {
     interface HTMLElementTagNameMap {
       'e-form': FormElement
     }
+
+    interface HTMLElementEventMap extends FromEvents {}
   }
 </script>

@@ -62,7 +62,11 @@ const {
 
       this.#priceElements = [...this.querySelectorAll('e-price')]
 
-      Promise.all(['e-product-button']).then(() => {
+      Promise.all([
+        customElements.whenDefined('e-product-button'),
+        this.#variantToggleElement ? customElements.whenDefined('e-toggle') : null,
+        this.#priceElements.length ? customElements.whenDefined('e-price') : null,
+      ]).then(() => {
         this.#loadListener()
       })
     }

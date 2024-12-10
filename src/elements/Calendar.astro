@@ -1,7 +1,9 @@
 <e-calendar
   hours-start="10:00"
   hours-end="22:00"
-></e-calendar>
+  data-popover-content
+>
+</e-calendar>
 
 <script>
   import { capitalize, clamp, createStylesheet, dispatchEvent } from 'aptechka/utils'
@@ -249,8 +251,12 @@
         this.shiftMonth(1)
       })
 
-      this.#createHours()
       this.#createMonth()
+      this.#createHours()
+    }
+
+    public get pickedDate() {
+      return this.#pickedDate
     }
 
     public setMonth(value: number) {

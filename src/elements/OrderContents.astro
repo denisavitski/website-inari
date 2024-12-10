@@ -1,4 +1,6 @@
 ---
+import PricePart from './PricePart.astro'
+import PricePartValue from './PricePartValue.astro'
 import Product from './Product.astro'
 import ProductButton from './ProductButton.astro'
 
@@ -80,47 +82,15 @@ const { class: className, ...rest } = Astro.props
 
   <div class="order-contents__price">
     <div class="order-contents__price__parts">
-      <div class="f-d-16-s f-m-14-s order-contents__price__part">
-        <div
-          class="order-contents__price__part__title"
-          set:html="4 товара"
-        />
-        <div
-          class="order-contents__price__part__value"
-          set:html="0 ₽"
-          data-products-price
-        />
-      </div>
-      <div
-        class="f-d-16-s f-m-14-s order-contents__price__part"
-        data-discount-price-container
-        style="color: var(--color-secondary-6)"
-      >
-        <div
-          class="order-contents__price__part__title"
-          set:html="Скидка"
-        />
-        <div
-          class="order-contents__price__part__value"
-          set:html="0 ₽"
-          data-discount-price
-        />
-      </div>
-      <div
-        class="f-d-16-s f-m-14-s order-contents__price__part"
-        data-delivery-price-container
-        style="color: var(--color-primary-2)"
-      >
-        <div
-          class="order-contents__price__part__title"
-          set:html="Доставка"
-        />
-        <div
-          class="order-contents__price__part__value"
-          set:html="Бесплатно"
-          data-delivery-price
-        />
-      </div>
+      <PricePart type={'products'} />
+      <PricePart
+        type={'discount'}
+        title="Скидка"
+      />
+      <PricePart
+        type={'delivery'}
+        title="Доставка"
+      />
     </div>
 
     <div class="f-d-18-s f-m-16-s order-contents__price__full">
@@ -128,10 +98,9 @@ const { class: className, ...rest } = Astro.props
         class="order-contents__price__full__title"
         set:html="Сумма заказа"
       />
-      <div
+      <PricePartValue
         class="order-contents__price__full__value"
-        set:html="3 420 ₽"
-        data-total-price
+        type={'total'}
       />
     </div>
   </div>
@@ -152,7 +121,7 @@ const { class: className, ...rest } = Astro.props
     }
   }
 
-  .order-contentss__title {
+  .order-contents__title {
     margin-bottom: 2.4rem;
 
     @media (max-width: 768px) {
@@ -251,22 +220,11 @@ const { class: className, ...rest } = Astro.props
 
     margin-bottom: 3.2rem;
 
+    color: var(--color-secondary-3);
+
     @media (max-width: 768px) {
       margin-bottom: 1.6rem;
     }
-  }
-
-  .order-contents__price__part {
-    display: flex;
-    justify-content: space-between;
-
-    color: var(--color-secondary-3);
-  }
-
-  .order-contents__price__part__title {
-  }
-
-  .order-contents__price__part__value {
   }
 
   .order-contents__price__full {
