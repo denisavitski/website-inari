@@ -97,6 +97,10 @@ body {
 
   --morph-duration: 0.3s;
 
+  @media (max-width: 1560px) {
+    --screen-horisontal-padding: 6rem;
+  }
+
   @media (max-width: 768px) {
     --screen-horisontal-padding: 1.6rem;
     --section-vertical-padding: 4.5rem;
@@ -115,6 +119,10 @@ body {
 
 html {
   font-size: calc(100vw / 1920 * 10);
+
+  @media (max-width: 1560px) {
+    font-size: calc(100vw / 1560 * 10);
+  }
 
   @media (max-width: 768px) {
     font-size: calc(100vw / 500 * 10);
