@@ -57,6 +57,7 @@ const {
   import { basketStore } from '@stores/basketStore'
   import { debounce } from 'aptechka/utils'
   import { productsToString } from '@utils/string'
+  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
 
   export class PricePartElement extends HTMLElement {
     #titleElement: HTMLElement | null = null
@@ -82,7 +83,10 @@ const {
           this.#titleElement.textContent = `${basketStore.fullAmount} ${productsToString(basketStore.fullAmount)}`
         }
       } else if (type === 'delivery') {
-        this.classList.toggle('invisible', orderStore.type === 'pickup' || !orderStore.address)
+        this.classList.toggle(
+          'invisible',
+          orderStore.type === 'pickup' || !orderStore.address || !deliveryZonesStore.userZone,
+        )
       }
     }, 10)
   }

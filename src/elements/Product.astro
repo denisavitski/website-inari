@@ -41,6 +41,7 @@ const {
   import type { ProductButtonElement } from './ProductButton.astro.0.mts'
   import type { PriceElement } from './Price.astro.0.mts'
   import type { ToggleElement } from '@lib/ToggleElement'
+  import { throttle } from 'aptechka/utils'
 
   export class ProductElement extends HTMLElement {
     #buttonElements: Array<ProductButtonElement> = []
@@ -104,7 +105,12 @@ const {
 
     #counterChangeListener = (event: Event) => {
       const ct = event.currentTarget as ProductButtonElement
-      const amount = ct.counter
+
+      this.#setStore(ct)
+    }
+
+    #setStore = throttle((button: ProductButtonElement) => {
+      const amount = button.counter
 
       const price = parseInt(this.getAttribute('price') || '0') || 0
       const name = this.getAttribute('name') || ''
@@ -119,7 +125,7 @@ const {
         pid: this.pid,
         image: image,
       })
-    }
+    }, 10)
 
     #storeChangeListener = () => {
       const storeItem = basketStore.items.find((item) => item.pid === this.pid)

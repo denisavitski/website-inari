@@ -1,97 +1,224 @@
 ---
 export interface Props {
   class?: string
+  markers?: boolean
+  zones?: boolean
 }
 
-const { class: className, ...rest } = Astro.props
+const { class: className, markers, zones, ...rest } = Astro.props
 ---
 
 <e-map
   {...rest}
   class:list={['class', className]}
+  data-popover-content
+  {markers}
+  {zones}
 >
 </e-map>
 
 <style is:global>
   e-map {
     position: relative;
+    z-index: 1;
     display: block;
   }
 </style>
 
 <script>
+  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
   import { ticker } from 'aptechka/ticker'
+  import { dispatchEvent } from 'aptechka/utils'
 
-  export class MapElement extends HTMLElement {
+  export interface YMapEvents {
+    markerClick: CustomEvent<{ address: string }>
+  }
+
+  let geojson: any
+
+  export class YMapElement extends HTMLElement {
     #map: any = null
     #searchControl: any = null
     #searchResults: any = null
+    #zones: Array<any> = []
+    #markers: Array<any> = []
+    #markersVisible = this.hasAttribute('markers')
+    #zonesVisible = this.hasAttribute('zones')
+    #userGeoObject: any = null
+    #allGeoObjects: any = null
 
     public get isReady() {
       return window.ymaps && this.#map
     }
 
-    public async search(value: string): Promise<Array<string>> {
+    public getDistances() {
       if (this.isReady) {
-        this.#searchResults.removeAll()
+        return this.#markers
+          .map((marker) => {
+            const address = marker.properties.get('iconCaption')
+
+            if (typeof address === 'string') {
+              let distance = 0
+
+              if (this.#userGeoObject) {
+                distance =
+                  window.ymaps.coordSystem.geo.getDistance(
+                    this.#userGeoObject.geometry.getCoordinates(),
+                    marker.geometry.getCoordinates(),
+                  ) / 1001
+              }
+
+              return { address, value: distance }
+            }
+
+            return null
+          })
+          .filter((v) => !!v)
+      }
+
+      return []
+    }
+
+    public async search(value: string): Promise<void> {
+      if (value === this.getUserAddress()) {
+        return
+      }
+
+      if (this.isReady) {
+        if (value.length < 3) {
+          this.#searchResults.removeAll()
+          this.#userGeoObject = null
+          return
+        }
 
         await this.#searchControl.search(value)
 
         const resultArray = this.#searchControl.getResultsArray()
 
         if (resultArray.length === 1) {
-          resultArray.forEach((result: any) => {
-            this.#searchResults.add(result)
-            this.#map.panTo(result.geometry.getCoordinates())
-          })
+          await this.#setUserGeoObject(resultArray[0].geometry.getCoordinates())
+        } else {
+          this.#searchResults.removeAll()
+          this.#userGeoObject = null
         }
-
-        return resultArray.map((result: any) => result.properties.get('text'))
       }
-
-      return []
     }
 
-    public async findLocation() {
+    public toggleMarkers(visible: boolean) {
+      this.#markersVisible = visible
+
+      this.#markers.find((marker) => {
+        marker.options.set({
+          iconOpacity: visible ? 1 : 0,
+          interactive: visible ? true : false,
+          cursor: visible ? 'pointer' : 'default',
+        })
+      })
+    }
+
+    public toggleZones(visible: boolean) {
+      this.#zonesVisible = visible
+
+      this.#zones.find((zone) => {
+        zone.options.set({
+          fillOpacity: this.#zonesVisible ? 0.25 : 0,
+          interactive: this.#zonesVisible ? true : false,
+          cursor: this.#zonesVisible ? 'pointer' : 'default',
+        })
+      })
+    }
+
+    public pickMarker(address: string) {
+      this.#markers.forEach((marker) => {
+        if (marker.properties.get('iconCaption') === address) {
+          marker.options.set({
+            iconImageHref: '/images/geo-picked.svg',
+          })
+        } else {
+          marker.options.set({
+            iconImageHref: '/images/geo.svg',
+          })
+        }
+      })
+    }
+
+    public getUserAddress() {
+      if (this.isReady && this.#userGeoObject) {
+        return this.#userGeoObject.getAddressLine()
+      } else {
+        return ''
+      }
+    }
+
+    public async findUserLocation() {
       if (this.isReady) {
         try {
-          const location = await window.ymaps.geolocation.get({
-            provider: 'browser',
+          const userLocation = await window.ymaps.geolocation.get({
+            provider: 'auto',
           })
 
-          this.#map.panTo(location.geoObjects.position)
-
-          // Получаем координаты местоположения
-          const coordinates = location.geoObjects.get(0).geometry.getCoordinates()
-
-          // Геокодируем координаты, чтобы получить адрес
-          const geocoder = await window.ymaps.geocode(coordinates)
-          const firstGeoObject = geocoder.geoObjects.get(0)
-
-          if (firstGeoObject) {
-            return firstGeoObject.getAddressLine()
-          } else {
-            return ''
-          }
+          await this.#setUserGeoObject(userLocation.geoObjects.position)
         } catch (e) {
           console.error(e)
-          return ''
         }
       }
     }
 
-    protected async connectedCallback() {
+    public getZone() {
+      if (this.#userGeoObject) {
+        const userPosition = this.#userGeoObject.geometry.getCoordinates()
+
+        const zones = this.#zones
+          .filter((z) => z.geometry.contains(userPosition))
+          .map((v) => {
+            return {
+              zone: v.zone as string,
+              description: v.description as string,
+              addition: v.addition as string,
+            }
+          })
+
+        return zones[zones.length - 1]
+      }
+
+      return null
+    }
+
+    public focusOnGeoObjects() {
+      if (this.isReady && this.#allGeoObjects) {
+        const bounds = this.#allGeoObjects.getBounds()
+
+        this.#map.setBounds(bounds, {
+          checkZoomRange: true, // Учитываем диапазон доступного масштабирования
+          duration: 500, // Анимация перемещения (в миллисекундах)
+        })
+      }
+    }
+
+    protected connectedCallback() {
       ticker.subscribe(this.#scriptReadyListener)
     }
 
     protected disconnectedCallback() {
+      this.innerHTML = ''
       this.#map?.destroy()
       ticker.unsubscribe(this.#scriptReadyListener)
     }
 
+    async #setUserGeoObject(position: any) {
+      this.#searchResults.removeAll()
+      const geocoder = await window.ymaps.geocode(position)
+      this.#map.panTo(position)
+      const firstGeoObject = geocoder.geoObjects.get(0)
+      this.#userGeoObject = firstGeoObject
+      this.#searchResults.add(this.#userGeoObject)
+    }
+
     async #createMap() {
-      const geo = await fetch('/map.geojson')
-      const geojson = await geo.json()
+      if (!geojson) {
+        const geo = await fetch('/map.geojson')
+        geojson = await geo.json()
+      }
 
       if (!this.isConnected) {
         return
@@ -104,9 +231,14 @@ const { class: className, ...rest } = Astro.props
         controls: [],
       })
 
+      this.#map.events.add('sizechange', () => {
+        this.focusOnGeoObjects()
+      })
+
       this.#searchControl = new window.ymaps.control.SearchControl({
         options: {
           noPlacemark: true,
+          provider: 'yandex#search',
         },
       })
 
@@ -116,31 +248,68 @@ const { class: className, ...rest } = Astro.props
 
       this.#map.geoObjects.add(this.#searchResults)
 
-      // for (let i = 0; i < searchControl.getResultsCount(); i++) {
-      //   searchControl.getResult(i).then((result) => {
-      //     results.push(result.properties.get('name'))
-
-      //     console.log(searchControl.getResultsCount())
-
-      //     if (i === searchControl.getResultsCount() - 1) {
-      //       // Отображаем результаты
-      //       console.log('Результаты поиска:', results)
-      //     }
-      //   })
-      // }
-
-      const deliveryZones = window.ymaps.geoQuery(geojson).addToMap(this.#map)
-
-      deliveryZones.each((obj: any) => {
-        obj.options.set({
-          fillColor: obj.properties.get('fill'),
-          fillOpacity: obj.properties.get('fill-opacity'),
-          strokeColor: obj.properties.get('stroke'),
-          strokeWidth: obj.properties.get('stroke-width'),
-          strokeOpacity: obj.properties.get('stroke-opacity'),
+      this.#allGeoObjects = window.ymaps
+        .geoQuery(geojson)
+        .addToMap(this.#map)
+        .applyBoundsToMap(this.#map, {
+          checkZoomRange: true,
         })
 
-        obj.properties.set('balloonContent', obj.properties.get('description'))
+      this.#zones = []
+      this.#markers = []
+
+      this.#allGeoObjects.each((obj: any) => {
+        if (obj.geometry.getType() === 'Polygon') {
+          this.#zones.push(obj)
+
+          const [zoneName] = obj.properties.get('description')?.split('\n')
+
+          const foundedZone = deliveryZonesStore.findZone(zoneName)
+
+          obj.zone = zoneName
+          obj.description = foundedZone?.description
+          obj.addition = foundedZone?.addition
+
+          obj.properties.set(
+            'balloonContent',
+            `
+              <h2 style="margin-bottom: 5px;">${obj.zone}</h2>
+              ${obj.description ? `<h3 style="margin-bottom: 5px;">${obj.description}</h3>` : ''}
+              ${obj.addition ? `<p style="margin-bottom: 5px;">${obj.addition}</p>` : ''}
+            `,
+          )
+
+          obj.options.set({
+            fillColor: obj.properties.get('fill'),
+            strokeWidth: 0,
+            strokeOpacity: 0,
+            fillOpacity: this.#zonesVisible ? 0.25 : 0,
+            interactive: this.#zonesVisible ? true : false,
+            cursor: this.#zonesVisible ? 'pointer' : 'default',
+          })
+        } else if (obj.geometry.getType() === 'Point') {
+          obj.properties.set('balloonContent', obj.properties.get('iconCaption'))
+
+          obj.options.set({
+            iconLayout: 'default#image',
+            iconImageHref: '/images/geo.svg',
+            iconImageSize: [50, 50],
+            iconImageOffset: [-25, -25],
+            iconOpacity: this.#markersVisible ? 1 : 0,
+            interactive: this.#markersVisible ? true : false,
+            cursor: this.#markersVisible ? 'pointer' : 'default',
+            hideIconOnBalloonOpen: false,
+          })
+
+          obj.events.add('click', (e: any) => {
+            const target = e.get('target')
+            const address = target.properties.get('iconCaption')
+            this.pickMarker(address)
+            dispatchEvent(this, 'markerClick', { detail: { address } })
+          })
+
+          this.#markers.push(obj)
+        }
       })
 
       // this.#map.behaviors.disable('scrollZoom')
@@ -158,7 +327,7 @@ const { class: className, ...rest } = Astro.props
   }
 
   if (!customElements.get('e-map')) {
-    customElements.define('e-map', MapElement)
+    customElements.define('e-map', YMapElement)
   }
 
   declare global {
@@ -167,7 +336,9 @@ const { class: className, ...rest } = Astro.props
     }
 
     interface HTMLElementTagNameMap {
-      'e-map': MapElement
+      'e-map': YMapElement
     }
+
+    interface HTMLElementEventMap extends YMapEvents {}
   }
 </script>

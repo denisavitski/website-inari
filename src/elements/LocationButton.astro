@@ -12,24 +12,76 @@ const { class: className, ...rest } = Astro.props
   {...rest}
   class:list={['location-button', className]}
 >
-  <Icon
-    name="geo-1"
-    class="location-button__icon"
-  />
+  <span class="location-button__icon-box">
+    <Icon
+      name="geo-1"
+      class="location-button__icon location-button__icon_geo"
+    />
+    <Icon
+      name="spinner"
+      class="location-button__icon location-button__icon_spinner"
+    />
+  </span>
   <span class="f-d-16-r f-d-14-r location-button__title">Определить местоположение</span>
 </button>
 
 <style is:global>
   .location-button {
+    --transition: opacity 0.2s;
+
     display: inline-flex;
     align-items: center;
     gap: 0.8rem;
+
+    .location-search & {
+      pointer-events: none;
+    }
+  }
+
+  .location-button__icon-box {
+    display: grid;
+    width: 2.4rem;
+    height: 2.4rem;
   }
 
   .location-button__icon {
-    width: 2.4rem;
-    height: 2.4rem;
+    grid-column: 1/1;
+    grid-row: 1/1;
+
+    width: 100%;
+    height: 100%;
 
     fill: var(--color-primary-2);
+
+    transition: opacity var(--transition);
+  }
+
+  .location-button__icon_geo {
+    .location-search & {
+      opacity: 0;
+    }
+  }
+
+  .location-button__icon_spinner {
+    opacity: 0;
+
+    .location-search & {
+      opacity: 1;
+      animation: spin 1s infinite linear;
+    }
+  }
+
+  .location-button__title {
+    transition: opacity var(--transition);
+
+    .location-search & {
+      opacity: 0;
+    }
+  }
+
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
   }
 </style>

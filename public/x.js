@@ -1,279 +1,117 @@
-var baseImageURL = 'images/';
+ymaps.ready(init);
 
-function init () {
-    /**
-     * Класс кнопки определения местоположения пользователя.
-     * с помощью Geolocation API.
-     * @see http://www.w3.org/TR/geolocation-API/
-     * @class
-     * @name GeolocationButton
-     * @param {Object} params Данные для кнопки и параметры к Geolocation API.
-     */
-    function GeolocationButton (params) {
-        GeolocationButton.superclass.constructor.call(this, params);
-
-        // Расширяем опции по умолчанию теми, что передали в конструкторе.
-        this.geoLocationOptions = ymaps.util.extend({
-            // Не центрировать карту.
-            noCentering: false,
-            // Не ставить метку.
-            noPlacemark: false,
-            // Не показывать точность определения местоположения.
-            noAccuracy: false,
-            // Режим получения наиболее точных данных.
-            enableHighAccuracy: true,
-            // Максимальное время ожидания ответа (в миллисекундах).
-            timeout: 10000,
-            // Максимальное время жизни полученных данных (в миллисекундах).
-            maximumAge: 1000
-        }, params.options);
-    }
-
-    ymaps.util.augment(GeolocationButton, ymaps.control.Button, {
-        /**
-         * Метод будет вызван при добавлении кнопки на карту.
-         * @function
-         * @name GeolocationButton.onAddToMap
-         * @param {ymaps.Map} map Карта на которую добавляется кнопка.
-         */
-        onAddToMap: function () {
-            GeolocationButton.superclass.onAddToMap.apply(this, arguments);
-
-            ymaps.option.presetStorage.add('geolocation#icon', {
-                iconImageHref: 'man.png',
-                iconImageSize: [27, 26],
-                iconImageOffset: [-10, -24]
-            });
-
-            this.hint = new GeolocationButtonHint(this);
-            // Обрабатываем клик на кнопке.
-            this.events.add('click', this.onGeolocationButtonClick, this);
-        },
-        /**
-         * Метод будет вызван при удалении кнопки с карты.
-         * @function
-         * @name GeolocationButton.onRemoveFromMap
-         * @param {ymaps.Map} map Карта с которой удаляется кнопка.
-         */
-        onRemoveFromMap: function () {
-            this.events.remove('click', this.onGeolocationButtonClick, this);
-            this.hint = null;
-            ymaps.option.presetStorage.remove('geolocation#icon');
-
-            GeolocationButton.superclass.onRemoveFromMap.apply(this, arguments);
-        },
-        /**
-         * Обработчик клика на кнопке.
-         * @function
-         * @private
-         * @name GeolocationButton.onGeolocationButtonClick
-         * @param {ymaps.Event} e Объект события.
-         */
-        onGeolocationButtonClick: function (e) {
-            // Меняем иконку кнопки на прелоадер.
-            this.toggleIconImage('loader.gif');
-
-            // Делаем кнопку ненажатой
-            if (this.isSelected()) {
-                this.deselect();
-            }
-
-            if (navigator.geolocation) {
-                // Запрашиваем текущие координаты устройства.
-                navigator.geolocation.getCurrentPosition(
-                    ymaps.util.bind(this._onGeolocationSuccess, this),
-                    ymaps.util.bind(this._onGeolocationError, this),
-                    this.geoLocationOptions
-                );
-            }
-            else {
-                this.handleGeolocationError('Ваш броузер не поддерживает GeolocationAPI.');
-            }
-        },
-        /**
-         * Обработчик успешного завершения геолокации.
-         * @function
-         * @private
-         * @name GeolocationButton._onGeolocationSuccess
-         * @param {Object} position Объект, описывающий текущее местоположение.
-         */
-        _onGeolocationSuccess: function (position) {
-            this.handleGeolocationResult(position);
-            // Меняем иконку кнопки обратно
-            this.toggleIconImage('wifi.png');
-        },
-        /**
-         * Обработчик ошибки геолокации.
-         * @function
-         * @name GeolocationButton._onGeolocationError
-         * @param {Object} error Описание причины ошибки.
-         */
-        _onGeolocationError: function (error) {
-            this.handleGeolocationError('Точное местоположение определить не удалось.');
-            // Меняем иконку кнопки обратно.
-            this.toggleIconImage('wifi.png');
-
-            if (console) {
-                console.warn('GeolocationError: ' + GeolocationButton.ERRORS[error.code - 1]);
-            }
-        },
-        /**
-         * Обработка ошибки геолокации.
-         * @function
-         * @name GeolocationButton.handleGeolocationError
-         * @param {Object|String} err Описание ошибки.
-         */
-        handleGeolocationError: function (err) {
-            this.hint
-                .show(err.toString())
-                .hide(2000);
-        },
-        /**
-         * Меняет иконку кнопки.
-         * @function
-         * @name GeolocationButton.toggleIconImage
-         * @param {String} image Путь до изображения.
-         */
-        toggleIconImage: function (image) {
-            this.data.set('image', baseImageURL + image);
-        },
-        /**
-         * Обработка результата геолокации.
-         * @function
-         * @name GeolocationButton.handleGeolocationResult
-         * @param {Object} position Результат геолокации.
-         */
-        handleGeolocationResult: function (position) {
-            var location = [position.coords.latitude, position.coords.longitude],
-                accuracy = position.coords.accuracy,
-                map = this.getMap(),
-                options = this.geoLocationOptions,
-                placemark = this._placemark,
-                circle = this._circle;
-
-            // Смена центра карты (если нужно)
-            if (!options.noCentering) {
-                map.setCenter(location, 15);
-            }
-
-            // Установка метки по координатам местоположения (если нужно).
-            if (!options.noPlacemark) {
-                // Удаляем старую метку.
-                if (placemark) {
-                    map.geoObjects.remove(placemark);
-                }
-                this._placemark = placemark = new ymaps.Placemark(location, {}, { preset: 'geolocation#icon' });
-                map.geoObjects.add(placemark);
-                // Показываем адрес местоположения в хинте метки.
-                this.getLocationInfo(placemark);
-            }
-
-            // Показываем точность определения местоположения (если нужно).
-            if (!options.noAccuracy) {
-                // Удаляем старую точность.
-                if (circle) {
-                    map.geoObjects.remove(circle);
-                }
-                this._circle = circle = new ymaps.Circle([location, accuracy], {}, { opacity: 0.5 });
-                map.geoObjects.add(circle);
-            }
-        },
-        /**
-         * Получение адреса по координатам метки.
-         * @function
-         * @name GeolocationButton.getLocationInfo
-         * @param {ymaps.Placemark} point Метка для которой ищем адрес.
-         */
-        getLocationInfo: function (point) {
-            ymaps.geocode(point.geometry.getCoordinates())
-                .then(function (res) {
-                    var result = res.geoObjects.get(0);
-
-                    if (result) {
-                        point.properties.set('hintContent', result.properties.get('name'));
-                    }
-                });
-        }
-    });
-
-    /**
-     * Человекопонятное описание кодов ошибок.
-     * @static
-     */
-    GeolocationButton.ERRORS = [
-        'permission denied',
-        'position unavailable',
-        'timeout'
-    ];
-
-    /**
-     * Класс хинта кнопки геолокации, будем использовать для отображения ошибок.
-     * @class
-     * @name GeolocationButtonHint
-     * @param {GeolocationButton} btn Экземпляр класса кнопки.
-     */
-    function GeolocationButtonHint (btn) {
-        var map = btn.getMap(),
-        // Позиция кнопки.
-            position = btn.options.get('position');
-
-        this._map = map;
-        // Отодвинем от кнопки на 35px.
-        this._position = [position.left + 35, position.top];
-    }
-
-    /**
-     * Отображает хинт справа от кнопки.
-     * @function
-     * @name GeolocationButtonHint.show
-     * @param {String} text
-     * @returns {GeolocationButtonHint}
-     */
-    GeolocationButtonHint.prototype.show = function (text) {
-        var map = this._map,
-            globalPixels = map.converter.pageToGlobal(this._position),
-            position = map.options.get('projection').fromGlobalPixels(globalPixels, map.getZoom());
-
-        this._hint = map.hint.show(position, text);
-
-        return this;
-    };
-    /**
-     * Прячет хинт с нужной задержкой.
-     * @function
-     * @name GeolocationButtonHint.hide
-     * @param {Number} timeout Задержка в миллисекундах.
-     * @returns {GeolocationButtonHint}
-     */
-    GeolocationButtonHint.prototype.hide = function (timeout) {
-        var hint = this._hint;
-
-        if (hint) {
-            setTimeout(function () {
-                hint.hide();
-            }, timeout);
-        }
-
-        return this;
-    };
-
-    var myMap = new ymaps.Map("map", {
-            center: [55.755768, 37.617671],
-            zoom: 10,
-            behaviors: ["default", "scrollZoom"]
+function init() {
+    var myMap = new ymaps.Map('map', {
+            center: [30.264981955459618, 59.9567962610097],
+            zoom: 9,
+            controls: ['geolocationControl', 'searchControl']
         }),
-        myButton = new GeolocationButton({
-            data: {
-                image: baseImageURL + 'wifi.png',
-                title: 'Определить местоположение'
-            },
-            options: {
-                // Режим получения наиболее точных данных.
-                enableHighAccuracy: true
-            }
+        deliveryPoint = new ymaps.GeoObject({
+            geometry: {type: 'Point'},
+            properties: {iconCaption: 'Адрес'}
+        }, {
+            preset: 'islands#blackDotIconWithCaption',
+            draggable: true,
+            iconCaptionMaxWidth: '215'
+        }),
+        searchControl = myMap.controls.get('searchControl');
+    searchControl.options.set({noPlacemark: true, placeholderContent: 'Введите адрес доставки'});
+    myMap.geoObjects.add(deliveryPoint);
+
+    function onZonesLoad(json) {
+        // Добавляем зоны на карту.
+        var deliveryZones = ymaps.geoQuery(json).addToMap(myMap);
+        // Задаём цвет и контент балунов полигонов.
+        deliveryZones.each(function (obj) {
+            obj.options.set({
+                fillColor: obj.properties.get('fill'),
+                fillOpacity: obj.properties.get('fill-opacity'),
+                strokeColor: obj.properties.get('stroke'),
+                strokeWidth: obj.properties.get('stroke-width'),
+                strokeOpacity: obj.properties.get('stroke-opacity')
+            });
+            obj.properties.set('balloonContent', obj.properties.get('description'));
         });
 
-    myMap.controls.add(myButton, {top: 5, left: 5});
-}
+        // Проверим попадание результата поиска в одну из зон доставки.
+        searchControl.events.add('resultshow', function (e) {
+            highlightResult(searchControl.getResultsArray()[e.get('index')]);
+        });
 
-ymaps.ready(init);
+        // Проверим попадание метки геолокации в одну из зон доставки.
+        myMap.controls.get('geolocationControl').events.add('locationchange', function (e) {
+            highlightResult(e.get('geoObjects').get(0));
+        });
+
+        // При перемещении метки сбрасываем подпись, содержимое балуна и перекрашиваем метку.
+        deliveryPoint.events.add('dragstart', function () {
+            deliveryPoint.properties.set({iconCaption: '', balloonContent: ''});
+            deliveryPoint.options.set('iconColor', 'black');
+        });
+
+        // По окончании перемещения метки вызываем функцию выделения зоны доставки.
+        deliveryPoint.events.add('dragend', function () {
+            highlightResult(deliveryPoint);
+        });
+
+        function highlightResult(obj) {
+            // Сохраняем координаты переданного объекта.
+            var coords = obj.geometry.getCoordinates(),
+            // Находим полигон, в который входят переданные координаты.
+                polygon = deliveryZones.searchContaining(coords).get(0);
+
+            if (polygon) {
+                // Уменьшаем прозрачность всех полигонов, кроме того, в который входят переданные координаты.
+                deliveryZones.setOptions('fillOpacity', 0.4);
+                polygon.options.set('fillOpacity', 0.8);
+                // Перемещаем метку с подписью в переданные координаты и перекрашиваем её в цвет полигона.
+                deliveryPoint.geometry.setCoordinates(coords);
+                deliveryPoint.options.set('iconColor', polygon.properties.get('fill'));
+                // Задаем подпись для метки.
+                if (typeof(obj.getThoroughfare) === 'function') {
+                    setData(obj);
+                } else {
+                    // Если вы не хотите, чтобы при каждом перемещении метки отправлялся запрос к геокодеру,
+                    // закомментируйте код ниже.
+                    ymaps.geocode(coords, {results: 1}).then(function (res) {
+                        var obj = res.geoObjects.get(0);
+                        setData(obj);
+                    });
+                }
+            } else {
+                // Если переданные координаты не попадают в полигон, то задаём стандартную прозрачность полигонов.
+                deliveryZones.setOptions('fillOpacity', 0.4);
+                // Перемещаем метку по переданным координатам.
+                deliveryPoint.geometry.setCoordinates(coords);
+                // Задаём контент балуна и метки.
+                deliveryPoint.properties.set({
+                    iconCaption: 'Доставка транспортной компанией',
+                    balloonContent: 'Cвяжитесь с оператором',
+                    balloonContentHeader: ''
+                });
+                // Перекрашиваем метку в чёрный цвет.
+                deliveryPoint.options.set('iconColor', 'black');
+            }
+
+            function setData(obj){
+                var address = [obj.getThoroughfare(), obj.getPremiseNumber(), obj.getPremise()].join(' ');
+                if (address.trim() === '') {
+                    address = obj.getAddressLine();
+                }
+                var price = polygon.properties.get('description');
+                price = price.match(/<strong>(.+)<\/strong>/)[1];
+                deliveryPoint.properties.set({
+                    iconCaption: address,
+                    balloonContent: address,
+                    balloonContentHeader: price
+                });
+            }
+        }
+    }
+
+    $.ajax({
+        url: 'data.geojson',
+        dataType: 'json',
+        success: onZonesLoad
+    });
+}

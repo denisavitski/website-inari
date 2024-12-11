@@ -64,6 +64,8 @@ function createBaksetStore() {
   }
 
   return {
+    store: derived,
+
     setItem,
 
     removeItem,

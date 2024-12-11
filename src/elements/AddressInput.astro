@@ -83,16 +83,16 @@ const { class: className, inputStyles, name = 'Адрес', ...rest } = Astro.pr
       this.#inputElement = this.querySelector('input')
       this.#valueElement = this.querySelector('.address-input__value')
 
-      orderStore.subscribe(this.#orderChangeListener)
+      orderStore.subscribeToAddress(this.#orderAddressChangeListener)
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
 
-      orderStore.unsubscribe(this.#orderChangeListener)
+      orderStore.unsubscribeFromAddress(this.#orderAddressChangeListener)
     }
 
-    #orderChangeListener = () => {
+    #orderAddressChangeListener = () => {
       this.classList.toggle('filled', !!orderStore.address)
 
       if (this.#inputElement) {

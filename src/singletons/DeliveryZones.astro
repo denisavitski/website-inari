@@ -1,0 +1,63 @@
+<e-delivery-zone
+  class="visually-hidden zones"
+  name="Зона 1"
+  description="Бесплатная доставка при заказе от 1 500 рублей"
+  addition="Если сумма заказа меньше 1 500 рублей — стоимость доставки 200 рублей"
+  free="1500"
+  price="200"
+></e-delivery-zone>
+
+<e-delivery-zone
+  class="visually-hidden zones"
+  name="Зона 2"
+  description="Бесплатная доставка при заказе от 2500 рублей"
+  addition="Если сумма заказа меньше — доставка 300 рублей"
+  free="2500"
+  price="300"
+></e-delivery-zone>
+
+<e-delivery-zone
+  class="visually-hidden zones"
+  name="Зона 3"
+  description="Стоимость доставки — 400 рублей, независимо от суммы заказа"
+  addition="Возможность доставки за город или на удаленные районы обсуждается индивидуально"
+  free="0"
+  price="400"
+></e-delivery-zone>
+
+<script>
+  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
+
+  export class DeliveryZoneElement extends HTMLElement {
+    protected connectedCallback() {
+      const name = this.getAttribute('name') || ''
+      const description = this.getAttribute('description') || ''
+      const addition = this.getAttribute('addition') || ''
+      const free = this.getAttribute('free') || '0'
+      const price = this.getAttribute('price') || '0'
+
+      deliveryZonesStore.addZone({
+        name,
+        description,
+        addition,
+        free: parseInt(free),
+        price: parseInt(price),
+      })
+    }
+
+    protected disconnectedCallback() {
+      const name = this.getAttribute('name') || ''
+      deliveryZonesStore.removeZone(name)
+    }
+  }
+
+  if (!customElements.get('e-delivery-zone')) {
+    customElements.define('e-delivery-zone', DeliveryZoneElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-delivery-zone': DeliveryZoneElement
+    }
+  }
+</script>

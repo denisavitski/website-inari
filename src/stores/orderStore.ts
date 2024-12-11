@@ -1,5 +1,6 @@
-import { Store } from 'aptechka/store'
+import { Derived, Store } from 'aptechka/store'
 import { basketStore } from './basketStore'
+import { deliveryZonesStore } from './deliveryZonesStore'
 
 export type OrderStoreType = 'delivery' | 'pickup'
 export type OrderStoreStep = 'basket' | 'order' | 'complete'
@@ -23,18 +24,42 @@ function createOrderStore() {
     step: 'basket',
   })
 
+  const typeStore = new Derived(store, (v) => v.type)
+  const addressStore = new Derived(store, (v) => v.address)
+
   function getFinalPrice(s: OrderStoreState) {
-    return Math.max(0, basketStore.fullPrice + s.deliveryPrice - s.discount)
+    return Math.max(0, basketStore.fullPrice + getDeliveryPrice() - s.discount)
+  }
+
+  function getDeliveryPrice() {
+    let deliveryPrice = 0
+
+    let productsPriceWithDiscount = basketStore.fullPrice - store.current.discount
+
+    if (deliveryZonesStore.userZone) {
+      if (productsPriceWithDiscount < deliveryZonesStore.userZone.free) {
+        deliveryPrice = deliveryZonesStore.userZone.price
+      }
+    }
+
+    return deliveryPrice
   }
 
   store.addMiddleware((e) => {
     return {
       ...e,
+      deliveryPrice: getDeliveryPrice(),
       finalPrice: getFinalPrice(e),
     }
   })
 
   basketStore.subscribe(() => {
+    store.current = {
+      ...store.current,
+    }
+  })
+
+  deliveryZonesStore.subscribe(() => {
     store.current = {
       ...store.current,
     }
@@ -48,37 +73,54 @@ function createOrderStore() {
       return
     }
 
+    if (store.current.type === value) {
+      return
+    }
+
     store.current = { ...store.current, type: value, address: '' }
   }
 
   function setDiscount(value: number) {
+    if (store.current.discount === value) {
+      return
+    }
+
     store.current = { ...store.current, discount: value }
   }
 
-  function setDeliveryPrice(value: number) {
-    store.current = { ...store.current, deliveryPrice: value }
-  }
-
   function setAddress(value: string) {
+    if (store.current.address === value) {
+      return
+    }
+
     store.current = { ...store.current, address: value }
   }
 
   function setStep(value: OrderStoreStep) {
+    if (store.current.step === value) {
+      return
+    }
+
     store.current = { ...store.current, step: value }
   }
 
   return {
     setType,
     setDiscount,
-    setDeliveryPrice,
     setAddress,
     setStep,
 
     subscribe: store.subscribe.bind(store),
     unsubscribe: store.unsubscribe.bind(store),
 
+    subscribeToType: typeStore.subscribe.bind(typeStore),
+    unsubscribeFromType: typeStore.unsubscribe.bind(typeStore),
+
+    subscribeToAddress: addressStore.subscribe.bind(addressStore),
+    unsubscribeFromAddress: addressStore.unsubscribe.bind(addressStore),
+
     get type() {
-      return store.current.type
+      return typeStore.current
     },
 
     get discount() {
@@ -94,7 +136,7 @@ function createOrderStore() {
     },
 
     get address() {
-      return store.current.address
+      return addressStore.current
     },
 
     get step() {

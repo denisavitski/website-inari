@@ -1,5 +1,4 @@
 ---
-import { tryCreateHrefFromContact } from '@utils/href'
 import Icon from './Icon.astro'
 
 export interface AddressData {
@@ -52,15 +51,16 @@ const Tag = tag
     />
   </div>
 
-  <a
+  <span
     class="address__phone"
-    href={tryCreateHrefFromContact(phone).href}
     set:html={phone}
   />
 </Tag>
 
 <style is:global>
   .address {
+    text-align: start;
+
     width: 100%;
     height: 100%;
 
@@ -72,6 +72,10 @@ const Tag = tag
     display: grid;
     grid-auto-rows: max-content;
     gap: 1.2rem;
+
+    &[data-checked] {
+      background-color: var(--color-secondary-2);
+    }
 
     @media (max-width: 768px) {
       gap: 0.8rem;

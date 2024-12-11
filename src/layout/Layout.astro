@@ -9,6 +9,7 @@ import { type Props as SeoProps } from './Seo.astro'
 import Basket from '@singletons/Basket.astro'
 import Review from '@singletons/Review.astro'
 import OrderType from '@singletons/OrderType.astro'
+import DeliveryZones from '@singletons/DeliveryZones.astro'
 
 export interface Props {
   header?: boolean
@@ -30,6 +31,7 @@ const { header = true, footer = true, seo } = Astro.props
   <body>
     <div class="page">
       {header && <Header />}
+      <DeliveryZones />
       <OrderType />
       <Basket />
       <Review />

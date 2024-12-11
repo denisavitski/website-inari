@@ -1,6 +1,5 @@
 ---
 import Button from '@elements/Button.astro'
-import Icon from '@elements/Icon.astro'
 import LocationButton from '@elements/LocationButton.astro'
 import Map from '@elements/Map.astro'
 import Modal from '@elements/Modal.astro'
@@ -39,34 +38,10 @@ export const modal = '#order-type'
           <input
             type="text"
             class="f-d-16-r f-m-14-r order-type__delivery__input"
-            placeholder="Улица"
+            placeholder="Город, улица, дом"
           />
 
-          <div
-            class="f-d-16-r f-m-14-r rder-type__delivery__price"
-            aria-hidden="true"
-          >
-            <div
-              class="order-type__delivery__price__zone-1"
-              data-price-zone="1"
-              aria-hidden="true"
-              >Бесплатная доставка по данному адресу при заказе на сумму <b>от 1 500 рублей</b></div
-            >
-
-            <div
-              class="order-type__delivery__price__zone-2"
-              data-price-zone="2"
-              aria-hidden="true"
-              >Бесплатная доставка по данному адресу при заказе на сумму <b>от 2 500 рублей</b></div
-            >
-
-            <div
-              class="order-type__delivery__price__zone-3"
-              data-price-zone="3"
-              aria-hidden="true"
-              >Стоимость доставки по данному адресу — <b>400 рублей</b>, независимо от суммы заказа</div
-            >
-          </div>
+          <div class="f-d-16-r f-m-14-r order-type__delivery__price"> </div>
         </div>
 
         <div
@@ -80,28 +55,24 @@ export const modal = '#order-type'
               name="Точка самовывоза"
               value="улица Щербакова, 48, Зеленоград, Москва"
               addressType="Фудмолл"
-              distance="1,5км"
             />
             <PickupPoint
               class="order-type__pickup__point"
               name="Точка самовывоза"
               value="Новокрюковская улица, 1824, Зеленоград, Москва"
               addressType="Пункт самовывоза"
-              distance="16 км"
             />
             <PickupPoint
               class="order-type__pickup__point"
               name="Точка самовывоза"
               value="ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва"
               addressType="Пункт самовывоза"
-              distance="17 км"
             />
             <PickupPoint
               class="order-type__pickup__point"
               name="Точка самовывоза"
               value="5253-й проезд, 1с1, Зеленоград, Москва"
               addressType="Фудмолл"
-              distance="22 км"
             />
           </e-input-group>
         </div>
@@ -210,28 +181,16 @@ export const modal = '#order-type'
   }
 
   .order-type__delivery__price {
-    &[aria-hidden='true'] {
-      display: none;
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      text-align: center;
+      margin-bottom: 1.2rem;
     }
 
     b {
       color: var(--color-primary-3);
     }
-  }
-
-  [data-price-zone] {
-    &[aria-hidden='true'] {
-      display: none;
-    }
-  }
-
-  .order-type__delivery__price__zone-1 {
-  }
-
-  .order-type__delivery__price__zone-2 {
-  }
-
-  .order-type__delivery__price__zone-3 {
   }
 
   .order-type__pickup {
@@ -266,7 +225,7 @@ export const modal = '#order-type'
     align-items: center;
     justify-content: space-between;
 
-    margin-top: 1.6rem;
+    /* margin-top: 1.6rem; */
 
     @media (max-width: 768px) {
       display: contents;
@@ -312,21 +271,21 @@ export const modal = '#order-type'
 </style>
 
 <script>
-  import type { ToggleElement } from '@lib/ToggleElement'
   import { SwipePopoverElement } from '@lib/SwipePopoverElement'
   import { orderStore } from '@stores/orderStore'
   import type { InputGroupElement } from '@lib/InputGroupElement'
-  import type { MapElement } from '@elements/Map.astro.0.mjs'
+  import type { YMapElement, YMapEvents } from '@elements/Map.astro.0.mjs'
   import { debounce } from 'aptechka/utils'
+  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
 
   export class OrderTypeElement extends SwipePopoverElement {
     #orderVariantElements: Array<HTMLElement> = []
-    #orderTypeToggleElement: ToggleElement<'delivery' | 'pickup'> | null = null
-    #priceZoneElements: Array<HTMLElement> = []
+    #deliveryPriceElement: HTMLElement | null = null
     #deliveryInputElement: HTMLInputElement | null = null
     #pickupInputElement: InputGroupElement | null = null
-    #mapElement: MapElement | null = null
+    #mapElement: YMapElement | null = null
     #locationButtonElement: HTMLElement | null = null
+    #distanceElements: Array<HTMLElement> = []
 
     #findLocationAttempts = 0
 
@@ -335,10 +294,7 @@ export const modal = '#order-type'
 
       this.addEventListener('popoverOpened', () => {
         if (orderStore.type === 'delivery') {
-          this.#deliveryInputElement?.dispatchEvent(new Event('change'))
           this.#deliveryInputElement?.focus()
-        } else {
-          this.#pickupInputElement?.dispatchEvent(new CustomEvent('inputGroupValueChange'))
         }
       })
     }
@@ -348,106 +304,172 @@ export const modal = '#order-type'
 
       this.#orderVariantElements = [...this.querySelectorAll<HTMLElement>('[data-order-type]')]
 
-      this.#orderTypeToggleElement = this.querySelector('.order-type__toggle')
-      this.#orderTypeToggleElement?.addEventListener('toggleChange', this.#orderTypeToggleListener)
-
-      this.#priceZoneElements = [...this.querySelectorAll<HTMLElement>('[data-price-zone]')]
+      this.#deliveryPriceElement = this.querySelector('.order-type__delivery__price')
 
       this.#deliveryInputElement = this.querySelector('.order-type__delivery__input')
       this.#deliveryInputElement?.addEventListener('input', this.#deliveryInputListener)
-      this.#deliveryInputElement?.addEventListener('change', this.#deliveryInputListener)
 
       this.#pickupInputElement = this.querySelector('.order-type__pickup__input-group')
       this.#pickupInputElement?.addEventListener('inputGroupValueChange', this.#pickupInputListener)
 
       this.#mapElement = this.querySelector('e-map')
+      this.#mapElement?.addEventListener('markerClick', this.#mapMarkerClickListener)
 
       this.#locationButtonElement = this.querySelector('.order-type__location')
       this.#locationButtonElement?.addEventListener('click', this.#locationButtonListener)
 
-      this.#orderTypeToggleListener()
+      this.#distanceElements = [...this.querySelectorAll<HTMLElement>('[data-distance-value]')]
+
+      Promise.all([customElements.whenDefined('e-map')]).then(() => {
+        if (this.isConnected) {
+          orderStore.subscribeToType(this.#orderStoreTypeChangeListener)
+        }
+      })
+
+      addEventListener('keydown', (e) => {
+        if (e.key === '0') {
+          this.open()
+        }
+      })
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
 
-      this.#orderTypeToggleElement?.removeEventListener(
-        'inputGroupValueChange',
-        this.#orderTypeToggleListener,
-      )
-
       this.#deliveryInputElement?.removeEventListener('input', this.#deliveryInputListener)
-      this.#deliveryInputElement?.removeEventListener('change', this.#deliveryInputListener)
 
       this.#pickupInputElement?.removeEventListener(
         'inputGroupValueChange',
         this.#pickupInputListener,
       )
 
+      this.#mapElement?.removeEventListener('markerClick', this.#mapMarkerClickListener)
+
       this.#locationButtonElement?.removeEventListener('click', this.#locationButtonListener)
+
+      orderStore.unsubscribeFromType(this.#orderStoreTypeChangeListener)
     }
 
-    #orderTypeToggleListener = () => {
-      const value = this.#orderTypeToggleElement?.value
-
-      orderStore.setType(value || 'delivery')
-
+    #orderStoreTypeChangeListener = () => {
       this.#orderVariantElements.forEach((element) => {
-        if (element.getAttribute('data-order-type') === value) {
+        if (element.getAttribute('data-order-type') === orderStore.type) {
           element.ariaHidden = 'false'
         } else {
           element.ariaHidden = 'true'
         }
       })
 
-      this.#checkValidAddress()
-    }
-
-    #checkValidAddress() {
-      if (!this.#deliveryInputElement) {
-        return
-      }
-
-      if (orderStore.type === 'delivery' && !this.#deliveryInputElement.value) {
-        this.classList.add('invalid-address')
+      if (orderStore.type === 'pickup') {
+        this.#mapElement?.toggleMarkers(true)
+        this.#mapElement?.toggleZones(false)
+        this.#updateStorePickupAddress()
       } else {
-        this.classList.remove('invalid-address')
+        this.#mapElement?.toggleMarkers(false)
+        this.#mapElement?.toggleZones(true)
+        this.#searchForAddress()
       }
     }
 
-    #deliveryInputListener = debounce((e: Event) => {
-      const ct = e.target as HTMLInputElement
-      this.#searchForAddress(ct.value)
-    }, 500)
+    #deliveryInputListener = debounce(() => {
+      this.#searchForAddress()
+    }, 50)
 
-    async #searchForAddress(value: string) {
-      await this.#mapElement?.search(value)
+    async #updateLocation(callback: Function) {
+      document.documentElement.classList.add('location-search')
 
-      orderStore.setAddress(value)
+      await callback()
 
-      this.#checkValidAddress()
+      this.#updateDistances()
+      this.#updateZone()
+
+      document.documentElement.classList.remove('location-search')
+    }
+
+    #updateDistances() {
+      const distances = this.#mapElement?.getDistances()
+
+      this.#distanceElements.forEach((element) => {
+        const address = element.getAttribute('data-distance-value')
+        const distance = distances?.find((d) => d.address === address)
+
+        if (distance?.value) {
+          element.textContent = distance.value.toFixed(2) + ' км'
+        } else {
+          element.textContent = ''
+        }
+      })
+    }
+
+    #updateZone() {
+      const zone = this.#mapElement?.getZone()
+
+      if (this.#deliveryPriceElement) {
+        if (zone?.description) {
+          this.#deliveryPriceElement.textContent = zone.description
+        } else {
+          if (this.#mapElement?.getUserAddress()) {
+            this.#deliveryPriceElement.textContent =
+              'Вы не попадаете в зону доставки. Возможность доставки за город или на удаленные районы обсуждается индивидуально.'
+          } else {
+            this.#deliveryPriceElement.textContent = ''
+          }
+        }
+      }
+
+      deliveryZonesStore.setUserZone(zone?.zone)
+    }
+
+    async #searchForAddress() {
+      const value = this.#deliveryInputElement?.value
+
+      if (this.#mapElement) {
+        await this.#updateLocation(() => {
+          return this.#mapElement!.search(value || '')
+        })
+
+        const address = this.#mapElement.getUserAddress()
+
+        this.classList.toggle('invalid-address', !address)
+
+        orderStore.setAddress(address)
+      }
     }
 
     #pickupInputListener = () => {
-      orderStore.setAddress(this.#pickupInputElement?.value || '')
-      this.#checkValidAddress()
+      this.#updateStorePickupAddress()
+    }
+
+    #updateStorePickupAddress() {
+      const value = this.#pickupInputElement?.value || ''
+
+      orderStore.setAddress(value)
+      this.#mapElement?.pickMarker(value)
+      this.classList.toggle('invalid-address', !value)
     }
 
     #locationButtonListener = async () => {
       if (this.#mapElement) {
         const attempt = ++this.#findLocationAttempts
 
-        const location = await this.#mapElement.findLocation()
+        await this.#updateLocation(() => {
+          return this.#mapElement!.findUserLocation()
+        })
 
         if (attempt === this.#findLocationAttempts) {
           if (this.#deliveryInputElement) {
-            this.#deliveryInputElement.value = location
-            this.#deliveryInputElement.dispatchEvent(new Event('change'))
+            this.#deliveryInputElement.value = this.#mapElement.getUserAddress()
+            this.#deliveryInputElement.dispatchEvent(new Event('input'))
           }
           if (!location) {
             alert('Не удалось установить ваше местоположение')
           }
         }
+      }
+    }
+
+    #mapMarkerClickListener = (e: YMapEvents['markerClick']) => {
+      if (orderStore.type === 'pickup') {
+        this.#pickupInputElement?.changeValue(e.detail.address)
       }
     }
   }

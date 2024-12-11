@@ -7,7 +7,6 @@ export interface Props {
   checked?: boolean
   value?: string
   addressType?: string
-  distance?: string
 }
 
 const {
@@ -15,7 +14,6 @@ const {
   name = 'Точка самовывоза',
   value = 'улица Щербакова, 48, Зеленоград, Москва',
   addressType = 'Фудмолл',
-  distance = '1,5км',
   checked,
   ...rest
 } = Astro.props
@@ -51,8 +49,8 @@ const {
         />
         <span
           class="pickup-address__distance"
-          set:html={distance}
-        />
+          data-distance-value={value}
+        ></span>
       </span>
     </span>
   </span>

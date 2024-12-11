@@ -21,7 +21,7 @@ export class ToggleElement<T extends string = string> extends HTMLElement {
     return this.#currentButtonElement
   }
 
-  public setValue(value: T | undefined, _notifyRest = false) {
+  public setValue(value: T | undefined) {
     if (value && value !== this.#value) {
       this.#value = value
 
@@ -69,7 +69,7 @@ export class ToggleElement<T extends string = string> extends HTMLElement {
         element.addEventListener('click', this.#buttonClickListener)
 
         if (element.hasAttribute('data-checked')) {
-          this.setValue(element.getAttribute('data-value') as T, true)
+          this.setValue(element.getAttribute('data-value') as T)
         }
       })
     }
@@ -81,7 +81,7 @@ export class ToggleElement<T extends string = string> extends HTMLElement {
     const value = ct.getAttribute('data-value')
 
     if (value) {
-      this.setValue(value as T, true)
+      this.setValue(value as T)
     }
   }
 

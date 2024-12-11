@@ -1,5 +1,6 @@
 ---
 import Address, { type AddressData } from '@elements/Address.astro'
+import Map from './Map.astro'
 
 export interface Props {
   class?: string
@@ -12,39 +13,35 @@ const {
   heading = 'Наши адреса',
   list = [
     {
-      tag: 'div',
       address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
       type: 'Пункт самовывоза',
       workingHours: '11:00 — 23:00',
       phone: '+ 7 (921) 999-84-22',
     },
     {
-      tag: 'div',
-      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+      address: 'Новокрюковская улица, 1824, Зеленоград, Москва',
       type: 'Пункт самовывоза',
+      workingHours: '11:00 — 23:00',
+      phone: '+ 7 (921) 999-99-99',
+    },
+    {
+      address: 'улица Щербакова, 48, Зеленоград, Москва',
+      type: 'Фудмолл',
       workingHours: '11:00 — 23:00',
       phone: '+ 7 (921) 999-84-22',
     },
     {
-      tag: 'div',
-      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
-      type: 'Пункт самовывоза',
+      address: '5253-й проезд, 1с1, Зеленоград, Москва',
+      type: 'Фудмолл',
       workingHours: '11:00 — 23:00',
-      phone: '+ 7 (921) 999-84-22',
-    },
-    {
-      tag: 'div',
-      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
-      type: 'Пункт самовывоза',
-      workingHours: '11:00 — 23:00',
-      phone: '+ 7 (921) 999-84-22',
+      phone: '+ 7 (921) 999-99-99',
     },
   ],
   ...rest
 } = Astro.props
 ---
 
-<section
+<e-addresses
   {...rest}
   class:list={['addresses', className]}
 >
@@ -52,19 +49,25 @@ const {
     class="f-d-36-s f-m-18-s addresses__heading"
     set:html={heading}
   />
-  <ul class="addresses__list">
+  <e-toggle
+    class="addresses__list"
+    name="addresses"
+  >
     {
       list.map((item) => {
         return (
-          <li class="contacts__list__item">
-            <Address {...item} />
-          </li>
+          <Address
+            {...item}
+            tag="button"
+            class="contacts__list__item"
+            data-value={item.address}
+          />
         )
       })
     }
-  </ul>
-  <div class="addresses__map"></div>
-</section>
+  </e-toggle>
+  <Map class="addresses__map" />
+</e-addresses>
 
 <style is:global>
   .addresses {
@@ -93,10 +96,8 @@ const {
     }
   }
 
-  .contacts__list__item {
-  }
-
   .addresses__map {
+    overflow: hidden;
     height: 50rem;
     border-radius: var(--border-radius-2);
 
@@ -107,3 +108,50 @@ const {
     }
   }
 </style>
+
+<script>
+  import type { ToggleElement } from '@lib/ToggleElement'
+  import type { YMapElement, YMapEvents } from './Map.astro.0.mts'
+
+  export class MyElement extends HTMLElement {
+    #toggleElement: ToggleElement | null = null
+    #mapElement: YMapElement | null = null
+
+    protected connectedCallback() {
+      this.#toggleElement = this.querySelector('e-toggle')
+      this.#mapElement = this.querySelector('e-map')
+
+      customElements.whenDefined('e-map').then(() => {
+        if (this.isConnected) {
+          this.#mapElement?.toggleMarkers(true)
+          this.#mapElement?.toggleZones(false)
+
+          this.#toggleElement?.addEventListener('toggleChange', this.#toggleListener)
+          this.#mapElement?.addEventListener('markerClick', this.#markerClickListener)
+        }
+      })
+    }
+
+    protected disconnectedCallback() {
+      this.#toggleElement?.removeEventListener('toggleChange', this.#toggleListener)
+    }
+
+    #toggleListener = () => {
+      this.#mapElement?.pickMarker(this.#toggleElement!.value || '')
+    }
+
+    #markerClickListener = (e: YMapEvents['markerClick']) => {
+      this.#toggleElement?.setValue(e.detail.address)
+    }
+  }
+
+  if (!customElements.get('e-addresses')) {
+    customElements.define('e-addresses', MyElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-addresses': MyElement
+    }
+  }
+</script>
