@@ -5,6 +5,8 @@ export interface Props {
   name?: string
   placeholder?: string
   font?: string
+  required?: boolean
+  suggestions?: Array<string>
 }
 
 const {
@@ -13,6 +15,8 @@ const {
   name = 'suggestions-input',
   placeholder = '',
   font = 'f-d-16-r f-d-14-r',
+  required,
+  suggestions,
   ...rest
 } = Astro.props
 ---
@@ -20,19 +24,18 @@ const {
 <e-suggestions-input
   {...rest}
   class:list={['suggestions-input', className]}
+  {suggestions}
 >
   <input
     type="text"
-    class:list={[font, 'suggestions-input__input']}
+    class:list={[font, 'input suggestions-input__input']}
     {value}
     {placeholder}
     {name}
+    {required}
   />
 
-  <div
-    class="suggestions-input__suggestions"
-    aria-hidden="true"
-  >
+  <div class="suggestions-input__suggestions hidden">
     <div class="suggestions-input__suggestion"> </div>
   </div>
 </e-suggestions-input>
@@ -40,21 +43,13 @@ const {
 <style is:global>
   .suggestions-input {
     position: relative;
+    z-index: 2;
 
     display: inline-block;
   }
 
   .suggestions-input__input {
     width: 100%;
-    height: var(---height, 4.3rem);
-    padding: var(--padding, 1.2rem 1.6rem);
-
-    border-radius: var(--border-radius-1);
-    background-color: var(--color-secondary-2);
-
-    @media (max-width: 768px) {
-      height: var(---height, 4.1rem);
-    }
   }
 
   .suggestions-input__suggestions {
@@ -65,7 +60,7 @@ const {
     width: 37.5rem;
     padding: 1.6rem;
 
-    display: grid;
+    display: none;
     gap: 0.4rem;
 
     border-radius: var(--border-radius-2);
@@ -80,8 +75,8 @@ const {
       border: 0.1rem solid var(--color-secondary-3);
     }
 
-    &[aria-hidden='true'] {
-      display: none;
+    .suggestions-input.suggestions-visible & {
+      display: grid;
     }
   }
 
@@ -106,6 +101,8 @@ const {
 </style>
 
 <script>
+  import { ClassLinkedStatus } from 'aptechka/class-linked-status'
+
   export interface SuggestParameters {
     value: string
     additional?: string
@@ -115,6 +112,7 @@ const {
     #element: HTMLElement
     #inputElement: HTMLInputElement
     #value: string
+    #matched: boolean = false
 
     constructor(parameters: SuggestParameters) {
       this.#element = document.createElement('label')
@@ -144,12 +142,30 @@ const {
     public get value() {
       return this.#value
     }
+
+    public get matched() {
+      return this.#matched
+    }
+
+    public match(value: string) {
+      if (this.#value.toLowerCase().includes(value.toLowerCase())) {
+        this.#matched = true
+        this.#element.style.display = ''
+      } else {
+        this.#matched = false
+        this.#element.style.display = 'none'
+      }
+
+      return this.#matched
+    }
   }
 
   export class SuggestionsInputElement extends HTMLElement {
     #inputElement: HTMLInputElement | null = null
     #suggestionsContainerElement: HTMLElement | null = null
     #suggestions: Array<Suggestion> = []
+
+    #status = new ClassLinkedStatus(this, { 'suggestions-visible': false })
 
     public get inputElement() {
       return this.#inputElement
@@ -166,9 +182,9 @@ const {
       }
     }
 
-    public suggest(parameters: Array<SuggestParameters>) {
+    public provideSuggestions(parameters: Array<SuggestParameters>) {
       this.#suggestions.forEach((suggestion) => {
-        suggestion.element.addEventListener('pointerdown', this.#suggestionClickListener)
+        suggestion.element.removeEventListener('pointerdown', this.#suggestionClickListener)
       })
 
       this.#suggestions = []
@@ -185,12 +201,10 @@ const {
           suggestion.element.addEventListener('pointerdown', this.#suggestionClickListener)
         })
 
+        this.#suggestionsContainerElement.innerHTML = ''
+
         if (this.#suggestions.length) {
-          this.#suggestionsContainerElement.ariaHidden = 'false'
-          this.#suggestionsContainerElement.innerHTML = ''
           this.#suggestionsContainerElement.append(...this.#suggestions.map((s) => s.element))
-        } else {
-          this.#suggestionsContainerElement.ariaHidden = 'true'
         }
       }
     }
@@ -199,7 +213,21 @@ const {
       this.#inputElement = this.querySelector('.suggestions-input__input')
       this.#suggestionsContainerElement = this.querySelector('.suggestions-input__suggestions')
 
+      const suggestions = this.getAttribute('suggestions')
+        ?.split(',')
+        .map((v) => v.trim())
+
+      if (suggestions) {
+        this.provideSuggestions(
+          suggestions.map((v) => {
+            return { value: v }
+          }),
+        )
+      }
+
+      this.#inputElement?.addEventListener('input', this.#inputListener)
       this.#inputElement?.addEventListener('blur', this.#blurListener)
+      this.#inputElement?.addEventListener('focus', this.#focusListener)
     }
 
     protected disconnectedCallback() {
@@ -208,16 +236,50 @@ const {
       })
 
       this.#inputElement?.removeEventListener('blur', this.#blurListener)
+      this.#inputElement?.removeEventListener('focus', this.#focusListener)
 
       this.#suggestions = []
 
       if (this.#suggestionsContainerElement) {
         this.#suggestionsContainerElement.innerHTML = ''
       }
+
+      this.#status.reset()
+    }
+
+    #inputListener = () => {
+      this.#tryShowSuggestions()
+    }
+
+    #focusListener = () => {
+      this.#tryShowSuggestions()
     }
 
     #blurListener = () => {
-      this.suggest([])
+      this.#status.set('suggestions-visible', false)
+    }
+
+    #tryShowSuggestions() {
+      if (this.#inputElement) {
+        const visibleSuggestions = this.#suggestions.filter((suggestion) => {
+          return suggestion.match(this.#inputElement!.value)
+        })
+
+        const sliced = visibleSuggestions.filter((suggestion, i) => {
+          if (i > 4) {
+            suggestion.match('__HIDE__')
+            return false
+          }
+
+          return true
+        })
+
+        if (sliced.length) {
+          this.#status.set('suggestions-visible', true)
+        } else {
+          this.#status.set('suggestions-visible', false)
+        }
+      }
     }
 
     #suggestionClickListener = (e: Event) => {
@@ -231,7 +293,7 @@ const {
         }
 
         if (this.#suggestionsContainerElement) {
-          this.#suggestionsContainerElement.ariaHidden = 'true'
+          this.#status.set('suggestions-visible', false)
         }
       }
     }

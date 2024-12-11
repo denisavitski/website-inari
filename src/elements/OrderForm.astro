@@ -164,6 +164,12 @@ const { class: className, type = 'delivery', ...rest } = Astro.props
     )
   }
 
+  <input
+    type="hidden"
+    name="promocode"
+    class="order-form__promocode-input"
+  />
+
   <div class="order-form__form__bottom">
     <Back
       href="/#menu"

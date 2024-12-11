@@ -31,11 +31,6 @@ const { header = true, footer = true, seo } = Astro.props
   <body>
     <div class="page">
       {header && <Header />}
-      <DeliveryZones />
-      <OrderType />
-      <Basket />
-      <Review />
-      <FormAnswer />
 
       <div
         data-morph
@@ -54,6 +49,12 @@ const { header = true, footer = true, seo } = Astro.props
           {footer && <Footer />}
         </div>
       </div>
+
+      <DeliveryZones />
+      <OrderType />
+      <Basket />
+      <Review />
+      <FormAnswer />
     </div>
   </body></html
 >

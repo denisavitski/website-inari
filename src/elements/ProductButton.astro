@@ -237,7 +237,9 @@ const { class: className, size = 'big', counter = 0, placeholder, max = 99, ...r
 
       this.classList.toggle('positive-value', !!this.#counter)
 
-      this.#clickAllowed = !this.#counter
+      setTimeout(() => {
+        this.#clickAllowed = !this.#counter
+      })
 
       dispatchEvent(this, 'productButtonCounterChange', {
         detail: {

@@ -12,6 +12,7 @@ export type OrderStoreState = {
   address: string
   finalPrice: number
   step: OrderStoreStep
+  promocode: string
 }
 
 function createOrderStore() {
@@ -22,6 +23,7 @@ function createOrderStore() {
     address: '',
     finalPrice: 0,
     step: 'basket',
+    promocode: '',
   })
 
   const typeStore = new Derived(store, (v) => v.type)
@@ -80,12 +82,12 @@ function createOrderStore() {
     store.current = { ...store.current, type: value, address: '' }
   }
 
-  function setDiscount(value: number) {
-    if (store.current.discount === value) {
+  function setPromocode(name: string, value: number) {
+    if (store.current.promocode === name) {
       return
     }
 
-    store.current = { ...store.current, discount: value }
+    store.current = { ...store.current, promocode: name, discount: value }
   }
 
   function setAddress(value: string) {
@@ -106,7 +108,7 @@ function createOrderStore() {
 
   return {
     setType,
-    setDiscount,
+    setPromocode,
     setAddress,
     setStep,
 
@@ -129,6 +131,10 @@ function createOrderStore() {
 
     get deliveryPrice() {
       return store.current.deliveryPrice
+    },
+
+    get promocode() {
+      return store.current.promocode
     },
 
     get finalPrice() {

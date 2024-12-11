@@ -112,6 +112,8 @@ const { class: className, ...rest } = Astro.props
     #formElement: FormElement | null = null
     #infoElement: HTMLElement | null = null
     #status = new ClassLinkedStatus(this, { success: false, error: false, pending: false })
+    #inputElement: HTMLInputElement | null = null
+    #promocode: string = ''
 
     protected connectedCallback() {
       this.#formElement = this.querySelector('e-form')
@@ -120,6 +122,7 @@ const { class: className, ...rest } = Astro.props
       this.#formElement?.addEventListener('formError', this.#formErrorListener)
 
       this.#infoElement = this.querySelector('.promocode__info')
+      this.#inputElement = this.querySelector<HTMLInputElement>('.promocode__input')
     }
 
     protected disconnectedCallback() {
@@ -130,6 +133,7 @@ const { class: className, ...rest } = Astro.props
     }
 
     #formSubmitListener = () => {
+      this.#promocode = this.#inputElement?.value || ''
       this.#status.reset()
       this.#status.set('pending', true)
       this.#setInfo('Проверяем промокод')
@@ -156,14 +160,14 @@ const { class: className, ...rest } = Astro.props
       this.#setInfo('Промокод применен')
       this.#status.set('pending', false)
       this.#status.set('success', true)
-      orderStore.setDiscount(value)
+      orderStore.setPromocode(this.#promocode, value)
     }
 
     #error() {
       this.#setInfo('Промокод не найден')
       this.#status.set('pending', false)
       this.#status.set('error', true)
-      orderStore.setDiscount(0)
+      orderStore.setPromocode(this.#promocode, 0)
     }
 
     // DEV

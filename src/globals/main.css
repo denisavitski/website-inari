@@ -224,6 +224,24 @@ b {
   font-weight: 600;
 }
 
+.input {
+  width: 100%;
+  height: 4.3rem;
+
+  padding: 1.2rem 1.6rem;
+
+  background-color: var(--color-secondary-2);
+  border-radius: var(--border-radius-1);
+
+  &::placeholder {
+    color: var(--color-secondary-3);
+  }
+
+  @media (max-width: 768px) {
+    height: 4.1rem;
+  }
+}
+
 .hidden-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

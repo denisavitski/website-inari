@@ -3,6 +3,7 @@ import Button from '@elements/Button.astro'
 import Form from '@elements/Form.astro'
 import Modal from '@elements/Modal.astro'
 import RatingInput from '@elements/RatingInput.astro'
+import SuggestionsInput from '@elements/SuggestionsInput.astro'
 
 export const modal = '#review'
 ---
@@ -58,20 +59,44 @@ export const modal = '#review'
         required
         name="name"
         placeholder="Ваше имя"
-        class="f-d-16-r f-m-14-r review__input"
+        class="f-d-16-r f-m-14-r input review__input"
       />
-      <input
-        type="text"
-        required
+
+      <SuggestionsInput
         name="product"
+        class="review__input"
         placeholder="Блюдо, которое попробовали у нас"
-        class="f-d-16-r f-m-14-r review__input"
+        required
+        font="f-d-16-r f-m-14-r"
+        suggestions={[
+          'Классический ролл с лососем',
+          'Калифорния с крабом',
+          'Филадельфия с крем-сыром',
+          'Ролл с угрем',
+          'Спайси тунец',
+          'Ролл с креветкой',
+          'Темпура с овощами',
+          'Дракон с угрем',
+          'Зеленый дракон с авокадо',
+          'Ролл с икрой масаго',
+          'Кани маки (ролл с крабовыми палочками)',
+          'Гункан с лососем',
+          'Ролл с осьминогом',
+          'Яки ролл с курицей',
+          'Сяке маки (ролл с лососем)',
+          'Тай маки (ролл с дораде)',
+          'Темпура с креветкой',
+          'Ролл с авокадо и огурцом',
+          'Ролл с тунцом и сливочным сыром',
+          'Футомаки с икрой и лососем',
+        ]}
       />
+
       <textarea
         required
         name="review"
         placeholder="Отзыв"
-        class="f-d-16-r f-m-14-r review__input review__input_textarea custom-scrollbar"
+        class="f-d-16-r f-m-14-r input review__input_textarea custom-scrollbar"
       ></textarea>
 
       <Button
@@ -142,18 +167,7 @@ export const modal = '#review'
   }
 
   .review__input {
-    width: 100%;
-    height: 4.3rem;
-
-    padding: 1.2rem 1.6rem;
     margin-bottom: 1rem;
-
-    background-color: var(--color-secondary-2);
-    border-radius: var(--border-radius-1);
-
-    &::placeholder {
-      color: var(--color-secondary-3);
-    }
 
     @media (max-width: 768px) {
       margin-bottom: 0.4rem;

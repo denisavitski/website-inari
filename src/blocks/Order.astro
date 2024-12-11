@@ -271,6 +271,8 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
 
     #productsContainerElement: HTMLElement | null = null
 
+    #promocodeInputElement: HTMLInputElement | null = null
+
     #products: Array<OrderProduct> = []
 
     #status = new ClassLinkedStatus(this, { success: false, error: false, pending: false })
@@ -305,12 +307,16 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
 
       this.#productsContainerElement = this.querySelector('.order-contents__products')
 
+      this.#promocodeInputElement = this.querySelector('.order-form__promocode-input')
+
+      orderStore.subscribe(this.#orderStoreChangeListener)
       basketStore.subscribe(this.#basketStoreChangeListener)
     }
 
     protected disconnectedCallback() {
       document.documentElement.classList.remove('order-page')
 
+      orderStore.unsubscribe(this.#orderStoreChangeListener)
       basketStore.unsubscribe(this.#basketStoreChangeListener)
 
       this.#formElements.forEach((element) => {
@@ -328,6 +334,12 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
       this.#status.close()
 
       orderStore.setStep('basket')
+    }
+
+    #orderStoreChangeListener = () => {
+      if (this.#promocodeInputElement) {
+        this.#promocodeInputElement.value = orderStore.promocode
+      }
     }
 
     #basketStoreChangeListener = () => {
