@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config'
 import { astroMergeAssets } from './astroMergeAssets'
 import { loadEnv } from 'vite'
-import { rm } from 'fs/promises'
+// import { rm } from 'fs/promises'
 
 // https://astro.build/config
 const { PUBLIC_DOMAIN } = loadEnv(process.env.NODE_ENV || '', process.cwd(), '')
