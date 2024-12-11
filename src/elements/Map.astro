@@ -154,7 +154,7 @@ const { class: className, markers, zones, ...rest } = Astro.props
       if (this.isReady) {
         try {
           const userLocation = await window.ymaps.geolocation.get({
-            provider: 'auto',
+            provider: 'browser',
           })
 
           await this.#setUserGeoObject(userLocation.geoObjects.position)
