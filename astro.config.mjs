@@ -17,12 +17,12 @@ export default defineConfig({
     {
       name: 'remove components',
       hooks: {
-        'astro:build:generated': (e) => {
-          return rm(`${e.dir.pathname}/ui`, {
-            force: true,
-            recursive: true,
-          })
-        },
+        // 'astro:build:generated': (e) => {
+        //   return rm(`${e.dir.pathname}/ui`, {
+        //     force: true,
+        //     recursive: true,
+        //   })
+        // },
       },
     },
     astroMergeAssets(),
