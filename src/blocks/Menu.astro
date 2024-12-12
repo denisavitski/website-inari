@@ -411,6 +411,8 @@ items.forEach((item) => {
     @media (max-width: 600px) {
       grid-template-columns: 100%;
     }
+
+    /*  */
   }
 
   .menu__item {
@@ -425,7 +427,6 @@ items.forEach((item) => {
 </style>
 
 <script>
-  import type { ProductElement } from '@elements/Product.astro.0.mjs'
   import type { InputGroupElement } from '@lib/InputGroupElement'
   import type { PopoverElement } from 'aptechka/popover'
   import { scrollToElement } from 'aptechka/utils'
@@ -434,7 +435,7 @@ items.forEach((item) => {
     #navPopoverElement: PopoverElement | null = null
     #navButtonValueElement: HTMLElement | null = null
     #categoryInputGroupElement: InputGroupElement | null = null
-    #itemElements: Array<ProductElement> = []
+    #itemElements: Array<HTMLElement> = []
     #subcategoryInputGroupElements: Array<InputGroupElement> = []
     #currentSubcategoryInputGroupElement: InputGroupElement | null = null
 
@@ -442,7 +443,7 @@ items.forEach((item) => {
       this.#navPopoverElement = this.querySelector('.menu__nav-popover')
       this.#navButtonValueElement = this.querySelector('.menu__nav-button__value')
       this.#categoryInputGroupElement = this.querySelector('.menu__nav')
-      this.#itemElements = [...this.querySelectorAll<ProductElement>('.menu__item')]
+      this.#itemElements = [...this.querySelectorAll<HTMLElement>('.menu__item')]
       this.#subcategoryInputGroupElements = [
         ...this.querySelectorAll<InputGroupElement>('.menu__subcategory-input-group'),
       ]

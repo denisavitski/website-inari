@@ -27,7 +27,7 @@ const { class: className, markers, zones, ...rest } = Astro.props
 </style>
 
 <script>
-  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
+  import { globalStore } from '@stores/globalStore'
   import { ticker } from 'aptechka/ticker'
   import { dispatchEvent } from 'aptechka/utils'
 
@@ -265,7 +265,7 @@ const { class: className, markers, zones, ...rest } = Astro.props
 
           const [zoneName] = obj.properties.get('description')?.split('\n')
 
-          const foundedZone = deliveryZonesStore.findZone(zoneName)
+          const foundedZone = globalStore.delivery.findZone(zoneName)
 
           obj.zone = zoneName
           obj.description = foundedZone?.description

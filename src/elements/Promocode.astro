@@ -8,7 +8,7 @@ export interface Props {
 const { class: className, ...rest } = Astro.props
 ---
 
-<e-promocode
+<div
   {...rest}
   class:list={['f-d-16-r f-m-14-r promocode', className]}
 >
@@ -27,7 +27,7 @@ const { class: className, ...rest } = Astro.props
     >
   </Form>
   <span class="promocode__info">Промокод применен</span>
-</e-promocode>
+</div>
 
 <style is:global>
   .promocode {
@@ -101,95 +101,3 @@ const { class: className, ...rest } = Astro.props
     }
   }
 </style>
-
-<script>
-  import { wait } from 'aptechka/utils'
-  import type { FormElement } from './Form.astro.0.mts'
-  import { orderStore } from '@stores/orderStore'
-  import { ClassLinkedStatus } from 'aptechka/class-linked-status'
-
-  export class PromocodeElement extends HTMLElement {
-    #formElement: FormElement | null = null
-    #infoElement: HTMLElement | null = null
-    #status = new ClassLinkedStatus(this, { success: false, error: false, pending: false })
-    #inputElement: HTMLInputElement | null = null
-    #promocode: string = ''
-
-    protected connectedCallback() {
-      this.#formElement = this.querySelector('e-form')
-      this.#formElement?.addEventListener('formSubmit', this.#formSubmitListener)
-      this.#formElement?.addEventListener('formSuccess', this.#formSuccessListener)
-      this.#formElement?.addEventListener('formError', this.#formErrorListener)
-
-      this.#infoElement = this.querySelector('.promocode__info')
-      this.#inputElement = this.querySelector<HTMLInputElement>('.promocode__input')
-    }
-
-    protected disconnectedCallback() {
-      this.#formElement?.removeEventListener('formSubmit', this.#formSubmitListener)
-      this.#formElement?.removeEventListener('formSuccess', this.#formSuccessListener)
-      this.#formElement?.removeEventListener('formError', this.#formErrorListener)
-      this.#status.close()
-    }
-
-    #formSubmitListener = () => {
-      this.#promocode = this.#inputElement?.value || ''
-      this.#status.reset()
-      this.#status.set('pending', true)
-      this.#setInfo('Проверяем промокод')
-    }
-
-    #formSuccessListener = async () => {
-      const testDiscount = await this.#getTestDiscount()
-      this.#fork(testDiscount)
-    }
-
-    #formErrorListener = () => {
-      this.#fork(0)
-    }
-
-    #fork(value: number) {
-      if (value) {
-        this.#success(value)
-      } else {
-        this.#error()
-      }
-    }
-
-    #success(value: number) {
-      this.#setInfo('Промокод применен')
-      this.#status.set('pending', false)
-      this.#status.set('success', true)
-      orderStore.setPromocode(this.#promocode, value)
-    }
-
-    #error() {
-      this.#setInfo('Промокод не найден')
-      this.#status.set('pending', false)
-      this.#status.set('error', true)
-      orderStore.setPromocode(this.#promocode, 0)
-    }
-
-    // DEV
-    async #getTestDiscount() {
-      await wait(1000)
-      return Math.random() > 0.5 ? Math.random() * 1000 : 0
-    }
-
-    #setInfo(value: string) {
-      if (this.#infoElement) {
-        this.#infoElement.textContent = value
-      }
-    }
-  }
-
-  if (!customElements.get('e-promocode')) {
-    customElements.define('e-promocode', PromocodeElement)
-  }
-
-  declare global {
-    interface HTMLElementTagNameMap {
-      'e-promocode': PromocodeElement
-    }
-  }
-</script>

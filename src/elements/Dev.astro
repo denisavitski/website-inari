@@ -1,0 +1,133 @@
+---
+import PricePart from './PricePart.astro'
+import PricePartValue from './PricePartValue.astro'
+import ProductButton from './ProductButton.astro'
+---
+
+<e-global>
+  <div>
+    <h3 class="f-d-24-s">Кнопка продукта</h3>
+    <p class="f-d-18-r">
+      Если на странице несколько кнопок имеют одно и тоже <code>name</code>, То по нажатию на одну
+      из них обновляются все.</p
+    >
+    <x-subject>
+      <ProductButton name="1">Кнопка 1</ProductButton>
+      <ProductButton name="1">Кнопка 2</ProductButton>
+      <ProductButton name="1">Кнопка 3</ProductButton>
+    </x-subject>
+  </div>
+
+  <h2 class="f-d-24-s">Элементы которые реагируют на хранилище</h2>
+
+  <div>
+    <p class="f-d-18-r"
+      >Этот элемент реагирует на изменения <code>window.globalStore.productsNumber.value</code> и
+      <code>window.globalStore.productsPrice.value</code>.
+    </p>
+    <blockquote>
+      window.globalStore.productsNumber.value = 11<br />
+      window.globalStore.productsPrice.value = 11
+    </blockquote>
+
+    <x-subject>
+      <PricePart type={'products'} />
+    </x-subject>
+  </div>
+
+  <div>
+    <p class="f-d-18-r"
+      >Этот элемент реагирует на изменения <code>window.globalStore.promocode.value</code>. Если
+      скидки нету, то он скрыт.
+    </p>
+    <blockquote
+      set:html={`
+        window.globalStore.promocode.value = { name: "name", discount: 1000 }<br>
+        window.globalStore.promocode.value = null
+      `}
+    />
+    <x-subject>
+      <PricePart
+        type={'discount'}
+        title="Скидка"
+      />
+    </x-subject>
+  </div>
+
+  <div>
+    <p class="f-d-18-r"
+      >Этот элемент реагирует на изменения <code>window.globalStore.deliveryPrice.value</code>. Если
+      цены или <code>globalStore.address.value</code> или <code
+        >window.globalStore.delivery.userZone</code
+      > нету, то он скрыт.
+    </p>
+    <blockquote
+      set:html={`
+      window.globalStore.deliveryPrice.value = 1000<br>
+      window.globalStore.address.value = 'Адрес'<br>
+    `}
+    />
+
+    <x-subject>
+      <PricePart
+        type={'delivery'}
+        title="Доставка"
+      />
+    </x-subject>
+  </div>
+
+  <div>
+    <p class="f-d-18-r"
+      >Этот элемент реагирует на изменения <code>window.globalStore.finalPrice.value</code>.
+    </p>
+    <blockquote
+      set:html={`
+        window.globalStore.finalPrice.value = 1000
+      `}
+    />
+    <x-subject>
+      <PricePartValue
+        class="f-d-24-s"
+        type={'final'}
+      />
+    </x-subject>
+  </div>
+</e-global>
+
+<style>
+  e-global {
+    display: block;
+    padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 2rem 0;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  code {
+    color: var(--color-secondary-6);
+  }
+
+  div {
+    margin-bottom: 4rem;
+  }
+
+  blockquote {
+    font-size: 1.6rem;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    background-color: var(--color-secondary-2);
+  }
+
+  x-subject {
+    padding: 2rem;
+    display: block;
+    background-color: var(--color-secondary-1);
+  }
+</style>

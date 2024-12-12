@@ -1,5 +1,6 @@
 ---
 import '@elements/BasketItem.astro'
+import BasketItem from '@elements/BasketItem.astro'
 
 import Button from '@elements/Button.astro'
 import Icon from '@elements/Icon.astro'
@@ -18,7 +19,7 @@ const { class: className, ...rest } = Astro.props
 ---
 
 <!-- SINGLETON -->
-<e-basket
+<e-popover
   {...rest}
   class:list={['basket', className]}
   id="basket"
@@ -39,7 +40,11 @@ const { class: className, ...rest } = Astro.props
       <div class="basket__scrollable custom-scrollbar">
         <div class="f-d-24-s f-m-18-s basket__head"></div>
 
-        <div class="basket__items-container"></div>
+        <div class="basket__items-container">
+          <BasketItem />
+          <BasketItem />
+          <BasketItem />
+        </div>
 
         <SuggestionProducts class="basket__suggestions" />
       </div>
@@ -67,7 +72,7 @@ const { class: className, ...rest } = Astro.props
             <div class="f-d-24-s f-m-18-s basket__final__title">Сумма заказа</div>
             <PricePartValue
               class="f-d-24-s f-m-18-s basket__final__value"
-              type={'total'}
+              type={'final'}
             />
           </div>
 
@@ -81,7 +86,7 @@ const { class: className, ...rest } = Astro.props
       </div>
     </div>
   </div>
-</e-basket>
+</e-popover>
 
 <style is:global>
   .basket {
@@ -275,98 +280,3 @@ const { class: className, ...rest } = Astro.props
     }
   }
 </style>
-
-<script>
-  import type { BasketItemElement } from '@elements/BasketItem.astro.0.mjs'
-  import { basketStore } from '@stores/basketStore'
-  import { numberToPrice } from '@utils/number'
-  import { productsToString } from '@utils/string'
-  import { PopoverElement } from 'aptechka/popover'
-
-  export class BasketElement extends PopoverElement {
-    #headElement: HTMLElement | null = null
-    #itemsContainerElement: HTMLElement | null = null
-    #orderButtonElement: HTMLElement | null = null
-
-    protected override connectedCallback() {
-      super.connectedCallback()
-
-      this.#headElement = this.querySelector('.basket__head')
-      this.#itemsContainerElement = this.querySelector('.basket__items-container')
-      this.#orderButtonElement = this.querySelector('.basket__order-button')
-
-      if (this.#itemsContainerElement) {
-        basketStore.subscribe(this.#basketStoreChangeListener)
-      }
-
-      this.#orderButtonElement?.addEventListener('click', this.#orderClickListener)
-    }
-
-    protected override disconnectedCallback() {
-      super.disconnectedCallback()
-
-      basketStore.unsubscribe(this.#basketStoreChangeListener)
-
-      this.#orderButtonElement?.removeEventListener('click', this.#orderClickListener)
-    }
-
-    #basketStoreChangeListener = () => {
-      const itemElements = [...this.#itemsContainerElement!.children] as Array<BasketItemElement>
-
-      basketStore.items.forEach((storeItem) => {
-        const itemElement = itemElements.find((itemElement) => itemElement.pid === storeItem.pid)
-
-        if (itemElement) {
-          itemElement.productButtonElement.set(storeItem.amount)
-        } else {
-          const itemElement = document.createElement('e-basket-item')
-
-          itemElement.setAttribute('pid', storeItem.pid)
-          itemElement.setAttribute('name', storeItem.name)
-          itemElement.setAttribute('image', storeItem.image)
-          itemElement.setAttribute('description', storeItem.description || '')
-          itemElement.setAttribute('price', storeItem.price.toString())
-          itemElement.setAttribute('amount', storeItem.amount.toString())
-
-          this.#itemsContainerElement?.appendChild(itemElement)
-        }
-      })
-
-      itemElements.forEach((itemElement) => {
-        const storeItem = basketStore.items.find((storeItem) => storeItem.pid === itemElement.pid)
-
-        if (!storeItem) {
-          itemElement.remove()
-        }
-      })
-
-      if (basketStore.fullAmount) {
-        if (this.#headElement) {
-          this.#headElement.textContent = `${basketStore.fullAmount} ${productsToString(basketStore.fullAmount)} на ${numberToPrice(basketStore.fullPrice)}`
-        }
-
-        this.#orderButtonElement?.removeAttribute('data-disabled')
-      } else {
-        this.#orderButtonElement?.setAttribute('data-disabled', '')
-
-        if (this.#headElement) {
-          this.#headElement.textContent = ''
-        }
-      }
-    }
-
-    #orderClickListener = () => {
-      this.close()
-    }
-  }
-
-  if (!customElements.get('e-basket')) {
-    customElements.define('e-basket', BasketElement)
-  }
-
-  declare global {
-    interface HTMLElementTagNameMap {
-      'e-basket': BasketElement
-    }
-  }
-</script>

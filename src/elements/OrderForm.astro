@@ -4,13 +4,13 @@ import Form from './Form.astro'
 import OrderField from './OrderField.astro'
 import RadioButton from './RadioButton.astro'
 import Button from './Button.astro'
-import type { OrderStoreType } from '@stores/orderStore'
 import AddressInput from './AddressInput.astro'
 import PricePartValue from './PricePartValue.astro'
+import type { OrderType } from '@stores/globalStore'
 
 export interface Props {
   class?: string
-  type?: OrderStoreType
+  type?: OrderType
 }
 
 const { class: className, type = 'delivery', ...rest } = Astro.props
@@ -164,12 +164,6 @@ const { class: className, type = 'delivery', ...rest } = Astro.props
     )
   }
 
-  <input
-    type="hidden"
-    name="promocode"
-    class="order-form__promocode-input"
-  />
-
   <div class="order-form__form__bottom">
     <Back
       href="/#menu"
@@ -180,7 +174,7 @@ const { class: className, type = 'delivery', ...rest } = Astro.props
       theme={'arrow'}
       type="submit"
       class="order-form__form__submit"
-      >Оформить заказ на <PricePartValue type={'total'} />
+      >Оформить заказ на <PricePartValue type={'final'} />
     </Button>
   </div>
 </Form>

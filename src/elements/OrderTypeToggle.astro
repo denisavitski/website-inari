@@ -38,7 +38,7 @@ const { class: className, name = 'order-type', ...rest } = Astro.props
 
 <script>
   import { ToggleElement } from '@lib/ToggleElement'
-  import { orderStore } from '@stores/orderStore'
+  import { globalStore } from '@stores/globalStore'
 
   export class OrderTypeToggleElement extends ToggleElement {
     constructor() {
@@ -46,7 +46,7 @@ const { class: className, name = 'order-type', ...rest } = Astro.props
 
       this.addEventListener('toggleChange', (e) => {
         if (e.detail) {
-          orderStore.setType(e.detail as any)
+          globalStore.orderType.value = e.detail as any
         }
       })
     }

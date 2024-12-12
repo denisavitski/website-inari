@@ -139,7 +139,7 @@ const { class: className, ...rest } = Astro.props
 </style>
 
 <script>
-  import { basketStore } from '@stores/basketStore'
+  import { globalStore } from '@stores/globalStore'
   import { PopoverButtonElement } from 'aptechka/popover'
   import { clamp } from 'aptechka/utils'
 
@@ -171,27 +171,17 @@ const { class: className, ...rest } = Astro.props
 
       this.#valueElement = this.querySelector('.basket-button__value')
 
-      /* addEventListener('keydown', (e) => {
-        if (e.key === '1') {
-          this.set(1)
-        } else if (e.key === '2') {
-          this.set(123)
-        } else if (e.key === '3') {
-          this.set(0)
-        }
-      }) */
-
-      basketStore.subscribe(this.#basketChangeListener)
+      globalStore.productsNumber.subscribe(this.#basketChangeListener)
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
 
-      basketStore.unsubscribe(this.#basketChangeListener)
+      globalStore.productsNumber.unsubscribe(this.#basketChangeListener)
     }
 
     #basketChangeListener = () => {
-      this.set(basketStore.fullAmount)
+      this.set(globalStore.productsNumber.value)
     }
   }
 

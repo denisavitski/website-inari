@@ -7,11 +7,24 @@ export interface Props {
   counter?: string | number
   placeholder?: string | number | false
   max?: string | number
+  name?: string | undefined
 }
 
-const { class: className, size = 'big', counter = 0, placeholder, max = 99, ...rest } = Astro.props
+const {
+  class: className,
+  size = 'big',
+  counter = 0,
+  placeholder,
+  max = 99,
+  name,
+  ...rest
+} = Astro.props
 ---
 
+<!-- 
+  Если на странице несколько кнопок имеют одно и тоже name,
+  То по нажатию на одну из них обновляются все.
+-->
 <e-product-button
   {...rest}
   class:list={[className]}
@@ -19,6 +32,7 @@ const { class: className, size = 'big', counter = 0, placeholder, max = 99, ...r
   counter={counter}
   max={max}
   placeholder={placeholder}
+  name={name}
 >
 </e-product-button>
 
@@ -245,6 +259,7 @@ const { class: className, size = 'big', counter = 0, placeholder, max = 99, ...r
         detail: {
           counter: this.#counter,
         },
+        bubbles: true,
       })
     }
 
@@ -267,6 +282,21 @@ const { class: className, size = 'big', counter = 0, placeholder, max = 99, ...r
       this.set(counterAttr)
 
       this.setAttribute('data-popover-content', '')
+
+      document.documentElement.addEventListener(
+        'productButtonCounterChange',
+        this.#counterChangeListener,
+      )
+    }
+
+    #counterChangeListener = (e: ProductButtonEvents['productButtonCounterChange']) => {
+      const target = e.target as ProductButtonElement
+      const targetName = target.getAttribute('name')
+      const thisName = this.getAttribute('name')
+
+      if (thisName && targetName && targetName === thisName && target !== this) {
+        this.set(e.detail.counter)
+      }
     }
   }
 

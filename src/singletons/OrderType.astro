@@ -272,11 +272,10 @@ export const modal = '#order-type'
 
 <script>
   import { SwipePopoverElement } from '@lib/SwipePopoverElement'
-  import { orderStore } from '@stores/orderStore'
   import type { InputGroupElement } from '@lib/InputGroupElement'
   import type { YMapElement, YMapEvents } from '@elements/Map.astro.0.mjs'
   import { debounce } from 'aptechka/utils'
-  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
+  import { globalStore } from '@stores/globalStore'
 
   export class OrderTypeElement extends SwipePopoverElement {
     #orderVariantElements: Array<HTMLElement> = []
@@ -293,7 +292,7 @@ export const modal = '#order-type'
       super()
 
       this.addEventListener('popoverOpened', () => {
-        if (orderStore.type === 'delivery') {
+        if (globalStore.orderType.value === 'delivery') {
           this.#deliveryInputElement?.focus()
         }
       })
@@ -322,7 +321,7 @@ export const modal = '#order-type'
 
       Promise.all([customElements.whenDefined('e-map')]).then(() => {
         if (this.isConnected) {
-          orderStore.subscribeToType(this.#orderStoreTypeChangeListener)
+          globalStore.orderType.subscribe(this.#orderTypeChangeListener)
         }
       })
 
@@ -347,19 +346,19 @@ export const modal = '#order-type'
 
       this.#locationButtonElement?.removeEventListener('click', this.#locationButtonListener)
 
-      orderStore.unsubscribeFromType(this.#orderStoreTypeChangeListener)
+      globalStore.orderType.unsubscribe(this.#orderTypeChangeListener)
     }
 
-    #orderStoreTypeChangeListener = () => {
+    #orderTypeChangeListener = () => {
       this.#orderVariantElements.forEach((element) => {
-        if (element.getAttribute('data-order-type') === orderStore.type) {
+        if (element.getAttribute('data-order-type') === globalStore.orderType.value) {
           element.ariaHidden = 'false'
         } else {
           element.ariaHidden = 'true'
         }
       })
 
-      if (orderStore.type === 'pickup') {
+      if (globalStore.orderType.value === 'pickup') {
         this.#mapElement?.toggleMarkers(true)
         this.#mapElement?.toggleZones(false)
         this.#updateStorePickupAddress()
@@ -416,7 +415,7 @@ export const modal = '#order-type'
         }
       }
 
-      deliveryZonesStore.setUserZone(zone?.zone)
+      globalStore.delivery.setUserZone(zone?.zone)
     }
 
     async #searchForAddress() {
@@ -431,7 +430,7 @@ export const modal = '#order-type'
 
         this.classList.toggle('invalid-address', !address)
 
-        orderStore.setAddress(address)
+        globalStore.address.value = address
       }
     }
 
@@ -442,7 +441,7 @@ export const modal = '#order-type'
     #updateStorePickupAddress() {
       const value = this.#pickupInputElement?.value || ''
 
-      orderStore.setAddress(value)
+      globalStore.address.value = value
       this.#mapElement?.pickMarker(value)
       this.classList.toggle('invalid-address', !value)
     }
@@ -468,7 +467,7 @@ export const modal = '#order-type'
     }
 
     #mapMarkerClickListener = (e: YMapEvents['markerClick']) => {
-      if (orderStore.type === 'pickup') {
+      if (globalStore.orderType.value === 'pickup') {
         this.#pickupInputElement?.changeValue(e.detail.address)
       }
     }

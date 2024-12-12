@@ -195,69 +195,10 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
 <script>
   import type { CalendarElement } from '@elements/Calendar.astro.0.mjs'
   import type { FormElement } from '@elements/Form.astro.0.mjs'
-  import { morph } from '@globals/page'
   import type { InputGroupElement, InputGroupEvents } from '@lib/InputGroupElement'
-  import { basketStore, type BasketStoreItem } from '@stores/basketStore'
-  import { orderStore } from '@stores/orderStore'
-  import { numberToPrice } from '@utils/number'
+  import { globalStore } from '@stores/globalStore'
   import { ClassLinkedStatus } from 'aptechka/class-linked-status'
   import type { PopoverElement } from 'aptechka/popover'
-
-  class OrderProduct {
-    #element: HTMLElement
-    #amountElement: HTMLElement
-    #priceElement: HTMLElement
-
-    #pid: string
-    #price: number
-    #amount: number
-
-    constructor(data: BasketStoreItem) {
-      this.#element = document.createElement('li')
-      this.#element.className = 'order-contents__product'
-
-      this.#element.innerHTML = `
-        <div class="order-contents__product__title">${data.name}</div>
-        <div class="order-contents__product__amount"></div>
-        <div class="order-contents__product__price"></div>
-      `
-
-      this.#amountElement = this.#element.querySelector('.order-contents__product__amount')!
-      this.#priceElement = this.#element.querySelector('.order-contents__product__price')!
-
-      this.#pid = data.pid
-      this.#price = data.price
-      this.#amount = data.amount
-
-      this.setAmount(this.#amount)
-    }
-
-    public get element() {
-      return this.#element
-    }
-
-    public get pid() {
-      return this.#pid
-    }
-
-    public get price() {
-      return this.#price
-    }
-
-    public get totalPrice() {
-      return this.#price * this.#amount
-    }
-
-    public get amount() {
-      return this.#amount
-    }
-
-    public setAmount(number: number) {
-      this.#amount = number
-      this.#amountElement.textContent = this.#amount.toString()
-      this.#priceElement.textContent = numberToPrice(this.#amount * this.#price)
-    }
-  }
 
   export class OrderElement extends HTMLElement {
     #formElements: Array<FormElement> = []
@@ -269,19 +210,9 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
     #calendarModalElement: PopoverElement | null = null
     #calendarElement: CalendarElement | null = null
 
-    #productsContainerElement: HTMLElement | null = null
-
-    #promocodeInputElement: HTMLInputElement | null = null
-
-    #products: Array<OrderProduct> = []
-
     #status = new ClassLinkedStatus(this, { success: false, error: false, pending: false })
 
     protected connectedCallback() {
-      // if (!basketStore.items.length) {
-      //   morph.navigate('/')
-      // }
-
       document.documentElement.classList.add('order-page')
 
       this.#formElements = [...this.querySelectorAll('e-form')]
@@ -304,20 +235,10 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
 
       this.#calendarElement = this.querySelector('e-calendar')
       this.#calendarElement?.addEventListener('calendarPick', this.#calendarPickListener)
-
-      this.#productsContainerElement = this.querySelector('.order-contents__products')
-
-      this.#promocodeInputElement = this.querySelector('.order-form__promocode-input')
-
-      orderStore.subscribe(this.#orderStoreChangeListener)
-      basketStore.subscribe(this.#basketStoreChangeListener)
     }
 
     protected disconnectedCallback() {
       document.documentElement.classList.remove('order-page')
-
-      orderStore.unsubscribe(this.#orderStoreChangeListener)
-      basketStore.unsubscribe(this.#basketStoreChangeListener)
 
       this.#formElements.forEach((element) => {
         element.removeEventListener('formSubmit', this.#formSubmitListener)
@@ -333,38 +254,7 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
 
       this.#status.close()
 
-      orderStore.setStep('basket')
-    }
-
-    #orderStoreChangeListener = () => {
-      if (this.#promocodeInputElement) {
-        this.#promocodeInputElement.value = orderStore.promocode
-      }
-    }
-
-    #basketStoreChangeListener = () => {
-      basketStore.items.forEach((item) => {
-        let product = this.#products.find((product) => product.pid === item.pid)
-
-        if (!product) {
-          product = new OrderProduct(item)
-          this.#productsContainerElement?.appendChild(product.element)
-          this.#products.push(product)
-        } else {
-          product.setAmount(item.amount)
-        }
-      })
-
-      this.#products = this.#products.filter((product) => {
-        const item = basketStore.items.find((item) => item.pid === product.pid)
-
-        if (!item) {
-          product.element.remove()
-          return false
-        }
-
-        return true
-      })
+      globalStore.orderStep.value = 'basket'
     }
 
     #timeChangeListener = (e: InputGroupEvents['inputGroupValueChange']) => {
@@ -386,24 +276,24 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
     }
 
     #formSubmitListener = () => {
-      orderStore.setStep('order')
+      globalStore.orderStep.value = 'order'
       this.#status.set('success', false)
       this.#status.set('error', false)
       this.#status.set('pending', true)
 
-      morph.scrollElement.scroll({
+      document.querySelector('#page-scroll')?.scroll({
         top: 0,
         behavior: 'instant',
       })
     }
 
     #formSuccessListener = () => {
-      orderStore.setStep('complete')
+      globalStore.orderStep.value = 'complete'
 
       this.#status.set('pending', false)
       this.#status.set('success', true)
 
-      morph.scrollElement.scroll({
+      document.querySelector('#page-scroll')?.scroll({
         top: 0,
         behavior: 'instant',
       })
@@ -413,7 +303,7 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
       this.#status.set('pending', false)
       this.#status.set('error', true)
 
-      morph.scrollElement.scroll({
+      document.querySelector('#page-scroll')?.scroll({
         top: 0,
         behavior: 'instant',
       })

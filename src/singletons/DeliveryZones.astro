@@ -30,7 +30,7 @@
 ></e-delivery-zone>
 
 <script>
-  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
+  import { globalStore } from '@stores/globalStore'
 
   export class DeliveryZoneElement extends HTMLElement {
     protected connectedCallback() {
@@ -40,7 +40,7 @@
       const free = this.getAttribute('free') || '0'
       const price = this.getAttribute('price') || '0'
 
-      deliveryZonesStore.addZone({
+      globalStore.delivery.addZone({
         name,
         description,
         addition,
@@ -51,7 +51,7 @@
 
     protected disconnectedCallback() {
       const name = this.getAttribute('name') || ''
-      deliveryZonesStore.removeZone(name)
+      globalStore.delivery.removeZone(name)
     }
   }
 

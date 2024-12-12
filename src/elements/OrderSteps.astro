@@ -166,19 +166,19 @@ const steps = ['Корзина', 'Оформление заказа', 'Зака�
 </style>
 
 <script>
-  import { orderStore } from '@stores/orderStore'
+  import { globalStore } from '@stores/globalStore'
 
   export class OrderStepsElement extends HTMLElement {
     protected connectedCallback() {
-      orderStore.subscribe(this.#storeChangeListener)
+      globalStore.orderStep.subscribe(this.#storeChangeListener)
     }
 
     protected disconnectedCallback() {
-      orderStore.unsubscribe(this.#storeChangeListener)
+      globalStore.orderStep.unsubscribe(this.#storeChangeListener)
     }
 
     #storeChangeListener = () => {
-      this.setAttribute('step', orderStore.step)
+      this.setAttribute('step', globalStore.orderStep.value)
     }
   }
 

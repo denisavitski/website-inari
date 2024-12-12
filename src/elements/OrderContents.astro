@@ -1,7 +1,6 @@
 ---
 import PricePart from './PricePart.astro'
 import PricePartValue from './PricePartValue.astro'
-import Product from './Product.astro'
 import ProductButton from './ProductButton.astro'
 
 export interface Props {
@@ -29,12 +28,7 @@ const { class: className, ...rest } = Astro.props
     />
 
     <div class="order-contents__devices__list">
-      <Product
-        name="Палочки"
-        pid="Палочки"
-        price={10}
-        class="order-contents__device"
-      >
+      <div class="order-contents__device">
         <div
           class="f-d-16-r f-m-14-r order-contents__device__name"
           set:html="Палочки"
@@ -44,13 +38,8 @@ const { class: className, ...rest } = Astro.props
           placeholder={false}
           size={'small'}
         />
-      </Product>
-      <Product
-        name="Ложка"
-        pid="Ложка"
-        price={10}
-        class="order-contents__device"
-      >
+      </div>
+      <div class="order-contents__device">
         <div
           class="f-d-16-r f-m-14-r order-contents__device__name"
           set:html="Ложка"
@@ -60,13 +49,8 @@ const { class: className, ...rest } = Astro.props
           placeholder={false}
           size={'small'}
         />
-      </Product>
-      <Product
-        name="Вилка"
-        pid="Вилка"
-        price={10}
-        class="order-contents__device"
-      >
+      </div>
+      <div class="order-contents__device">
         <div
           class="f-d-16-r f-m-14-r order-contents__device__name"
           set:html="Вилка"
@@ -76,7 +60,7 @@ const { class: className, ...rest } = Astro.props
           placeholder={false}
           size={'small'}
         />
-      </Product>
+      </div>
     </div>
   </div>
 
@@ -100,7 +84,7 @@ const { class: className, ...rest } = Astro.props
       />
       <PricePartValue
         class="order-contents__price__full__value"
-        type={'total'}
+        type={'final'}
       />
     </div>
   </div>

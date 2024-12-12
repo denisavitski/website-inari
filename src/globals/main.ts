@@ -1,5 +1,7 @@
 import 'construct-style-sheets-polyfill'
 
+import '@stores/globalStore'
+
 import 'aptechka/popover'
 import 'aptechka/custom-scrollbar'
 import 'aptechka/scroll'

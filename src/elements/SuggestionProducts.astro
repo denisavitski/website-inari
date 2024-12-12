@@ -62,11 +62,13 @@ const {
     set:html={title}
   />
   <div class="suggestion-products__content">
-    {
-      products.map((product) => {
-        return <SuggestionProduct {...product} />
-      })
-    }
+    <e-scroll>
+      {
+        products.map((product) => {
+          return <SuggestionProduct {...product} />
+        })
+      }
+    </e-scroll>
   </div>
 </e-suggestion-products>
 
@@ -93,82 +95,3 @@ const {
     margin-bottom: 1.6rem;
   }
 </style>
-
-<script>
-  import { basketStore } from '@stores/basketStore'
-  import { ScrollElement } from 'aptechka/scroll'
-  import type { BasketElement } from '@singletons/Basket.astro.0.mjs'
-  import { shuffleArray } from '@utils/array'
-  import type { ProductElement } from './Product.astro.0.mts'
-
-  export class SuggestionProductsElement extends HTMLElement {
-    #basketElement: BasketElement | null = null
-    #contentElement: HTMLElement | null = null
-    #allProductElements: Array<ProductElement> = []
-    #sliderElement: ScrollElement | null = null
-
-    protected connectedCallback() {
-      this.#basketElement = document.querySelector('e-basket')
-
-      this.#contentElement = this.querySelector('.suggestion-products__content')
-
-      this.#allProductElements = [...this.querySelectorAll<ProductElement>('.suggestion-product')]
-
-      this.#allProductElements.forEach((element) => {
-        element.remove()
-      })
-
-      if (this.#basketElement) {
-        this.#basketElement.addEventListener('popoverOpened', this.#popoverOpenListener)
-      } else {
-        this.#createSlider()
-      }
-    }
-
-    protected disconnectedCallback() {
-      this.#basketElement?.removeEventListener('popoverOpened', this.#popoverOpenListener)
-      this.#sliderElement?.remove()
-
-      if (this.#contentElement) {
-        this.#contentElement.append(...this.#allProductElements)
-      }
-    }
-
-    #popoverOpenListener = () => {
-      this.#createSlider()
-    }
-
-    #createSlider() {
-      if (this.#contentElement) {
-        this.#sliderElement?.remove()
-
-        const filtered = this.#allProductElements.filter((element) => {
-          return !basketStore.items.find((item) => item.pid === element.pid)
-        })
-
-        const randomized = shuffleArray(filtered)
-        const sliced = randomized.slice(0, 4)
-
-        if (sliced.length) {
-          this.style.display = ''
-          this.#sliderElement = new ScrollElement()
-          this.#sliderElement.append(...sliced)
-
-          this.#contentElement.appendChild(this.#sliderElement)
-        } else {
-          this.style.display = 'none'
-        }
-      }
-    }
-  }
-
-  if (!customElements.get('e-suggestion-products')) {
-    customElements.define('e-suggestion-products', SuggestionProductsElement)
-  }
-
-  declare global {
-    interface HTMLElementTagNameMap {
-      'e-suggestion-products': SuggestionProductsElement
-    }
-  }
-</script>

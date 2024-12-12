@@ -1,7 +1,5 @@
 ---
-import type { BasketStoreItem } from '@stores/basketStore'
 import Image from '@elements/Image.astro'
-import Product, { type ProductVariant } from '@elements/Product.astro'
 import ProductButton from '@elements/ProductButton.astro'
 import Labels, { type Props as LabelsProps } from '@elements/Labels.astro'
 import type { ProductFeatureIcon } from '@elements/ProductFeature.astro'
@@ -10,12 +8,7 @@ import Price from '@elements/Price.astro'
 import ProductVariants from '@elements/ProductVariants.astro'
 import MenuProductDetails from '@elements/MenuProductDetails.astro'
 import { type Props as EnergyProps } from '@elements/Energy.astro'
-
-export const componentDescription = `
-  <code>\
-    &lt;e-input-group&gt;CONTENT&lt;/e-input-group&gt;
-  </code>
-`
+import type { BasketStoreItem, ProductVariant } from '@utils/types'
 
 export interface MenuProductStat {
   title: string
@@ -114,14 +107,9 @@ const {
 const modalId = `product-${pid}`
 ---
 
-<Product
+<div
   {...rest}
   class={`menu-product ${className || ''}`}
-  {pid}
-  {price}
-  image={images[0]!}
-  {name}
-  {description}
   data-type={'small'}
   data-categories={categories}
   data-subcategories={subcategories}
@@ -216,6 +204,7 @@ const modalId = `product-${pid}`
         placeholder="В корзину"
         counter={amount}
         size={'always-big'}
+        name={name}
       />
     </div>
   </div>
@@ -235,7 +224,7 @@ const modalId = `product-${pid}`
     {variants}
     {setItems}
   />
-</Product>
+</div>
 
 <style is:global>
   .menu-product {

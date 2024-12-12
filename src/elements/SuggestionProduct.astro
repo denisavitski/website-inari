@@ -1,8 +1,7 @@
 ---
-import type { BasketStoreItem } from '@stores/basketStore'
+import type { BasketStoreItem } from '@utils/types'
 import Image from './Image.astro'
 import ProductButton from './ProductButton.astro'
-import Product from './Product.astro'
 
 export interface Props extends Omit<BasketStoreItem, 'amount'> {
   class?: string
@@ -19,12 +18,7 @@ const {
 } = Astro.props
 ---
 
-<Product
-  {price}
-  {name}
-  {description}
-  {pid}
-  {image}
+<div
   {...rest}
   class={`suggestion-product ${className || ''}`}
 >
@@ -43,7 +37,7 @@ const {
     class="suggestion-product__button"
     placeholder={price}
   />
-</Product>
+</div>
 
 <style is:global>
   .suggestion-product {

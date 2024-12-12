@@ -13,7 +13,7 @@ const {
   class: className,
   font = 'f-d-16-s f-m-14-s',
   title = 'Сумма',
-  type = 'total',
+  type = 'final',
   ...rest
 } = Astro.props
 ---
@@ -44,7 +44,7 @@ const {
       color: var(--color-secondary-6);
     }
 
-    &[type='total'],
+    &[type='final'],
     &[type='delivery'] {
       color: var(--color-primary-2);
     }
@@ -52,43 +52,40 @@ const {
 </style>
 
 <script>
-  import { orderStore } from '@stores/orderStore'
+  import { globalStore } from '@stores/globalStore'
   import type { PricePartValueType } from './PricePartValue.astro.0.mts'
-  import { basketStore } from '@stores/basketStore'
-  import { debounce } from 'aptechka/utils'
   import { productsToString } from '@utils/string'
-  import { deliveryZonesStore } from '@stores/deliveryZonesStore'
 
   export class PricePartElement extends HTMLElement {
     #titleElement: HTMLElement | null = null
 
     protected connectedCallback() {
       this.#titleElement = this.querySelector('.price-part__title')
-      orderStore.subscribe(this.#storeChangeListener)
-      basketStore.subscribe(this.#storeChangeListener)
+      globalStore.all.subscribe(this.#storeChangeListener)
     }
 
     protected disconnectedCallback() {
-      orderStore.unsubscribe(this.#storeChangeListener)
-      basketStore.unsubscribe(this.#storeChangeListener)
+      globalStore.all.unsubscribe(this.#storeChangeListener)
     }
 
-    #storeChangeListener = debounce(() => {
+    #storeChangeListener = () => {
       const type = this.getAttribute('type') as PricePartValueType
 
       if (type === 'discount') {
-        this.classList.toggle('invisible', !orderStore.discount)
+        this.classList.toggle('invisible', !globalStore.promocode?.value?.discount)
       } else if (type === 'products') {
         if (this.#titleElement) {
-          this.#titleElement.textContent = `${basketStore.fullAmount} ${productsToString(basketStore.fullAmount)}`
+          this.#titleElement.textContent = `${globalStore.productsNumber.value} ${productsToString(globalStore.productsNumber.value)}`
         }
       } else if (type === 'delivery') {
         this.classList.toggle(
           'invisible',
-          orderStore.type === 'pickup' || !orderStore.address || !deliveryZonesStore.userZone,
+          globalStore.orderType.value === 'pickup' ||
+            !globalStore.address.value ||
+            !globalStore.delivery.userZone,
         )
       }
-    }, 10)
+    }
   }
 
   if (!customElements.get('e-price-part')) {

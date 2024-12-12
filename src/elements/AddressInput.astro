@@ -70,7 +70,7 @@ const { class: className, inputStyles, name = 'Адрес', ...rest } = Astro.pr
 </style>
 
 <script>
-  import { orderStore } from '@stores/orderStore'
+  import { globalStore } from '@stores/globalStore'
   import { PopoverButtonElement } from 'aptechka/popover'
 
   export class AddressInputElement extends PopoverButtonElement {
@@ -83,24 +83,24 @@ const { class: className, inputStyles, name = 'Адрес', ...rest } = Astro.pr
       this.#inputElement = this.querySelector('input')
       this.#valueElement = this.querySelector('.address-input__value')
 
-      orderStore.subscribeToAddress(this.#orderAddressChangeListener)
+      globalStore.address.subscribe(this.#userAddressChangeListener)
     }
 
     protected override disconnectedCallback() {
       super.disconnectedCallback()
 
-      orderStore.unsubscribeFromAddress(this.#orderAddressChangeListener)
+      globalStore.address.subscribe(this.#userAddressChangeListener)
     }
 
-    #orderAddressChangeListener = () => {
-      this.classList.toggle('filled', !!orderStore.address)
+    #userAddressChangeListener = () => {
+      this.classList.toggle('filled', !!globalStore.address.value)
 
       if (this.#inputElement) {
-        this.#inputElement.value = orderStore.address
+        this.#inputElement.value = globalStore.address.value
       }
 
       if (this.#valueElement) {
-        this.#valueElement.textContent = orderStore.address || this.#inputElement?.name || ''
+        this.#valueElement.textContent = globalStore.address.value || this.#inputElement?.name || ''
       }
 
       this.#inputElement?.dispatchEvent(new Event('change'))
