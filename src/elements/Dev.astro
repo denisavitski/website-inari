@@ -5,7 +5,7 @@ import PricePartValue from './PricePartValue.astro'
 import ProductButton from './ProductButton.astro'
 ---
 
-<e-global>
+<e-dev class="">
   <a
     target="_blank"
     href="https://github.com/nomorejalapenos/website-inari/blob/modx/docs/FomElement.md"
@@ -118,46 +118,46 @@ import ProductButton from './ProductButton.astro'
       />
     </x-subject>
   </div>
-</e-global>
+</e-dev>
 
 <style>
-  e-global {
+  e-dev {
     display: block;
     padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
   }
 
-  h1,
-  h2,
-  h3 {
+  e-dev h1,
+  e-dev h2,
+  e-dev h3 {
     margin: 2rem 0;
   }
 
-  p {
+  e-dev p {
     margin-bottom: 1rem;
   }
 
-  code {
+  e-dev code {
     color: var(--color-secondary-6);
   }
 
-  div {
+  e-dev div {
     margin-bottom: 4rem;
   }
 
-  blockquote {
+  e-dev blockquote {
     font-size: 1.6rem;
     padding: 2rem;
     margin-bottom: 1rem;
     background-color: var(--color-secondary-2);
   }
 
-  x-subject {
+  e-dev x-subject {
     padding: 2rem;
     display: block;
     background-color: var(--color-secondary-1);
   }
 
-  a {
+  e-dev a {
     display: block;
     font-size: 2rem;
     text-decoration: underline;
