@@ -5,159 +5,170 @@ import PricePartValue from './PricePartValue.astro'
 import ProductButton from './ProductButton.astro'
 ---
 
-<e-dev class="">
+<div class="docs">
   <a
+    class="docs__a"
     target="_blank"
     href="https://github.com/nomorejalapenos/website-inari/blob/modx/docs/FomElement.md"
     >Описание формы</a
   >
 
   <a
+    class="docs__a"
     target="_blank"
     href="https://github.com/nomorejalapenos/website-inari/blob/modx/docs/globalStore.md"
     >Описание хранилища</a
   >
 
-  <div>
-    <h3 class="f-d-24-s">Кнопка продукта</h3>
-    <p class="f-d-18-r">
-      Если на странице несколько кнопок имеют одно и тоже <code>name</code>, То по нажатию на одну
-      из них обновляются все.</p
+  <div class="docs__block">
+    <h3 class="f-d-24-s docs__heading">Кнопка продукта</h3>
+    <p class="f-d-18-r docs__p">
+      Если на странице несколько кнопок имеют одно и тоже <code class="docs__code">name</code>, То
+      по нажатию на одну из них обновляются все.</p
     >
-    <x-subject>
+    <div class="docs__subject">
       <ProductButton name="1">Кнопка 1</ProductButton>
       <ProductButton name="1">Кнопка 2</ProductButton>
       <ProductButton name="1">Кнопка 3</ProductButton>
-    </x-subject>
+    </div>
   </div>
 
-  <h2 class="f-d-24-s">Элементы которые реагируют на хранилище</h2>
+  <h2 class="f-d-24-s docs__heading">Элементы которые реагируют на хранилище</h2>
 
-  <div>
-    <p class="f-d-18-r">
-      Этот элемент реагирует на изменения <code>window.globalStore.productsNumber.value</code></p
+  <div class="docs__block">
+    <p class="f-d-18-r docs__p">
+      Этот элемент реагирует на изменения <code class="docs__code"
+        >window.globalStore.productsNumber.value</code
+      ></p
     >
-    <blockquote>
+    <blockquote class="docs__exmp">
       window.globalStore.productsNumber.value = 11<br />
     </blockquote>
 
-    <x-subject>
+    <div class="docs__subject">
       <BasketButton>Кнопка 1</BasketButton>
-    </x-subject>
+    </div>
   </div>
 
-  <div>
-    <p class="f-d-18-r"
-      >Этот элемент реагирует на изменения <code>window.globalStore.productsNumber.value</code> и
-      <code>window.globalStore.productsPrice.value</code>.
+  <div class="docs__block">
+    <p class="f-d-18-r docs__p"
+      >Этот элемент реагирует на изменения <code class="docs__code"
+        >window.globalStore.productsNumber.value</code
+      > и
+      <code class="docs__code">window.globalStore.productsPrice.value</code>.
     </p>
-    <blockquote>
+    <blockquote class="docs__exmp">
       window.globalStore.productsNumber.value = 11<br />
       window.globalStore.productsPrice.value = 11
     </blockquote>
 
-    <x-subject>
+    <div class="docs__subject">
       <PricePart type={'products'} />
-    </x-subject>
+    </div>
   </div>
 
-  <div>
-    <p class="f-d-18-r"
-      >Этот элемент реагирует на изменения <code>window.globalStore.promocode.value</code>. Если
-      скидки нету, то он скрыт.
+  <div class="docs__block">
+    <p class="f-d-18-r docs__p"
+      >Этот элемент реагирует на изменения <code class="docs__code"
+        >window.globalStore.promocode.value</code
+      >. Если скидки нету, то он скрыт.
     </p>
     <blockquote
+      class="docs__exmp"
       set:html={`
         window.globalStore.promocode.value = { name: "name", discount: 1000 }<br>
         window.globalStore.promocode.value = null
       `}
     />
-    <x-subject>
+    <div class="docs__subject">
       <PricePart
         type={'discount'}
         title="Скидка"
       />
-    </x-subject>
+    </div>
   </div>
 
-  <div>
-    <p class="f-d-18-r"
-      >Этот элемент реагирует на изменения <code>window.globalStore.deliveryPrice.value</code>. Если
-      цены или <code>globalStore.address.value</code> или <code
+  <div class="docs__block">
+    <p class="f-d-18-r docs__p"
+      >Этот элемент реагирует на изменения <code class="docs__code"
+        >window.globalStore.deliveryPrice.value</code
+      >. Если цены или <code class="docs__code">globalStore.address.value</code> или <code
         >window.globalStore.delivery.userZone</code
       > нету, то он скрыт.
     </p>
     <blockquote
+      class="docs__exmp"
       set:html={`
       window.globalStore.deliveryPrice.value = 1000<br>
       window.globalStore.address.value = 'Адрес'<br>
     `}
     />
 
-    <x-subject>
+    <div class="docs__subject">
       <PricePart
         type={'delivery'}
         title="Доставка"
       />
-    </x-subject>
+    </div>
   </div>
 
-  <div>
-    <p class="f-d-18-r"
-      >Этот элемент реагирует на изменения <code>window.globalStore.finalPrice.value</code>.
+  <div class="docs__block">
+    <p class="f-d-18-r docs__p"
+      >Этот элемент реагирует на изменения <code class="docs__code"
+        >window.globalStore.finalPrice.value</code
+      >.
     </p>
     <blockquote
+      class="docs__exmp"
       set:html={`
         window.globalStore.finalPrice.value = 1000
       `}
     />
-    <x-subject>
+    <div class="docs__subject">
       <PricePartValue
         class="f-d-24-s"
         type={'final'}
       />
-    </x-subject>
+    </div>
   </div>
-</e-dev>
+</div>
 
-<style>
-  e-dev {
+<style is:global>
+  .docs {
     display: block;
     padding: var(--section-vertical-padding) var(--screen-horisontal-padding);
   }
 
-  e-dev h1,
-  e-dev h2,
-  e-dev h3 {
+  .docs__heading {
     margin: 2rem 0;
   }
 
-  e-dev p {
+  .docs__p {
     margin-bottom: 1rem;
   }
 
-  e-dev code {
+  .docs__code {
     color: var(--color-secondary-6);
   }
 
-  e-dev div {
+  .docs__block {
     margin-bottom: 4rem;
   }
 
-  e-dev blockquote {
+  .docs__exmp {
     font-size: 1.6rem;
     padding: 2rem;
     margin-bottom: 1rem;
     background-color: var(--color-secondary-2);
   }
 
-  e-dev x-subject {
+  .docs__subject {
     padding: 2rem;
     display: block;
     background-color: var(--color-secondary-1);
   }
 
-  e-dev a {
+  .docs__a {
     display: block;
     font-size: 2rem;
     text-decoration: underline;
