@@ -126,8 +126,6 @@ const {
     '.sign': {
       boxSizing: 'border-box',
 
-      borderRadius: '0.3rem',
-
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -151,14 +149,19 @@ const {
       fontSize: '1.6rem',
       width: '1.5rem',
       height: '1.5rem',
+      border: 'none',
     },
 
     '.plus': {
       borderLeft: '0.1rem solid var(--color-primary-2)',
+      borderTopLeftRadius: '0.3rem',
+      borderBottomLeftRadius: '0.3rem',
     },
 
     '.minus': {
       borderRight: '0.1rem solid var(--color-primary-2)',
+      borderTopRightRadius: '0.3rem',
+      borderBottomRightRadius: '0.3rem',
     },
 
     '@media(max-width: 768px)': {

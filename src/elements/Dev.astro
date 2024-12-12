@@ -1,10 +1,23 @@
 ---
+import BasketButton from './BasketButton.astro'
 import PricePart from './PricePart.astro'
 import PricePartValue from './PricePartValue.astro'
 import ProductButton from './ProductButton.astro'
 ---
 
 <e-global>
+  <a
+    target="_blank"
+    href="https://github.com/nomorejalapenos/website-inari/blob/modx/docs/FomElement.md"
+    >Описание формы</a
+  >
+
+  <a
+    target="_blank"
+    href="https://github.com/nomorejalapenos/website-inari/blob/modx/docs/globalStore.md"
+    >Описание хранилища</a
+  >
+
   <div>
     <h3 class="f-d-24-s">Кнопка продукта</h3>
     <p class="f-d-18-r">
@@ -19,6 +32,19 @@ import ProductButton from './ProductButton.astro'
   </div>
 
   <h2 class="f-d-24-s">Элементы которые реагируют на хранилище</h2>
+
+  <div>
+    <p class="f-d-18-r">
+      Этот элемент реагирует на изменения <code>window.globalStore.productsNumber.value</code></p
+    >
+    <blockquote>
+      window.globalStore.productsNumber.value = 11<br />
+    </blockquote>
+
+    <x-subject>
+      <BasketButton>Кнопка 1</BasketButton>
+    </x-subject>
+  </div>
 
   <div>
     <p class="f-d-18-r"
@@ -129,5 +155,12 @@ import ProductButton from './ProductButton.astro'
     padding: 2rem;
     display: block;
     background-color: var(--color-secondary-1);
+  }
+
+  a {
+    display: block;
+    font-size: 2rem;
+    text-decoration: underline;
+    margin-bottom: 1rem;
   }
 </style>
