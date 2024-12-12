@@ -17,7 +17,7 @@ const steps = ['Корзина', 'Оформление заказа', 'Зака�
   {
     steps.map((step, i) => {
       return (
-        <dir
+        <div
           class="order-steps__step"
           data-step={i + 1}
         >
@@ -34,7 +34,7 @@ const steps = ['Корзина', 'Оформление заказа', 'Зака�
             class="f-d-14-s f-m-10-s order-steps__step__name"
             set:html={step}
           />
-        </dir>
+        </div>
       )
     })
   }
