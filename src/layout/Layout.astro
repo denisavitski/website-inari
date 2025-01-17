@@ -6,7 +6,6 @@ import Scrollbar from '@singletons/Scrollbar.astro'
 
 import Head from './Head.astro'
 import { type Props as SeoProps } from './Seo.astro'
-import Basket from '@singletons/Basket.astro'
 import Review from '@singletons/Review.astro'
 import OrderType from '@singletons/OrderType.astro'
 import DeliveryZones from '@singletons/DeliveryZones.astro'
@@ -20,9 +19,10 @@ export interface Props {
   ctaModal?: boolean
   partnerModal?: boolean
   seo?: SeoProps | undefined
+  basketOpened?: boolean | undefined
 }
 
-const { header = true, footer = true, seo } = Astro.props
+const { header = true, footer = true, basketOpened, seo } = Astro.props
 ---
 
 <html
@@ -33,7 +33,7 @@ const { header = true, footer = true, seo } = Astro.props
 
   <body>
     <div class="page">
-      {header && <Header />}
+      {header && <Header basketOpened={basketOpened} />}
 
       <div
         class="scroll hidden-scrollbar"
@@ -50,7 +50,6 @@ const { header = true, footer = true, seo } = Astro.props
 
       <DeliveryZones />
       <OrderType />
-      <Basket />
       <Review />
       <FormAnswer />
     </div>

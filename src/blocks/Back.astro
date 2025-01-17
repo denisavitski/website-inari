@@ -1,16 +1,20 @@
 ---
 import Icon from '@elements/Icon.astro'
+import type { HTMLAttributes } from 'astro/types'
 
-export interface Props {
+export interface Props extends HTMLAttributes<any> {
   class?: string
-  href?: string
+  href?: string | false
+  tag?: string
 }
 
-const { class: className, href = '/', ...rest } = Astro.props
+const { class: className, href = '/', tag = 'a', ...rest } = Astro.props
+
+const Tag = tag as any
 ---
 
 <!-- BLOCK -->
-<a
+<Tag
   {...rest}
   class:list={['back', className]}
   {href}
@@ -20,7 +24,7 @@ const { class: className, href = '/', ...rest } = Astro.props
     class="back__arrow"
   />
   <span class="f-d-16-s back__name"><slot /></span>
-</a>
+</Tag>
 
 <style is:global>
   .back {

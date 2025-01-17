@@ -1,0 +1,246 @@
+---
+import '@elements/BasketItem.astro'
+import BasketItem from '@elements/BasketItem.astro'
+
+import Button from '@elements/Button.astro'
+import PricePart from '@elements/PricePart.astro'
+import PricePartValue from '@elements/PricePartValue.astro'
+import Promocode from '@elements/Promocode.astro'
+import SuggestionProducts from '@elements/SuggestionProducts.astro'
+import Back from './Back.astro'
+
+export const modal = '#basket'
+
+export interface Props {
+  class?: string
+}
+
+const { class: className, ...rest } = Astro.props
+---
+
+<!-- SINGLETON -->
+<div
+  {...rest}
+  class:list={['basket', className]}
+>
+  <Back
+    href={false}
+    onclick="history.back();"
+    >Назад
+  </Back>
+
+  <div class="basket__content">
+    <div class="basket__products">
+      <div class="basket__products__head">
+        <div class="f-d-24-s f-m-18-s basket__products__price">1 товара на 250 ₽</div>
+        <div class="f-d-16-s f-m-14-s basket__products__free"
+          >До бесплатной доставки осталось <b>1 250 ₽</b></div
+        >
+      </div>
+
+      <div class="basket__products__list">
+        <BasketItem />
+        <BasketItem />
+        <BasketItem />
+      </div>
+    </div>
+
+    <div class="basket__suggestions">
+      <SuggestionProducts />
+    </div>
+
+    <div class="basket__bottom">
+      <Promocode class="basket__promo" />
+
+      <div class="basket__info">
+        <PricePart
+          type={'products'}
+          title=""
+        />
+        <PricePart
+          type={'discount'}
+          title="Скидка"
+        />
+        <PricePart
+          type={'delivery'}
+          title="Доставка"
+        />
+      </div>
+
+      <div class="basket__final">
+        <div class="basket__final__text">
+          <div class="f-d-24-s f-m-18-s basket__final__title">Сумма заказа</div>
+          <PricePartValue
+            class="f-d-24-s f-m-18-s basket__final__value"
+            type={'final'}
+          />
+        </div>
+
+        <Button
+          class="basket__order-button"
+          theme={'arrow'}
+          href="/order"
+          >К оформлению заказа</Button
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .basket {
+    width: 100%;
+    height: 100%;
+  }
+
+  .basket__content {
+    padding: 0 var(--screen-horisontal-padding);
+
+    width: 100%;
+    display: grid;
+    grid-template-columns: 69.6rem 69.6rem;
+    grid-template-areas:
+      'products suggestions'
+      'products bottom';
+    gap: 5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 100%;
+
+      grid-template-areas:
+        'products'
+        'suggestions'
+        'bottom';
+
+      gap: 4rem;
+    }
+  }
+
+  .basket__products {
+    grid-area: products;
+    position: relative;
+
+    @media (max-width: 768px) {
+    }
+  }
+
+  .basket__scrollbar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0.5rem;
+    height: 100%;
+  }
+
+  .basket__products__head {
+    padding-bottom: 1.6rem;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      padding-bottom: 1.2rem;
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .basket__products__price {
+    margin-bottom: 0.4rem;
+  }
+
+  .basket__products__free {
+    b {
+      font-weight: 600;
+      color: var(--color-primary-3);
+    }
+  }
+
+  .basket__products__list {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 1rem;
+  }
+
+  .basket__suggestions {
+    grid-area: suggestions;
+
+    @media (min-width: 769px) {
+      overflow: hidden;
+    }
+  }
+
+  .basket__bottom {
+    grid-area: bottom;
+
+    margin-top: auto;
+
+    padding: 5rem;
+    padding-bottom: 2.4rem;
+
+    background-color: var(--color-secondary-2);
+    border-radius: 2rem;
+
+    @media (max-width: 768px) {
+      width: calc(100% + var(--screen-horisontal-padding) * 2);
+      margin-left: calc(var(--screen-horisontal-padding) * -1);
+      border-radius: 0;
+      padding: 2.4rem 1.6rem;
+    }
+  }
+
+  .basket__promo {
+    margin-bottom: 3.2rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.6rem;
+    }
+  }
+
+  .basket__info {
+    padding-bottom: 3.2rem;
+    border-bottom: 0.1rem solid var(--color-secondary-1);
+
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: 0.8rem;
+  }
+
+  .basket__final {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding-top: 1.6rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  .basket__final__text {
+    display: flex;
+    justify-content: space-between;
+    gap: 4.7rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      gap: 2.4rem;
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .basket__final__title {
+  }
+
+  .basket__final__value {
+  }
+
+  .basket__order-button {
+    &[data-disabled] {
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+</style>

@@ -1,0 +1,16 @@
+---
+import BasketSection from '@blocks/Basket.astro'
+import Layout from '@layout/Layout.astro'
+---
+
+<Layout
+  seo={{
+    title: 'Инари: Корзина',
+    description: 'Свежие суши каждый день',
+    cover: '/images/seo/home.jpg',
+  }}
+  footer={false}
+  basketOpened={true}
+>
+  <BasketSection />
+</Layout>

@@ -10,6 +10,7 @@ export interface Props {
     href?: string
     include?: string
   }>
+  basketOpened?: boolean | undefined
 }
 
 const {
@@ -37,6 +38,7 @@ const {
       href: '/contacts',
     },
   ],
+  basketOpened,
 } = Astro.props
 ---
 
@@ -80,7 +82,10 @@ const {
     </e-popover>
 
     <div class="header__basket-wrapper">
-      <BasketButton class="header__basket" />
+      <BasketButton
+        class="header__basket"
+        opened={basketOpened}
+      />
     </div>
 
     <OrderSteps class="header__order-steps" />

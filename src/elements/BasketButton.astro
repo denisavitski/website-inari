@@ -3,28 +3,42 @@ import Icon from './Icon.astro'
 
 export interface Props {
   class?: string
+  opened?: boolean | undefined
+  counter?: number
 }
 
-const { class: className, ...rest } = Astro.props
+const { class: className, opened = false, counter = 10, ...rest } = Astro.props
 ---
 
+<!-- 
+  Можно указать атрибут counter для отображения изначального количества итемов в корзине
+  <e-basket-button counter="10">
+
+  либо через window.globalStore.productsNumber.value = 10
+-->
 <e-basket-button
   {...rest}
-  class:list={['basket-button', className]}
-  target="basket"
+  class:list={['basket-button', className, { opened }]}
+  {counter}
 >
-  <div class="basket-button__face">
-    <div class="f-d-16-s basket-button__name">Корзина</div>
+  <a
+    class="basket-button__link"
+    href={opened ? undefined : '/basket'}
+    onclick={opened ? 'history.back();' : ''}
+  >
+    <div class="basket-button__face">
+      <div class="f-d-16-s basket-button__name">Корзина</div>
+      <Icon
+        class="basket-button__icon"
+        name="basket"
+      />
+    </div>
+    <div class="f-d-16-s f-m-14-s basket-button__value"></div>
     <Icon
-      class="basket-button__icon"
-      name="basket"
+      class="basket-button__back-icon"
+      name="tailless-arrow"
     />
-  </div>
-  <div class="f-d-16-s f-m-14-s basket-button__value"></div>
-  <Icon
-    class="basket-button__back-icon"
-    name="tailless-arrow"
-  />
+  </a>
 </e-basket-button>
 
 <style is:global>
@@ -34,8 +48,7 @@ const { class: className, ...rest } = Astro.props
     padding: 0 1.6rem;
     height: 4rem;
 
-    display: inline-flex;
-    align-items: center;
+    display: inline-block;
 
     color: var(--color-primary-2);
     background-color: var(--color-primary-3);
@@ -44,12 +57,30 @@ const { class: className, ...rest } = Astro.props
 
     user-select: none;
 
+    @media (min-width: 769px) {
+      &.opened {
+        cursor: default;
+      }
+    }
+
     @media (max-width: 768px) {
       padding: 0 0.4rem;
       height: 3.2rem;
 
       &.opened {
         width: 3.2rem;
+      }
+    }
+  }
+
+  .basket-button__link {
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+
+    @media (min-width: 769px) {
+      .basket-button.opened & {
+        pointer-events: none;
       }
     }
   }
@@ -140,12 +171,10 @@ const { class: className, ...rest } = Astro.props
 
 <script>
   import { globalStore } from '@stores/globalStore'
-  import { PopoverButtonElement } from 'aptechka/popover'
   import { clamp } from 'aptechka/utils'
 
-  export class BasketButtonElement extends PopoverButtonElement {
+  export class BasketButtonElement extends HTMLElement {
     #valueElement: HTMLElement | null = null
-
     #counter = 0
 
     public set(value: number) {
@@ -166,17 +195,19 @@ const { class: className, ...rest } = Astro.props
       this.set(this.#counter + value)
     }
 
-    protected override connectedCallback() {
-      super.connectedCallback()
-
+    protected connectedCallback() {
       this.#valueElement = this.querySelector('.basket-button__value')
+
+      const counterValue = this.getAttribute('counter')
+
+      if (counterValue) {
+        globalStore.productsNumber.value = parseInt(counterValue)
+      }
 
       globalStore.productsNumber.subscribe(this.#basketChangeListener)
     }
 
-    protected override disconnectedCallback() {
-      super.disconnectedCallback()
-
+    protected disconnectedCallback() {
       globalStore.productsNumber.unsubscribe(this.#basketChangeListener)
     }
 

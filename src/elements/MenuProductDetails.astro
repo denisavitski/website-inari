@@ -31,6 +31,7 @@ export interface MenuProductDetailsData extends Omit<BasketStoreItem, 'image'> {
   energy: Omit<EnergyPropsProps, 'class'>
   images: Array<string>
   setItems?: Array<MenuProductSetItem> | undefined | false
+  counter?: number
 }
 
 export interface Props extends Partial<MenuProductDetailsData> {
@@ -88,6 +89,7 @@ const {
       href: '/products/simple',
     },
   ],
+  counter,
   ...rest
 } = Astro.props
 ---
@@ -240,6 +242,7 @@ const {
           placeholder={false}
           size={'always-big'}
           name={name}
+          counter={counter}
         />
         <Price
           class="product-details__price"

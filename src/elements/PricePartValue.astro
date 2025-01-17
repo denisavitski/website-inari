@@ -5,15 +5,20 @@ export interface Props {
   class?: string
   font?: string
   type?: PricePartValueType
+  value?: string | number | undefined
 }
 
-const { class: className, type = 'final', ...rest } = Astro.props
+const { class: className, type = 'final', value, ...rest } = Astro.props
 ---
 
+<!-- Если не нужен функционал https://website-inari-git-modx-denisavitskis-projects.vercel.app/ui/elements/Dev
+  можно замениь тег на любой другой
+-->
 <e-price-part-value
   {...rest}
   class:list={[className]}
   type={type}
+  {value}
 >
 </e-price-part-value>
 
