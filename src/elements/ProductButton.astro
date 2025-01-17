@@ -22,6 +22,15 @@ const {
 ---
 
 <!-- 
+  const element = document.querySelector('e-product-button')
+
+  element.addEventListener('productButtonCounterChange', (e) => {
+    console.log(e.detail.counter, element.counter)
+  })
+
+  element.set(10)
+  element.shift(1)
+
   Если на странице несколько кнопок имеют одно и тоже name,
   То по нажатию на одну из них обновляются все.
 -->
@@ -101,6 +110,14 @@ const {
       color: 'var(--color-primary-2)',
       border: '0.1rem solid var(--color-primary-2)',
       borderRadius: 'var(--border-radius-1)',
+    },
+
+    ':host(.has-placeholder) .content': {
+      borderColor: 'transparent',
+    },
+
+    ':host(.positive-value) .content': {
+      borderColor: 'var(--color-primary-2)',
     },
 
     ':host([size="big"]) .content, :host([size="always-big"]) .content': {

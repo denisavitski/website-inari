@@ -75,6 +75,14 @@ const Tag = tag as any
 
     background-color: rgba(0, 0, 0, 0.8);
 
+    &.triggered {
+      display: block;
+    }
+
+    &.opened {
+      opacity: 1;
+    }
+
     @media (max-width: 768px) {
       --swipe-enabled: true;
       --max-height: 80vh;

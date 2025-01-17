@@ -1,0 +1,40 @@
+---
+import MenuProductDetails, { type MenuProductDetailsData } from '@elements/MenuProductDetails.astro'
+import Back from './Back.astro'
+
+export interface Props {
+  data?: Partial<MenuProductDetailsData>
+}
+
+const { data } = Astro.props
+---
+
+<div class="product">
+  <Back href="/#menu">Назад к меню</Back>
+
+  <div class="product__content">
+    <MenuProductDetails {...data} />
+  </div>
+</div>
+
+<style is:global>
+  .product {
+  }
+
+  .product__content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 79.2rem;
+    padding-bottom: 12rem;
+
+    @media (max-width: 768px) {
+      min-height: unset;
+      align-items: flex-start;
+      padding: 0 var(--screen-horisontal-padding);
+      padding-bottom: 2.4rem;
+      padding-top: 0.8rem;
+    }
+  }
+</style>

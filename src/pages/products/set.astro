@@ -1,0 +1,70 @@
+---
+import Product from '@blocks/Product.astro'
+import Layout from '@layout/Layout.astro'
+---
+
+<Layout
+  seo={{
+    title: 'Инари: Продукт',
+    description: 'Свежие суши каждый день',
+    cover: '/images/seo/home.jpg',
+  }}
+  footer={false}
+>
+  <Product
+    data={{
+      type: 'set',
+      pid: '1',
+      price: 1000,
+      oldPrice: 2000,
+      images: ['/images/food/1.jpg', '/images/food/2.jpg'],
+      labels: [
+        { value: 'Новинка', color: '#1A8704' },
+        { value: 'Акция 10%', color: '#E53935' },
+      ],
+      feature: 'spicy',
+      name: 'Филадельфия фреш',
+      description: false,
+      energy: { proteins: '111', fats: '111', carbohydrates: '111', calories: '111' },
+      stats: [
+        { title: 'Вес', value: '1 245 г.', variantProp: 'size' },
+        { title: 'Количество', value: '32 шт.', variantProp: 'size' },
+      ],
+      variants: [{ name: '4 шт.' }, { name: '8 шт.' }],
+      setItems: [
+        {
+          image: '/images/food/1.jpg',
+          pid: '5',
+          name: 'Филадельфия фреш, 8 шт.',
+          description: 'Филе лосося, сливочный сыр, огурец',
+          feature: 'spicy',
+          href: '/products/simple',
+        },
+        {
+          image: '/images/food/2.jpg',
+          pid: '6',
+          name: 'Филадельфия фреш, 8 шт.',
+          description: 'Филе лосося, сливочный сыр, огурец',
+          feature: 'spicy',
+          href: '/products/simple',
+        },
+        {
+          image: '/images/food/3.jpg',
+          pid: '7',
+          name: 'Филадельфия фреш, 8 шт.',
+          description: 'Филе лосося, сливочный сыр, огурец',
+          feature: 'spicy',
+          href: '/products/simple',
+        },
+        {
+          image: '/images/food/1.jpg',
+          pid: '7',
+          name: 'Филадельфия фреш, 8 шт.',
+          description: 'Филе лосося, сливочный сыр, огурец',
+          feature: 'spicy',
+          href: '/products/simple',
+        },
+      ],
+    }}
+  />
+</Layout>

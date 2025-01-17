@@ -26,7 +26,7 @@
     "vite": "^6.0.1"
   },
   "dependencies": {
-    "aptechka": "^0.47.12",
+    "aptechka": "^0.51.11",
     "construct-style-sheets-polyfill": "^3.1.0"
   }
 }

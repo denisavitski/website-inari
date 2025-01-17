@@ -1,0 +1,31 @@
+---
+import Product from '@blocks/Product.astro'
+import Layout from '@layout/Layout.astro'
+---
+
+<Layout
+  seo={{
+    title: 'Инари: Продукт',
+    description: 'Свежие суши каждый день',
+    cover: '/images/seo/home.jpg',
+  }}
+  footer={false}
+>
+  <Product
+    data={{
+      type: 'simple',
+      pid: '1',
+      price: 1000,
+      oldPrice: false,
+      images: ['/images/food/1.jpg'],
+      labels: [],
+      feature: false,
+      name: 'Филадельфия фреш',
+      description: 'Филе лосося, сливочный сыр, свежий огурец',
+      energy: { proteins: '111', fats: '111', carbohydrates: '111', calories: '111' },
+      stats: [{ title: 'Объем', value: '500мл', variantProp: 'size' }],
+      variants: [],
+      setItems: [],
+    }}
+  />
+</Layout>

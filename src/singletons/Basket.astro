@@ -111,6 +111,14 @@ const { class: className, ...rest } = Astro.props
 
     background-color: rgba(26, 26, 26, 0.8);
 
+    &.triggered {
+      display: block;
+    }
+
+    &.opened {
+      opacity: 1;
+    }
+
     @media (min-width: 769px) {
       --click-outside: true;
       padding-right: var(--screen-horisontal-padding);

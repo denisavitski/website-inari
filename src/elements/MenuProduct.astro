@@ -6,7 +6,6 @@ import type { ProductFeatureIcon } from '@elements/ProductFeature.astro'
 import ProductFeature from '@elements/ProductFeature.astro'
 import Price from '@elements/Price.astro'
 import ProductVariants from '@elements/ProductVariants.astro'
-import MenuProductDetails from '@elements/MenuProductDetails.astro'
 import { type Props as EnergyProps } from '@elements/Energy.astro'
 import type { BasketStoreItem, ProductVariant } from '@utils/types'
 
@@ -17,12 +16,7 @@ export interface MenuProductStat {
   border?: boolean
 }
 
-export interface MenuProductSetItem
-  extends Pick<BasketStoreItem, 'description' | 'image' | 'name' | 'pid'> {
-  feature?: ProductFeatureIcon | undefined | false
-}
-
-export interface MenuProductData extends Omit<BasketStoreItem, 'image'> {
+export interface MenuProductData extends BasketStoreItem {
   feature?: ProductFeatureIcon | undefined | false
   oldPrice?: number | undefined | false
   categories: Array<string>
@@ -31,10 +25,7 @@ export interface MenuProductData extends Omit<BasketStoreItem, 'image'> {
   stats: Array<MenuProductStat>
   variants?: Array<ProductVariant> | undefined | false
   type: 'small' | 'large'
-  detailsType: 'set' | 'simple' | 'variants'
   energy: Omit<EnergyProps, 'class'>
-  images: Array<string>
-  setItems?: Array<MenuProductSetItem> | undefined | false
 }
 
 export interface Props extends Partial<MenuProductData> {
@@ -47,6 +38,7 @@ const {
   amount = 0,
   price = 1000,
   oldPrice = 2000,
+  href = '/products/simple',
   categories = ['Популярное', 'Роллы'],
   subcategories = ['Хосо маки'],
   labels = [
@@ -63,48 +55,12 @@ const {
       variantProp: '',
     },
   ],
-  variants = [
-    { shortName: '4 шт.', name: 'Филадельфия фреш 4 шт.', pid: '1', price: 111, size: '10г' },
-    { shortName: '8 шт.', name: 'Филадельфия фреш 8 шт.', pid: '2', price: 222, size: '20г' },
-  ],
+  variants = [{ name: '4 шт.' }, { name: '8 шт.' }],
   type = 'large',
   energy = { proteins: '111', fats: '111', carbohydrates: '111', calories: '111' },
-  images = ['/images/food/1.jpg', '/images/food/2.jpg'],
-  detailsType = 'set',
-  setItems = [
-    {
-      image: '/images/food/1.jpg',
-      pid: '5',
-      name: 'Филадельфия фреш, 8 шт.',
-      description: 'Филе лосося, сливочный сыр, огурец',
-      feature: 'spicy',
-    },
-    {
-      image: '/images/food/2.jpg',
-      pid: '6',
-      name: 'Филадельфия фреш, 8 шт.',
-      description: 'Филе лосося, сливочный сыр, огурец',
-      feature: 'spicy',
-    },
-    {
-      image: '/images/food/3.jpg',
-      pid: '7',
-      name: 'Филадельфия фреш, 8 шт.',
-      description: 'Филе лосося, сливочный сыр, огурец',
-      feature: 'spicy',
-    },
-    {
-      image: '/images/food/1.jpg',
-      pid: '7',
-      name: 'Филадельфия фреш, 8 шт.',
-      description: 'Филе лосося, сливочный сыр, огурец',
-      feature: 'spicy',
-    },
-  ],
+  image = '/images/food/1.jpg',
   ...rest
 } = Astro.props
-
-const modalId = `product-${pid}`
 ---
 
 <div
@@ -115,10 +71,10 @@ const modalId = `product-${pid}`
   data-subcategories={subcategories}
 >
   <div class="menu-product__card">
-    <e-popover-button
+    <a
       class="menu-product__popover-button"
-      target={modalId}
-    ></e-popover-button>
+      href={href}
+    ></a>
 
     {
       labels && (
@@ -131,7 +87,7 @@ const modalId = `product-${pid}`
 
     <Image
       class="menu-product__image"
-      src={images[0]!}
+      src={image}
       lazy
       lazyBackground
       cover
@@ -174,7 +130,6 @@ const modalId = `product-${pid}`
               <div
                 class="f-d-16-s f-m-14-s menu-product__stat__value"
                 set:html={stat.value}
-                data-variant-prop={stat.variantProp}
                 data-border={stat.border}
               />
             </div>
@@ -208,22 +163,6 @@ const modalId = `product-${pid}`
       />
     </div>
   </div>
-
-  <MenuProductDetails
-    pid={modalId}
-    {detailsType}
-    {price}
-    {oldPrice}
-    {images}
-    {labels}
-    {feature}
-    {name}
-    {description}
-    {energy}
-    {stats}
-    {variants}
-    {setItems}
-  />
 </div>
 
 <style is:global>

@@ -5,14 +5,11 @@ export interface BasketStoreItem {
   price: number
   image: string
   description?: string | undefined | false
+  href: string
 }
 
 export type BasketStoreState = Array<BasketStoreItem>
 
 export interface ProductVariant {
-  shortName: string
   name: string
-  size: string
-  price: string | number
-  oldPrice?: string | number | undefined
 }

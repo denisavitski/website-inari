@@ -1,26 +1,46 @@
 ---
-import Modal from '@elements/Modal.astro'
 import Image from '@elements/Image.astro'
-import Energy from '@elements/Energy.astro'
+import Energy, { type Props as EnergyPropsProps } from '@elements/Energy.astro'
 import SliderButton from '@elements/SliderButton.astro'
 import ProductButton from '@elements/ProductButton.astro'
 import Price from '@elements/Price.astro'
-import Labels from '@elements/Labels.astro'
+import Labels, { type Props as LabelsPropsProps } from '@elements/Labels.astro'
 import SliderBullets from '@elements/SliderBullets.astro'
 import ProductVariants from '@elements/ProductVariants.astro'
-import ProductFeature from '@elements/ProductFeature.astro'
-import type { MenuProductData } from './MenuProduct.astro'
+import ProductFeature, { type ProductFeatureIcon } from '@elements/ProductFeature.astro'
+import type { MenuProductStat } from './MenuProduct.astro'
+import type { BasketStoreItem, ProductVariant } from '@utils/types'
+import Button from './Button.astro'
 
 export const modal = '#product-details'
 
-export interface Props extends Partial<MenuProductData> {
+export interface MenuProductSetItem
+  extends Pick<BasketStoreItem, 'description' | 'image' | 'name' | 'pid' | 'href'> {
+  feature?: ProductFeatureIcon | undefined | false
+}
+
+export interface MenuProductDetailsData extends Omit<BasketStoreItem, 'image'> {
+  feature?: ProductFeatureIcon | undefined | false
+  oldPrice?: number | undefined | false
+  categories: Array<string>
+  subcategories?: Array<string> | undefined | false
+  labels?: LabelsPropsProps['list'] | undefined | false
+  stats: Array<MenuProductStat>
+  variants?: Array<ProductVariant> | undefined | false
+  type: 'set' | 'simple' | 'variants'
+  energy: Omit<EnergyPropsProps, 'class'>
+  images: Array<string>
+  setItems?: Array<MenuProductSetItem> | undefined | false
+}
+
+export interface Props extends Partial<MenuProductDetailsData> {
   class?: string
 }
 
 const {
   class: className,
-  detailsType = 'set',
-  pid,
+  pid = '1',
+  type = 'simple',
   price = '1000',
   oldPrice = '2000',
   images = ['/images/food/1.jpg', '/images/food/2.jpg'],
@@ -33,10 +53,7 @@ const {
   description = 'Филе лосося, сливочный сыр, свежий огурец',
   energy = { proteins: '111', fats: '111', carbohydrates: '111', calories: '111' },
   stats = [{ title: 'Вес', value: '1 245 г.', variantProp: 'size' }],
-  variants = [
-    { shortName: '4 шт.', name: 'Филадельфия фреш 4 шт.', pid: '1', price: 111, size: '10г' },
-    { shortName: '8 шт.', name: 'Филадельфия фреш 8 шт.', pid: '2', price: 222, size: '20г' },
-  ],
+  variants = [{ name: '4 шт.' }, { name: '8 шт.' }],
   setItems = [
     {
       image: '/images/food/1.jpg',
@@ -44,6 +61,7 @@ const {
       name: 'Филадельфия фреш, 8 шт.',
       description: 'Филе лосося, сливочный сыр, огурец',
       feature: 'spicy',
+      href: '/products/simple',
     },
     {
       image: '/images/food/2.jpg',
@@ -51,6 +69,7 @@ const {
       name: 'Филадельфия фреш, 8 шт.',
       description: 'Филе лосося, сливочный сыр, огурец',
       feature: 'spicy',
+      href: '/products/simple',
     },
     {
       image: '/images/food/3.jpg',
@@ -58,6 +77,7 @@ const {
       name: 'Филадельфия фреш, 8 шт.',
       description: 'Филе лосося, сливочный сыр, огурец',
       feature: 'spicy',
+      href: '/products/simple',
     },
     {
       image: '/images/food/1.jpg',
@@ -65,21 +85,29 @@ const {
       name: 'Филадельфия фреш, 8 шт.',
       description: 'Филе лосося, сливочный сыр, огурец',
       feature: 'spicy',
+      href: '/products/simple',
     },
   ],
   ...rest
 } = Astro.props
 ---
 
-<Modal
+<!-- 
+Связывает кнопки "В корзину" и кнопку счетчика.
+
+Изначальное количество можно указать в атрибуте counter
+<e-product-button counter="10">
+
+Если функционал не нужен, можно тег просто переименовать в div
+-->
+<e-product-details
   {...rest}
   class:list={['product-details', className]}
-  id={pid || 'product-details'}
-  data-type={detailsType}
+  data-type={type}
 >
   <div class="product-details__content">
     <div class="product-details__text">
-      <h3 class="f-d-24-s f-m-18-s product-details__title">
+      <h1 class="f-d-24-s f-m-18-s product-details__title">
         <span set:html={name} />
         {
           feature && (
@@ -89,7 +117,7 @@ const {
             />
           )
         }
-      </h3>
+      </h1>
 
       {
         description && (
@@ -102,12 +130,13 @@ const {
     </div>
 
     {
-      setItems && detailsType === 'set' && (
+      setItems && type === 'set' && (
         <div class="product-details__set">
           {setItems.map((item) => {
             return (
-              <e-popover-button
-                target={`product-${item.pid}`}
+              <a
+                href={item.href}
+                target="_blank"
                 class="product-details__set__item"
               >
                 <Image
@@ -130,7 +159,7 @@ const {
                     icon={item.feature}
                   />
                 )}
-              </e-popover-button>
+              </a>
             )
           })}
         </div>
@@ -187,7 +216,6 @@ const {
               <div
                 class="product-details__stat__value"
                 set:html={stat.value}
-                data-variant-prop={stat.variantProp}
               />
             </div>
           )
@@ -195,7 +223,7 @@ const {
       }
 
       {
-        variants && variants?.length && detailsType !== 'set' ? (
+        variants && variants?.length && type !== 'set' ? (
           <ProductVariants
             class="product-details__variants"
             variants={variants}
@@ -206,35 +234,46 @@ const {
     </div>
 
     <div class="product-details__bottom">
-      <Price
-        class="product-details__price"
-        value={price}
-        oldValue={oldPrice}
-      />
-      <ProductButton
-        class="product-details__product-button"
-        placeholder="В корзину"
-        size={'always-big'}
-        name={name}
-      />
+      <div class="product-details__bottom__first">
+        <ProductButton
+          class="product-details__product-button"
+          placeholder={false}
+          size={'always-big'}
+          name={name}
+        />
+        <Price
+          class="product-details__price"
+          value={price}
+          oldValue={oldPrice}
+        />
+      </div>
+      <Button
+        class="product-details__basket-button"
+        theme={'big'}
+        >В корзину</Button
+      >
     </div>
   </div>
-</Modal>
+</e-product-details>
 
 <style is:global>
   .product-details {
-    --group: product-details;
-    --dominance: -1;
-    z-index: calc(var(--z-modal) + var(--open-index, 0));
+    width: 120rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
   }
 
   .product-details__content {
     position: relative;
 
+    width: 100%;
+
     display: grid;
 
     .product-details[data-type='variants'] & {
-      grid-template-columns: 46.9rem 44.8rem;
+      grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr max-content max-content max-content;
       grid-template-areas:
         'slider text'
@@ -257,10 +296,11 @@ const {
     }
 
     .product-details[data-type='simple'] & {
-      grid-template-columns: 35.2rem 44.8rem;
-      grid-template-rows: 1fr max-content max-content max-content;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: max-content;
       grid-template-areas:
         'slider text'
+        'slider .'
         'slider energy'
         'slider stats'
         'slider bottom';
@@ -281,12 +321,14 @@ const {
     }
 
     .product-details[data-type='set'] & {
-      grid-template-columns: 46.9rem 55.8rem;
+      grid-template-columns: 1fr 1fr;
       grid-template-rows: unset;
       grid-auto-rows: max-content;
       grid-template-areas:
         'slider text'
         'slider set'
+        'slider .'
+        'slider stats'
         'energy stats'
         'energy bottom';
       gap: 0rem 5rem;
@@ -407,38 +449,21 @@ const {
   .product-details__slider__images {
     display: grid;
     width: 100%;
-
-    margin-bottom: 1.6rem;
+    height: 46.3rem;
 
     overflow: hidden;
     border-radius: var(--border-radius-1);
 
-    .product-details[data-type='variants'] & {
-      height: 36.1rem;
-
-      @media (max-width: 768px) {
-        height: 25rem;
-      }
-    }
-
-    .product-details[data-type='set'] & {
-      height: 38.9rem;
-
-      @media (max-width: 768px) {
-        height: 25rem;
-      }
-    }
-
-    .product-details[data-type='simple'] & {
-      height: 28.7rem;
-
-      @media (max-width: 768px) {
-        height: 25rem;
-      }
+    .has-length & {
+      margin-bottom: 1.6rem;
     }
 
     @media (max-width: 768px) {
-      margin-bottom: 0.8rem;
+      height: 25rem;
+
+      .has-length & {
+        margin-bottom: 0.8rem;
+      }
     }
   }
 
@@ -463,9 +488,13 @@ const {
     width: 100%;
     height: 3.2rem;
 
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
+
+    .has-length & {
+      display: flex;
+    }
 
     @media (max-width: 768px) {
       height: max-content;
@@ -506,6 +535,14 @@ const {
         .energy__title {
           text-align: center;
         }
+
+        .energy__pfc {
+          margin-left: auto;
+        }
+
+        .energy__pfc::before {
+          margin: 0 7rem;
+        }
       }
     }
 
@@ -526,14 +563,12 @@ const {
     height: max-content;
     margin-bottom: 2.4rem;
 
-    .product-details[data-type='variants'] &,
-    .product-details[data-type='simple'] & {
-      padding-top: 2.4rem;
-      border-top: 0.1rem solid var(--color-secondary-1);
+    border-top: 0.1rem solid var(--color-secondary-1);
 
-      @media (max-width: 768px) {
-        padding-top: 1.6rem;
-      }
+    padding-top: 2.4rem;
+
+    @media (max-width: 768px) {
+      padding-top: 1.6rem;
     }
   }
 
@@ -554,7 +589,7 @@ const {
 
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 3.2rem;
 
     height: max-content;
@@ -562,18 +597,136 @@ const {
 
     @media (max-width: 768px) {
       justify-content: space-between;
-      flex-direction: row-reverse;
+      flex-direction: column;
+      gap: 2.4rem;
+    }
+  }
+
+  .product-details__bottom__first {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .product-details__basket-button {
+    --height: 4.3rem;
+    min-width: 14rem;
+
+    @media (max-width: 768px) {
+      width: 100%;
     }
   }
 
   .product-details__price {
+    font-size: 2.4rem;
+    font-weight: 600;
   }
 
   .product-details__product-button {
-    width: 13.6rem;
+    width: 12rem;
     height: 4.3rem;
 
     --color: var(--color-primary-2);
     --background-color: var(--color-functional-1);
+
+    @media (max-width: 768px) {
+      width: 10.9rem;
+      height: 3.4rem;
+      --padding: 0 0.6rem;
+    }
   }
 </style>
+
+<script>
+  import type { ProductButtonElement } from './ProductButton.astro.0.mts'
+
+  export class MyElement extends HTMLElement {
+    #basketButtonElement: HTMLElement | null = null
+    #basketButtonNameElement: HTMLElement | null = null
+    #productButtonElement: ProductButtonElement | null = null
+    #inBasket = false
+
+    protected async connectedCallback() {
+      this.#basketButtonElement = this.querySelector('.product-details__basket-button')
+      this.#basketButtonNameElement =
+        this.#basketButtonElement?.querySelector('.button__name') || null
+      this.#productButtonElement = this.querySelector('.product-details__product-button')
+
+      await customElements.whenDefined('e-product-button')
+
+      this.#productButtonElement?.addEventListener(
+        'productButtonCounterChange',
+        this.#counterChangeListener,
+      )
+
+      this.#basketButtonElement?.addEventListener('click', this.#basketButtonClickListener)
+
+      if (this.#productButtonElement?.counter) {
+        this.#updateButton(true)
+      }
+    }
+
+    protected disconnectedCallback() {
+      this.#productButtonElement?.removeEventListener(
+        'productButtonCounterChange',
+        this.#counterChangeListener,
+      )
+    }
+
+    #toggle() {
+      this.#updateButton(!this.#inBasket)
+    }
+
+    #updateButton(inBasket = false) {
+      this.#inBasket = inBasket
+
+      console.log(this.#inBasket)
+
+      if (this.#inBasket) {
+        this.#basketButtonElement?.classList.add('active')
+
+        if (this.#basketButtonNameElement) {
+          this.#basketButtonNameElement.textContent = 'В корзине'
+        }
+      } else {
+        this.#basketButtonElement?.classList.remove('active')
+
+        if (this.#basketButtonNameElement) {
+          this.#basketButtonNameElement.textContent = 'В корзину'
+        }
+      }
+    }
+
+    #counterChangeListener = () => {
+      if (
+        (this.#inBasket && !this.#productButtonElement?.counter) ||
+        (!this.#inBasket && this.#productButtonElement?.counter)
+      ) {
+        this.#toggle()
+      }
+    }
+
+    #basketButtonClickListener = () => {
+      const inBasket = this.#inBasket
+
+      this.#toggle()
+
+      if (!inBasket) {
+        this.#productButtonElement?.set(1)
+      } else {
+        this.#productButtonElement?.set(0)
+      }
+    }
+  }
+
+  if (!customElements.get('e-product-details')) {
+    customElements.define('e-product-details', MyElement)
+  }
+
+  declare global {
+    interface HTMLElementTagNameMap {
+      'e-product-details': MyElement
+    }
+  }
+</script>

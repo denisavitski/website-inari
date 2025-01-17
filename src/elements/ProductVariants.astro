@@ -10,10 +10,7 @@ export interface Props {
 const {
   class: className,
   name = 'product-variants',
-  variants = [
-    { shortName: '4 шт.', name: 'Филадельфия фреш 4 шт.', price: 111, size: '10г' },
-    { shortName: '8 шт.', name: 'Филадельфия фреш 8 шт.', price: 222, size: '20г' },
-  ],
+  variants = [{ name: '4 шт.' }, { name: '8 шт.' }],
   ...rest
 } = Astro.props
 ---
@@ -28,14 +25,10 @@ const {
       return (
         <button
           class="f-d-16-s f-m-14-s product-variants__variant"
-          data-name={variant.name}
-          data-price={variant.price}
-          data-old-price={variant.oldPrice}
           data-checked={i === 0}
-          data-variant-size-value={variant.size}
           data-value={variant.name}
         >
-          {variant.shortName}
+          {variant.name}
         </button>
       )
     })

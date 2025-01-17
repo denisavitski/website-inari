@@ -68,10 +68,15 @@ if (modal) {
       }
 
       @media (hover: hover) {
-        &:not(:active):not([disabled]):not([data-disabled]):hover {
+        &:not([disabled]):not([data-disabled]):hover {
           color: var(--color-primary-3);
           border-color: var(--color-primary-3);
         }
+      }
+
+      &:not([disabled]):not([data-disabled]).active {
+        color: var(--color-primary-3);
+        border-color: var(--color-primary-3);
       }
     }
 
@@ -92,6 +97,11 @@ if (modal) {
           color: var(--color-primary-3);
           background-color: var(--color-primary-2);
         }
+      }
+
+      &:not(:active):not([disabled]):not([data-disabled]).active {
+        color: var(--color-primary-3);
+        background-color: var(--color-primary-2);
       }
 
       @media (max-width: 768px) {
