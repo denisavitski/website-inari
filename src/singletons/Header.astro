@@ -223,6 +223,10 @@ const {
       opacity: 1 !important;
       transition: opacity var(--duration-button);
 
+      &.triggered {
+        display: block;
+      }
+
       &::before {
         content: '';
         position: absolute;

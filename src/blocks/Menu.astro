@@ -283,6 +283,11 @@ items.forEach((item) => {
 
       opacity: 1 !important;
       transition: opacity var(--duration-button);
+      display: none;
+
+      &.triggered {
+        display: block;
+      }
     }
   }
 
