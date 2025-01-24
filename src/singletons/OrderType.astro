@@ -49,32 +49,9 @@ export const modal = '#order-type'
           aria-hidden="true"
           data-order-type="pickup"
         >
-          <e-input-group class="order-type__pickup__input-group">
-            <PickupPoint
-              class="order-type__pickup__point"
-              name="Точка самовывоза"
-              value="улица Щербакова, 48, Зеленоград, Москва"
-              addressType="Фудмолл"
-            />
-            <PickupPoint
-              class="order-type__pickup__point"
-              name="Точка самовывоза"
-              value="Новокрюковская улица, 1824, Зеленоград, Москва"
-              addressType="Пункт самовывоза"
-            />
-            <PickupPoint
-              class="order-type__pickup__point"
-              name="Точка самовывоза"
-              value="ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва"
-              addressType="Пункт самовывоза"
-            />
-            <PickupPoint
-              class="order-type__pickup__point"
-              name="Точка самовывоза"
-              value="5253-й проезд, 1с1, Зеленоград, Москва"
-              addressType="Фудмолл"
-            />
-          </e-input-group>
+          <template class="order-type__point-template">
+            <PickupPoint />
+          </template>
         </div>
       </div>
 
@@ -88,7 +65,10 @@ export const modal = '#order-type'
       </div>
     </div>
 
-    <Map class="order-type__map" />
+    <Map
+      class="order-type__map"
+      user={true}
+    />
   </div>
 </Modal>
 
@@ -145,6 +125,7 @@ export const modal = '#order-type'
   }
 
   .order-type__variants {
+    width: 100%;
   }
 
   .order-type__delivery {
@@ -203,6 +184,7 @@ export const modal = '#order-type'
   }
 
   .order-type__pickup__input-group {
+    width: 100%;
     display: grid;
     gap: 1rem;
 
@@ -272,21 +254,22 @@ export const modal = '#order-type'
 
 <script>
   import { SwipePopoverElement } from '@lib/SwipePopoverElement'
-  import type { InputGroupElement } from '@lib/InputGroupElement'
+  import { InputGroupElement } from '@lib/InputGroupElement'
   import type { YMapElement, YMapEvents } from '@elements/Map.astro.0.mjs'
   import { debounce } from 'aptechka/utils'
   import { globalStore } from '@stores/globalStore'
+  import { cloneTemplateContent } from '@utils/template'
 
   export class OrderTypeElement extends SwipePopoverElement {
     #orderVariantElements: Array<HTMLElement> = []
     #deliveryPriceElement: HTMLElement | null = null
     #deliveryInputElement: HTMLInputElement | null = null
+    #pickupContainerElement: HTMLElement | null = null
     #pickupInputElement: InputGroupElement | null = null
     #mapElement: YMapElement | null = null
     #locationButtonElement: HTMLElement | null = null
     #distanceElements: Array<HTMLElement> = []
-
-    #findLocationAttempts = 0
+    #pickupPointTemplate: HTMLTemplateElement | null = null
 
     constructor() {
       super()
@@ -298,8 +281,10 @@ export const modal = '#order-type'
       })
     }
 
-    protected override connectedCallback() {
+    protected override async connectedCallback() {
       super.connectedCallback()
+
+      await customElements.whenDefined('e-map')
 
       this.#orderVariantElements = [...this.querySelectorAll<HTMLElement>('[data-order-type]')]
 
@@ -308,28 +293,18 @@ export const modal = '#order-type'
       this.#deliveryInputElement = this.querySelector('.order-type__delivery__input')
       this.#deliveryInputElement?.addEventListener('input', this.#deliveryInputListener)
 
-      this.#pickupInputElement = this.querySelector('.order-type__pickup__input-group')
-      this.#pickupInputElement?.addEventListener('inputGroupValueChange', this.#pickupInputListener)
+      this.#pickupContainerElement = this.querySelector('.order-type__pickup')
 
       this.#mapElement = this.querySelector('e-map')
       this.#mapElement?.addEventListener('markerClick', this.#mapMarkerClickListener)
+      this.#mapElement?.addEventListener('ready', this.#mapReadyListener)
+      this.#mapElement?.addEventListener('userAddressSearch', this.#userAddressSearchListener)
+      this.#mapElement?.addEventListener('userAddressChange', this.#userAddressChangeListener)
 
       this.#locationButtonElement = this.querySelector('.order-type__location')
       this.#locationButtonElement?.addEventListener('click', this.#locationButtonListener)
 
-      this.#distanceElements = [...this.querySelectorAll<HTMLElement>('[data-distance-value]')]
-
-      Promise.all([customElements.whenDefined('e-map')]).then(() => {
-        if (this.isConnected) {
-          globalStore.orderType.subscribe(this.#orderTypeChangeListener)
-        }
-      })
-
-      addEventListener('keydown', (e) => {
-        if (e.key === '0') {
-          this.open()
-        }
-      })
+      this.#pickupPointTemplate = this.querySelector('.order-type__point-template')
     }
 
     protected override disconnectedCallback() {
@@ -343,10 +318,52 @@ export const modal = '#order-type'
       )
 
       this.#mapElement?.removeEventListener('markerClick', this.#mapMarkerClickListener)
+      this.#mapElement?.removeEventListener('ready', this.#mapReadyListener)
+      this.#mapElement?.removeEventListener('userAddressSearch', this.#userAddressSearchListener)
+      this.#mapElement?.removeEventListener('userAddressChange', this.#userAddressChangeListener)
 
       this.#locationButtonElement?.removeEventListener('click', this.#locationButtonListener)
 
       globalStore.orderType.unsubscribe(this.#orderTypeChangeListener)
+    }
+
+    #createPickupInputGroup() {
+      if (!this.#pickupContainerElement || !this.#mapElement) {
+        return
+      }
+
+      this.#pickupInputElement = new InputGroupElement()
+      this.#pickupInputElement.className = 'order-type__pickup__input-group'
+
+      this.#mapElement.pickupAddresses.forEach((address) => {
+        cloneTemplateContent(this.#pickupPointTemplate, (e) => {
+          const titleElement = e.querySelector('.pickup-address__title')
+
+          if (titleElement) {
+            titleElement.textContent = address
+          }
+
+          const inputElement = e.querySelector<HTMLInputElement>('.pickup-address__input')
+
+          if (inputElement) {
+            inputElement.value = address
+          }
+
+          const distanceElement = e.querySelector<HTMLInputElement>('.pickup-address__distance')
+
+          if (distanceElement) {
+            distanceElement.setAttribute('data-distance-value', address)
+          }
+
+          this.#pickupInputElement!.appendChild(e)
+        })
+      })
+
+      this.#pickupInputElement?.addEventListener('inputGroupValueChange', this.#pickupInputListener)
+
+      this.#pickupContainerElement.appendChild(this.#pickupInputElement)
+
+      this.#distanceElements = [...this.querySelectorAll<HTMLElement>('[data-distance-value]')]
     }
 
     #orderTypeChangeListener = () => {
@@ -373,17 +390,6 @@ export const modal = '#order-type'
       this.#searchForAddress()
     }, 50)
 
-    async #updateLocation(callback: Function) {
-      document.documentElement.classList.add('location-search')
-
-      await callback()
-
-      this.#updateDistances()
-      this.#updateZone()
-
-      document.documentElement.classList.remove('location-search')
-    }
-
     #updateDistances() {
       const distances = this.#mapElement?.getDistances()
 
@@ -406,7 +412,7 @@ export const modal = '#order-type'
         if (zone?.description) {
           this.#deliveryPriceElement.textContent = zone.description
         } else {
-          if (this.#mapElement?.getUserAddress()) {
+          if (this.#mapElement?.userAddress) {
             this.#deliveryPriceElement.textContent =
               'Вы не попадаете в зону доставки. Возможность доставки за город или на удаленные районы обсуждается индивидуально.'
           } else {
@@ -422,15 +428,11 @@ export const modal = '#order-type'
       const value = this.#deliveryInputElement?.value
 
       if (this.#mapElement) {
-        await this.#updateLocation(() => {
-          return this.#mapElement!.search(value || '')
-        })
+        this.#mapElement!.search(value || '')
 
-        const address = this.#mapElement.getUserAddress()
+        const address = this.#mapElement.userAddress
 
         this.classList.toggle('invalid-address', !address)
-
-        globalStore.address.value = address
       }
     }
 
@@ -446,29 +448,35 @@ export const modal = '#order-type'
       this.classList.toggle('invalid-address', !value)
     }
 
-    #locationButtonListener = async () => {
-      if (this.#mapElement) {
-        const attempt = ++this.#findLocationAttempts
-
-        await this.#updateLocation(() => {
-          return this.#mapElement!.findUserLocation()
-        })
-
-        if (attempt === this.#findLocationAttempts) {
-          if (this.#deliveryInputElement) {
-            this.#deliveryInputElement.value = this.#mapElement.getUserAddress()
-            this.#deliveryInputElement.dispatchEvent(new Event('input'))
-          }
-          if (!location) {
-            alert('Не удалось установить ваше местоположение')
-          }
-        }
-      }
+    #locationButtonListener = () => {
+      this.#mapElement?.findUserLocation()
     }
 
     #mapMarkerClickListener = (e: YMapEvents['markerClick']) => {
       if (globalStore.orderType.value === 'pickup') {
         this.#pickupInputElement?.changeValue(e.detail.address)
+      }
+    }
+
+    #mapReadyListener = () => {
+      this.#createPickupInputGroup()
+      globalStore.orderType.subscribe(this.#orderTypeChangeListener)
+    }
+
+    #userAddressSearchListener = () => {
+      document.documentElement.classList.add('location-search')
+    }
+
+    #userAddressChangeListener = (e: YMapEvents['userAddressChange']) => {
+      this.#updateDistances()
+      this.#updateZone()
+
+      document.documentElement.classList.remove('location-search')
+
+      globalStore.address.value = e.detail.address
+
+      if (this.#deliveryInputElement && this.#deliveryInputElement !== document.activeElement) {
+        this.#deliveryInputElement.value = e.detail.address
       }
     }
   }

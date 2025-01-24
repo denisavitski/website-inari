@@ -2,7 +2,6 @@
 import Header from '@singletons/Header.astro'
 import Footer from '@singletons/Footer.astro'
 import FormAnswer from '@singletons/FormAnswer.astro'
-import Scrollbar from '@singletons/Scrollbar.astro'
 
 import Head from './Head.astro'
 import { type Props as SeoProps } from './Seo.astro'
@@ -36,11 +35,9 @@ const { header = true, footer = true, basketOpened, seo } = Astro.props
       {header && <Header basketOpened={basketOpened} />}
 
       <div
-        class="scroll hidden-scrollbar"
+        class="scroll custom-scrollbar"
         id="page-scroll"
       >
-        <Scrollbar />
-
         <main>
           <slot />
         </main>

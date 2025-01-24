@@ -12,8 +12,8 @@ export interface Props {
 const {
   class: className,
   name = 'Точка самовывоза',
-  value = 'улица Щербакова, 48, Зеленоград, Москва',
-  addressType = 'Фудмолл',
+  value,
+  addressType,
   checked,
   ...rest
 } = Astro.props
@@ -28,7 +28,6 @@ const {
     type="radio"
     {checked}
     {name}
-    {value}
   />
 
   <span class="pickup-address__card">
@@ -43,13 +42,18 @@ const {
         set:html={value}
       />
       <span class="f-d-16-r f-m-12-r pickup-address__bottom">
-        <span
-          class="pickup-address__type"
-          set:html={addressType}
-        />
+        {
+          addressType && (
+            <span
+              class="pickup-address__type"
+              set:html={addressType}
+            />
+          )
+        }
+
         <span
           class="pickup-address__distance"
-          data-distance-value={value}
+          data-distance-value
         ></span>
       </span>
     </span>

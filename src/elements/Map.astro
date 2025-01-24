@@ -3,9 +3,10 @@ export interface Props {
   class?: string
   markers?: boolean
   zones?: boolean
+  user?: boolean
 }
 
-const { class: className, markers, zones, ...rest } = Astro.props
+const { class: className, markers, zones, user, ...rest } = Astro.props
 ---
 
 <e-map
@@ -14,6 +15,7 @@ const { class: className, markers, zones, ...rest } = Astro.props
   data-popover-content
   {markers}
   {zones}
+  {user}
 >
 </e-map>
 
@@ -33,6 +35,9 @@ const { class: className, markers, zones, ...rest } = Astro.props
 
   export interface YMapEvents {
     markerClick: CustomEvent<{ address: string }>
+    ready: CustomEvent
+    userAddressChange: CustomEvent<{ address: string }>
+    userAddressSearch: CustomEvent
   }
 
   let geojson: any
@@ -40,20 +45,31 @@ const { class: className, markers, zones, ...rest } = Astro.props
   export class YMapElement extends HTMLElement {
     #map: any = null
     #searchControl: any = null
-    #searchResults: any = null
     #zones: Array<any> = []
     #markers: Array<any> = []
-    #markersVisible = this.hasAttribute('markers')
-    #zonesVisible = this.hasAttribute('zones')
-    #userGeoObject: any = null
+    #markersActive = this.hasAttribute('markers')
+    #zonesActive = this.hasAttribute('zones')
+    #userSearchActive = this.hasAttribute('user')
     #allGeoObjects: any = null
+    #pickupAddresses: Array<string> = []
+    #userPlacemark: any = null
+    #userAddress: string = ''
+    #userCoords: any
 
     public get isReady() {
       return window.ymaps && this.#map
     }
 
+    public get pickupAddresses() {
+      return this.#pickupAddresses
+    }
+
+    public get userAddress() {
+      return this.#userAddress
+    }
+
     public getDistances() {
-      if (this.isReady) {
+      if (this.isReady && this.#userSearchActive) {
         return this.#markers
           .map((marker) => {
             const address = marker.properties.get('iconCaption')
@@ -61,10 +77,10 @@ const { class: className, markers, zones, ...rest } = Astro.props
             if (typeof address === 'string') {
               let distance = 0
 
-              if (this.#userGeoObject) {
+              if (this.#userCoords) {
                 distance =
                   window.ymaps.coordSystem.geo.getDistance(
-                    this.#userGeoObject.geometry.getCoordinates(),
+                    this.#userCoords,
                     marker.geometry.getCoordinates(),
                   ) / 1001
               }
@@ -81,14 +97,15 @@ const { class: className, markers, zones, ...rest } = Astro.props
     }
 
     public async search(value: string): Promise<void> {
-      if (value === this.getUserAddress()) {
+      if (value === this.#userAddress) {
         return
       }
 
+      dispatchEvent(this, 'userAddressSearch', { custom: true })
+
       if (this.isReady) {
         if (value.length < 3) {
-          this.#searchResults.removeAll()
-          this.#userGeoObject = null
+          this.#resetUserAddress()
           return
         }
 
@@ -97,16 +114,16 @@ const { class: className, markers, zones, ...rest } = Astro.props
         const resultArray = this.#searchControl.getResultsArray()
 
         if (resultArray.length === 1) {
-          await this.#setUserGeoObject(resultArray[0].geometry.getCoordinates())
+          this.#resetUserAddress()
+          this.#createUserPlacemark(resultArray[0].geometry.getCoordinates())
         } else {
-          this.#searchResults.removeAll()
-          this.#userGeoObject = null
+          this.#resetUserAddress()
         }
       }
     }
 
     public toggleMarkers(visible: boolean) {
-      this.#markersVisible = visible
+      this.#markersActive = visible
 
       this.#markers.find((marker) => {
         marker.options.set({
@@ -118,13 +135,13 @@ const { class: className, markers, zones, ...rest } = Astro.props
     }
 
     public toggleZones(visible: boolean) {
-      this.#zonesVisible = visible
+      this.#zonesActive = visible
 
       this.#zones.find((zone) => {
         zone.options.set({
-          fillOpacity: this.#zonesVisible ? 0.25 : 0,
-          interactive: this.#zonesVisible ? true : false,
-          cursor: this.#zonesVisible ? 'pointer' : 'default',
+          fillOpacity: this.#zonesActive ? zone.properties.get('fill-opacity') : 0,
+          strokeOpacity: this.#zonesActive ? zone.properties.get('stroke-opacity') : 0,
+          strokeWidth: this.#zonesActive ? zone.properties.get('stroke-width') : 0,
         })
       })
     }
@@ -135,6 +152,8 @@ const { class: className, markers, zones, ...rest } = Astro.props
           marker.options.set({
             iconImageHref: '/images/geo-picked.svg',
           })
+
+          this.#map.panTo(marker.geometry.getCoordinates())
         } else {
           marker.options.set({
             iconImageHref: '/images/geo.svg',
@@ -143,22 +162,18 @@ const { class: className, markers, zones, ...rest } = Astro.props
       })
     }
 
-    public getUserAddress() {
-      if (this.isReady && this.#userGeoObject) {
-        return this.#userGeoObject.getAddressLine()
-      } else {
-        return ''
-      }
-    }
-
     public async findUserLocation() {
       if (this.isReady) {
+        dispatchEvent(this, 'userAddressSearch', { custom: true })
+
         try {
           const userLocation = await window.ymaps.geolocation.get({
             provider: 'auto',
           })
 
-          await this.#setUserGeoObject(userLocation.geoObjects.position)
+          await this.#createUserPlacemark(userLocation.geoObjects.position)
+
+          this.#map.panTo(userLocation.geoObjects.position)
         } catch (e) {
           console.error(e)
         }
@@ -166,16 +181,14 @@ const { class: className, markers, zones, ...rest } = Astro.props
     }
 
     public getZone() {
-      if (this.#userGeoObject) {
-        const userPosition = this.#userGeoObject.geometry.getCoordinates()
-
+      if (this.#userCoords) {
         const zones = this.#zones
-          .filter((z) => z.geometry.contains(userPosition))
+          .filter((z) => z.geometry.contains(this.#userCoords))
           .map((v) => {
             return {
-              zone: v.zone as string,
-              description: v.description as string,
-              addition: v.addition as string,
+              zone: v.zone,
+              description: v.description,
+              addition: v.addition,
             }
           })
 
@@ -190,8 +203,8 @@ const { class: className, markers, zones, ...rest } = Astro.props
         const bounds = this.#allGeoObjects.getBounds()
 
         this.#map.setBounds(bounds, {
-          checkZoomRange: true, // Учитываем диапазон доступного масштабирования
-          duration: 500, // Анимация перемещения (в миллисекундах)
+          checkZoomRange: true,
+          duration: 500,
         })
       }
     }
@@ -204,15 +217,6 @@ const { class: className, markers, zones, ...rest } = Astro.props
       this.innerHTML = ''
       this.#map?.destroy()
       ticker.unsubscribe(this.#scriptReadyListener)
-    }
-
-    async #setUserGeoObject(position: any) {
-      this.#searchResults.removeAll()
-      const geocoder = await window.ymaps.geocode(position)
-      this.#map.panTo(position)
-      const firstGeoObject = geocoder.geoObjects.get(0)
-      this.#userGeoObject = firstGeoObject
-      this.#searchResults.add(this.#userGeoObject)
     }
 
     async #createMap() {
@@ -236,18 +240,18 @@ const { class: className, markers, zones, ...rest } = Astro.props
         this.focusOnGeoObjects()
       })
 
+      if (this.#userSearchActive) {
+        this.#map.events.add('click', async (e: any) => {
+          this.#createUserPlacemark(e.get('coords'))
+        })
+      }
+
       this.#searchControl = new window.ymaps.control.SearchControl({
         options: {
           noPlacemark: true,
           provider: 'yandex#search',
         },
       })
-
-      this.#searchResults = new window.ymaps.GeoObjectCollection(null, {
-        hintContentLayout: window.ymaps.templateLayoutFactory.createClass('$[properties.name]'),
-      })
-
-      this.#map.geoObjects.add(this.#searchResults)
 
       this.#allGeoObjects = window.ymaps
         .geoQuery(geojson)
@@ -259,7 +263,7 @@ const { class: className, markers, zones, ...rest } = Astro.props
       this.#zones = []
       this.#markers = []
 
-      this.#allGeoObjects.each((obj: any) => {
+      await this.#allGeoObjects.each((obj: any) => {
         if (obj.geometry.getType() === 'Polygon') {
           this.#zones.push(obj)
 
@@ -271,34 +275,30 @@ const { class: className, markers, zones, ...rest } = Astro.props
           obj.description = foundedZone?.description
           obj.addition = foundedZone?.addition
 
-          obj.properties.set(
-            'balloonContent',
-            `
-              <h2 style="margin-bottom: 5px;">${obj.zone}</h2>
-              ${obj.description ? `<h3 style="margin-bottom: 5px;">${obj.description}</h3>` : ''}
-              ${obj.addition ? `<p style="margin-bottom: 5px;">${obj.addition}</p>` : ''}
-            `,
-          )
-
           obj.options.set({
             fillColor: obj.properties.get('fill'),
-            strokeWidth: 0,
-            strokeOpacity: 0,
-            fillOpacity: this.#zonesVisible ? 0.25 : 0,
-            interactive: this.#zonesVisible ? true : false,
-            cursor: this.#zonesVisible ? 'pointer' : 'default',
+            strokeColor: obj.properties.get('stroke'),
+            strokeWidth: obj.properties.get('stroke-width'),
+            strokeOpacity: this.#zonesActive ? obj.properties.get('stroke-opacity') : 0,
+            fillOpacity: this.#zonesActive ? obj.properties.get('fill-opacity') : 0,
+            interactive: false,
+            cursor: 'default',
           })
         } else if (obj.geometry.getType() === 'Point') {
-          obj.properties.set('balloonContent', obj.properties.get('iconCaption'))
+          const caption = obj.properties.get('iconCaption')
+
+          if (caption) {
+            this.#pickupAddresses.push(caption)
+          }
 
           obj.options.set({
             iconLayout: 'default#image',
             iconImageHref: '/images/geo.svg',
             iconImageSize: [50, 50],
             iconImageOffset: [-25, -25],
-            iconOpacity: this.#markersVisible ? 1 : 0,
-            interactive: this.#markersVisible ? true : false,
-            cursor: this.#markersVisible ? 'pointer' : 'default',
+            iconOpacity: this.#markersActive ? 1 : 0,
+            interactive: false,
+            cursor: this.#markersActive ? 'pointer' : 'default',
             hideIconOnBalloonOpen: false,
           })
 
@@ -313,7 +313,71 @@ const { class: className, markers, zones, ...rest } = Astro.props
         }
       })
 
-      // this.#map.behaviors.disable('scrollZoom')
+      dispatchEvent(this, 'ready', { custom: true })
+    }
+
+    async #createUserPlacemark(coords: any) {
+      dispatchEvent(this, 'userAddressSearch', { detail: { address: this.userAddress } })
+
+      if (this.#userSearchActive) {
+        if (this.#userPlacemark) {
+          this.#userPlacemark.geometry.setCoordinates(coords)
+        } else {
+          this.#userPlacemark = new window.ymaps.Placemark(coords, {
+            preset: 'islands#redDotIcon',
+            hasBalloon: false,
+          })
+
+          this.#userPlacemark.options.set('draggable', true)
+
+          this.#map.panTo(coords)
+
+          this.#map.geoObjects.add(this.#userPlacemark)
+
+          this.#userPlacemark.events.add('dragend', () => {
+            this.#updateUserAddress(this.#userPlacemark.geometry.getCoordinates())
+          })
+        }
+
+        await this.#updateUserAddress(coords)
+
+        this.#userPlacemark?.options.set({ visible: true })
+      }
+    }
+
+    #resetUserAddress() {
+      this.#userAddress = ''
+      this.#userCoords = null
+
+      this.#userPlacemark?.options.set({ visible: false })
+
+      dispatchEvent(this, 'userAddressChange', { detail: { address: this.#userAddress } })
+    }
+
+    async #updateUserAddress(coords: any) {
+      this.#userAddress = await this.#getAddress(coords)
+      this.#userCoords = this.#userPlacemark.geometry.getCoordinates()
+
+      dispatchEvent(this, 'userAddressChange', { detail: { address: this.#userAddress } })
+    }
+
+    async #getAddress(coords: any) {
+      const res = await window.ymaps.geocode(coords)
+
+      const firstGeoObject = res.geoObjects.get(0)
+
+      const addressLine = firstGeoObject.getAddressLine()
+
+      // const caption = [
+      //   firstGeoObject.getLocalities().length
+      //     ? firstGeoObject.getLocalities()
+      //     : firstGeoObject.getAdministrativeAreas(),
+      //   firstGeoObject.getThoroughfare() || firstGeoObject.getPremise(),
+      // ]
+      //   .filter(Boolean)
+      //   .join(', ')
+
+      return addressLine
     }
 
     #scriptReadyListener = () => {

@@ -261,7 +261,7 @@ b {
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-secondary-3) var(--color-secondary-1);
+  scrollbar-color: var(--color-primary-3) var(--color-secondary-1);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -274,7 +274,7 @@ b {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--color-secondary-3);
+  background-color: var(--color-primary-3);
 }
 
 .f-d-48-s {
