@@ -289,7 +289,7 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
           obj.options.set({
             fillColor: obj.properties.get('fill'),
             strokeColor: obj.properties.get('stroke'),
-            strokeWidth: obj.properties.get('stroke-width'),
+            strokeWidth: this.#zonesActive ? obj.properties.get('stroke-width') : 0,
             strokeOpacity: this.#zonesActive ? obj.properties.get('stroke-opacity') : 0,
             fillOpacity: this.#zonesActive ? obj.properties.get('fill-opacity') : 0,
             interactive: false,

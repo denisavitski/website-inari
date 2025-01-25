@@ -13,25 +13,25 @@ const {
   heading = 'Наши адреса',
   list = [
     {
-      address: 'ЖК Жемчужина Зеленограда, 10.1, 17-й микрорайон, Зеленоград, Москва',
+      address: 'Москва, Зеленоград, 17-й микрорайон, жилой комплекс Жемчужина Зеленограда, 10.1',
       type: 'Пункт самовывоза',
       workingHours: '11:00 — 23:00',
       phone: '+ 7 (921) 999-84-22',
     },
     {
-      address: 'Новокрюковская улица, 1824, Зеленоград, Москва',
+      address: 'Москва, Зеленоград, Новокрюковская улица, 1824',
       type: 'Пункт самовывоза',
       workingHours: '11:00 — 23:00',
       phone: '+ 7 (921) 999-99-99',
     },
     {
-      address: 'улица Щербакова, 48, Зеленоград, Москва',
+      address: 'Москва, Зеленоград, улица Щербакова, 48',
       type: 'Фудмолл',
       workingHours: '11:00 — 23:00',
       phone: '+ 7 (921) 999-84-22',
     },
     {
-      address: '5253-й проезд, 1с1, Зеленоград, Москва',
+      address: 'Москва, Зеленоград, 5253-й проезд, 1с1',
       type: 'Фудмолл',
       workingHours: '11:00 — 23:00',
       phone: '+ 7 (921) 999-99-99',
@@ -71,6 +71,7 @@ const {
 
 <style is:global>
   .addresses {
+    display: block;
   }
 
   .addresses__heading {
@@ -113,7 +114,7 @@ const {
   import type { ToggleElement } from '@lib/ToggleElement'
   import type { YMapElement, YMapEvents } from './Map.astro.0.mts'
 
-  export class MyElement extends HTMLElement {
+  export class AddressesElement extends HTMLElement {
     #toggleElement: ToggleElement | null = null
     #mapElement: YMapElement | null = null
 
@@ -127,7 +128,7 @@ const {
           this.#mapElement?.toggleZones(false)
 
           this.#toggleElement?.addEventListener('toggleChange', this.#toggleListener)
-          this.#mapElement?.addEventListener('markerClick', this.#markerClickListener)
+          this.#mapElement?.addEventListener('markerPick', this.#markerClickListener)
         }
       })
     }
@@ -140,18 +141,18 @@ const {
       this.#mapElement?.pickMarker(this.#toggleElement!.value || '')
     }
 
-    #markerClickListener = (e: YMapEvents['markerClick']) => {
+    #markerClickListener = (e: YMapEvents['markerPick']) => {
       this.#toggleElement?.setValue(e.detail.address)
     }
   }
 
   if (!customElements.get('e-addresses')) {
-    customElements.define('e-addresses', MyElement)
+    customElements.define('e-addresses', AddressesElement)
   }
 
   declare global {
     interface HTMLElementTagNameMap {
-      'e-addresses': MyElement
+      'e-addresses': AddressesElement
     }
   }
 </script>
