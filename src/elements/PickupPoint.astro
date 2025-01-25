@@ -42,14 +42,10 @@ const {
         set:html={value}
       />
       <span class="f-d-16-r f-m-12-r pickup-address__bottom">
-        {
-          addressType && (
-            <span
-              class="pickup-address__type"
-              set:html={addressType}
-            />
-          )
-        }
+        <span
+          class="pickup-address__type"
+          set:html={addressType || ''}
+        />
 
         <span
           class="pickup-address__distance"

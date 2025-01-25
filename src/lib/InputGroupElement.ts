@@ -28,7 +28,7 @@ export class InputGroupElement<T extends string = string> extends HTMLElement {
 
     if (input && input.value !== this.#value) {
       input.checked = true
-      this.#inputListener()
+      this.#updateValue()
     }
   }
 

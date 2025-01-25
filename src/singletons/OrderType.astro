@@ -296,7 +296,7 @@ export const modal = '#order-type'
       this.#pickupContainerElement = this.querySelector('.order-type__pickup')
 
       this.#mapElement = this.querySelector('e-map')
-      this.#mapElement?.addEventListener('markerClick', this.#mapMarkerClickListener)
+      this.#mapElement?.addEventListener('markerPick', this.#mapMarkerPickListener)
       this.#mapElement?.addEventListener('ready', this.#mapReadyListener)
       this.#mapElement?.addEventListener('userAddressSearch', this.#userAddressSearchListener)
       this.#mapElement?.addEventListener('userAddressChange', this.#userAddressChangeListener)
@@ -317,7 +317,7 @@ export const modal = '#order-type'
         this.#pickupInputListener,
       )
 
-      this.#mapElement?.removeEventListener('markerClick', this.#mapMarkerClickListener)
+      this.#mapElement?.removeEventListener('markerPick', this.#mapMarkerPickListener)
       this.#mapElement?.removeEventListener('ready', this.#mapReadyListener)
       this.#mapElement?.removeEventListener('userAddressSearch', this.#userAddressSearchListener)
       this.#mapElement?.removeEventListener('userAddressChange', this.#userAddressChangeListener)
@@ -325,6 +325,7 @@ export const modal = '#order-type'
       this.#locationButtonElement?.removeEventListener('click', this.#locationButtonListener)
 
       globalStore.orderType.unsubscribe(this.#orderTypeChangeListener)
+      globalStore.address.unsubscribe(this.#addressChangeListener)
     }
 
     #createPickupInputGroup() {
@@ -335,24 +336,34 @@ export const modal = '#order-type'
       this.#pickupInputElement = new InputGroupElement()
       this.#pickupInputElement.className = 'order-type__pickup__input-group'
 
-      this.#mapElement.pickupAddresses.forEach((address) => {
+      this.#mapElement.pickupPoints.forEach((point) => {
         cloneTemplateContent(this.#pickupPointTemplate, (e) => {
           const titleElement = e.querySelector('.pickup-address__title')
 
           if (titleElement) {
-            titleElement.textContent = address
+            titleElement.textContent = point.address
           }
 
           const inputElement = e.querySelector<HTMLInputElement>('.pickup-address__input')
 
           if (inputElement) {
-            inputElement.value = address
+            inputElement.value = point.address
           }
 
           const distanceElement = e.querySelector<HTMLInputElement>('.pickup-address__distance')
 
           if (distanceElement) {
-            distanceElement.setAttribute('data-distance-value', address)
+            distanceElement.setAttribute('data-distance-value', point.address)
+          }
+
+          const typeElement = e.querySelector('.pickup-address__type')
+
+          if (typeElement) {
+            if (point.description) {
+              typeElement.textContent = point.description
+            } else {
+              typeElement.remove()
+            }
           }
 
           this.#pickupInputElement!.appendChild(e)
@@ -365,30 +376,6 @@ export const modal = '#order-type'
 
       this.#distanceElements = [...this.querySelectorAll<HTMLElement>('[data-distance-value]')]
     }
-
-    #orderTypeChangeListener = () => {
-      this.#orderVariantElements.forEach((element) => {
-        if (element.getAttribute('data-order-type') === globalStore.orderType.value) {
-          element.ariaHidden = 'false'
-        } else {
-          element.ariaHidden = 'true'
-        }
-      })
-
-      if (globalStore.orderType.value === 'pickup') {
-        this.#mapElement?.toggleMarkers(true)
-        this.#mapElement?.toggleZones(false)
-        this.#updateStorePickupAddress()
-      } else {
-        this.#mapElement?.toggleMarkers(false)
-        this.#mapElement?.toggleZones(true)
-        this.#searchForAddress()
-      }
-    }
-
-    #deliveryInputListener = debounce(() => {
-      this.#searchForAddress()
-    }, 50)
 
     #updateDistances() {
       const distances = this.#mapElement?.getDistances()
@@ -405,55 +392,86 @@ export const modal = '#order-type'
       })
     }
 
-    #updateZone() {
+    #updateDeliveryPriceDescription() {
       const zone = this.#mapElement?.getZone()
 
       if (this.#deliveryPriceElement) {
-        if (zone?.description) {
-          this.#deliveryPriceElement.textContent = zone.description
+        if (zone) {
+          this.#deliveryPriceElement.textContent = [zone.description, zone.addition]
+            .filter(Boolean)
+            .join('\n')
+
+          globalStore.delivery.setUserZone(zone?.zone)
         } else {
           if (this.#mapElement?.userAddress) {
-            this.#deliveryPriceElement.textContent =
-              'Вы не попадаете в зону доставки. Возможность доставки за город или на удаленные районы обсуждается индивидуально.'
+            const unknownZone = globalStore.delivery.findZone('UNKNOWN')
+
+            this.#deliveryPriceElement.textContent = [
+              unknownZone?.description,
+              unknownZone?.addition,
+            ]
+              .filter(Boolean)
+              .join('\n')
+
+            globalStore.delivery.setUserZone('UNKNOWN')
           } else {
             this.#deliveryPriceElement.textContent = ''
+            globalStore.delivery.setUserZone(null)
           }
         }
       }
-
-      globalStore.delivery.setUserZone(zone?.zone)
     }
 
-    async #searchForAddress() {
-      const value = this.#deliveryInputElement?.value
+    #searchAddress() {
+      this.#mapElement?.search(this.#deliveryInputElement?.value || '')
+    }
 
-      if (this.#mapElement) {
-        this.#mapElement!.search(value || '')
+    #pickMarker() {
+      this.#mapElement?.pickMarker(this.#pickupInputElement?.value || '')
+    }
 
-        const address = this.#mapElement.userAddress
+    #orderTypeChangeListener = () => {
+      this.#orderVariantElements.forEach((element) => {
+        if (element.getAttribute('data-order-type') === globalStore.orderType.value) {
+          element.ariaHidden = 'false'
+        } else {
+          element.ariaHidden = 'true'
+        }
+      })
 
-        this.classList.toggle('invalid-address', !address)
+      globalStore.address.value = ''
+      globalStore.delivery.setUserZone(null)
+
+      if (globalStore.orderType.value === 'pickup') {
+        this.#mapElement?.toggleMarkers(true)
+        this.#mapElement?.toggleZones(false)
+        this.#pickMarker()
+      } else {
+        this.#mapElement?.toggleMarkers(false)
+        this.#mapElement?.toggleZones(true)
+        this.#searchAddress()
       }
     }
 
-    #pickupInputListener = () => {
-      this.#updateStorePickupAddress()
+    #addressChangeListener = () => {
+      this.classList.toggle('invalid-address', !globalStore.address.value)
     }
 
-    #updateStorePickupAddress() {
-      const value = this.#pickupInputElement?.value || ''
+    #deliveryInputListener = debounce(() => {
+      this.#searchAddress()
+    }, 50)
 
-      globalStore.address.value = value
-      this.#mapElement?.pickMarker(value)
-      this.classList.toggle('invalid-address', !value)
+    #pickupInputListener = () => {
+      this.#pickMarker()
     }
 
     #locationButtonListener = () => {
       this.#mapElement?.findUserLocation()
     }
 
-    #mapMarkerClickListener = (e: YMapEvents['markerClick']) => {
+    #mapMarkerPickListener = (e: YMapEvents['markerPick']) => {
       if (globalStore.orderType.value === 'pickup') {
+        globalStore.address.value = e.detail.address
         this.#pickupInputElement?.changeValue(e.detail.address)
       }
     }
@@ -461,6 +479,7 @@ export const modal = '#order-type'
     #mapReadyListener = () => {
       this.#createPickupInputGroup()
       globalStore.orderType.subscribe(this.#orderTypeChangeListener)
+      globalStore.address.subscribe(this.#addressChangeListener)
     }
 
     #userAddressSearchListener = () => {
@@ -469,14 +488,16 @@ export const modal = '#order-type'
 
     #userAddressChangeListener = (e: YMapEvents['userAddressChange']) => {
       this.#updateDistances()
-      this.#updateZone()
+      this.#updateDeliveryPriceDescription()
 
       document.documentElement.classList.remove('location-search')
 
-      globalStore.address.value = e.detail.address
-
       if (this.#deliveryInputElement && this.#deliveryInputElement !== document.activeElement) {
         this.#deliveryInputElement.value = e.detail.address
+      }
+
+      if (globalStore.orderType.value === 'delivery') {
+        globalStore.address.value = e.detail.address
       }
     }
   }

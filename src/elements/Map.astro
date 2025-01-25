@@ -34,10 +34,15 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
   import { dispatchEvent } from 'aptechka/utils'
 
   export interface YMapEvents {
-    markerClick: CustomEvent<{ address: string }>
+    markerPick: CustomEvent<PickupPoint>
     ready: CustomEvent
     userAddressChange: CustomEvent<{ address: string }>
     userAddressSearch: CustomEvent
+  }
+
+  export interface PickupPoint {
+    address: string
+    description: string
   }
 
   let geojson: any
@@ -51,7 +56,7 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
     #zonesActive = this.hasAttribute('zones')
     #userSearchActive = this.hasAttribute('user')
     #allGeoObjects: any = null
-    #pickupAddresses: Array<string> = []
+    #pickupPoints: Array<PickupPoint> = []
     #userPlacemark: any = null
     #userAddress: string = ''
     #userCoords: any
@@ -60,8 +65,8 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
       return window.ymaps && this.#map
     }
 
-    public get pickupAddresses() {
-      return this.#pickupAddresses
+    public get pickupPoints() {
+      return this.#pickupPoints
     }
 
     public get userAddress() {
@@ -97,11 +102,12 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
     }
 
     public async search(value: string): Promise<void> {
+      dispatchEvent(this, 'userAddressSearch', { custom: true })
+
       if (value === this.#userAddress) {
+        dispatchEvent(this, 'userAddressChange', { detail: { address: this.#userAddress } })
         return
       }
-
-      dispatchEvent(this, 'userAddressSearch', { custom: true })
 
       if (this.isReady) {
         if (value.length < 3) {
@@ -153,7 +159,10 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
             iconImageHref: '/images/geo-picked.svg',
           })
 
+          const description = marker.properties.get('description')
+
           this.#map.panTo(marker.geometry.getCoordinates())
+          dispatchEvent(this, 'markerPick', { detail: { address, description } })
         } else {
           marker.options.set({
             iconImageHref: '/images/geo.svg',
@@ -192,7 +201,9 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
             }
           })
 
-        return zones[zones.length - 1]
+        const lastZone = zones[zones.length - 1]
+
+        return lastZone
       }
 
       return null
@@ -285,10 +296,11 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
             cursor: 'default',
           })
         } else if (obj.geometry.getType() === 'Point') {
-          const caption = obj.properties.get('iconCaption')
+          const address = obj.properties.get('iconCaption')
+          const description = obj.properties.get('description') || ''
 
-          if (caption) {
-            this.#pickupAddresses.push(caption)
+          if (address) {
+            this.#pickupPoints.push({ address, description })
           }
 
           obj.options.set({
@@ -303,10 +315,7 @@ const { class: className, markers, zones, user, ...rest } = Astro.props
           })
 
           obj.events.add('click', (e: any) => {
-            const target = e.get('target')
-            const address = target.properties.get('iconCaption')
-            this.pickMarker(address)
-            dispatchEvent(this, 'markerClick', { detail: { address } })
+            this.pickMarker(e.get('target').properties.get('iconCaption'))
           })
 
           this.#markers.push(obj)
