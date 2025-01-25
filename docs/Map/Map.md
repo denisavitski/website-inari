@@ -1,5 +1,20 @@
 # Карта
 
+## Подключение
+
+Карта подключается в `<head>` страницы следующим образом:
+
+```html
+<script
+  is:inline
+  src="https://api-maps.yandex.ru/2.1/?coordorder=longlat&apikey=ВАШ_КЛЮЧ&lang=ru_RU"
+  type="text/javascript"
+></script>
+```
+
+**Для работы карты необходимо создать собственный API-ключ** — сделать это можно [здесь](https://developer.tech.yandex.ru/services/3).
+Более подробную информацию по подключению можно найти в [документации](https://yandex.ru/dev/jsapi30/doc/ru/common/quickstart) в разделе «Быстрый старт».
+
 ## Конструктор
 
 Карта редактируется и выгружается [отсюда](https://yandex.ru/map-constructor/).
