@@ -223,6 +223,7 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
       })
 
       this.#timeGroupElements = [...this.querySelectorAll<InputGroupElement>('.order-form__time')]
+
       this.#timeGroupElements.forEach((element) => {
         element.addEventListener('inputGroupValueChange', this.#timeChangeListener)
       })
@@ -230,6 +231,10 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
       this.#customDateInputElements = [
         ...this.querySelectorAll<HTMLInputElement>('[data-custom-date]'),
       ]
+
+      this.#customDateInputElements.forEach((el) => {
+        el.addEventListener('click', this.#customDateClickListener)
+      })
 
       this.#calendarModalElement = this.querySelector('#order-calendar')
 
@@ -250,11 +255,19 @@ import OrderCalendar from '@elements/OrderCalendar.astro'
         element.removeEventListener('inputGroupValueChange', this.#timeChangeListener)
       })
 
+      this.#customDateInputElements.forEach((el) => {
+        el.removeEventListener('click', this.#customDateClickListener)
+      })
+
       this.#calendarElement?.removeEventListener('calendarPick', this.#calendarPickListener)
 
       this.#status.close()
 
       globalStore.orderStep.value = 'basket'
+    }
+
+    #customDateClickListener = () => {
+      this.#calendarModalElement?.open()
     }
 
     #timeChangeListener = (e: InputGroupEvents['inputGroupValueChange']) => {
